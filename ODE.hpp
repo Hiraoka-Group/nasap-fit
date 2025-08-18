@@ -1,4 +1,6 @@
 constexpr int species = 4;
+constexpr int constantSize = 3;
+
 class speciesAmount {
 	std::array<double, species>amount;
 public:;
@@ -47,14 +49,12 @@ speciesAmount operator*(const double leftVal, const speciesAmount& rightVal) {
 	return ret;
 }
 
-//反応速度定数
-std::array<double, 3>k;
-//
-speciesAmount diffCoeff(speciesAmount status) {
+
+speciesAmount diffCoeff(const std::array<double, constantSize>& reactConst, const speciesAmount& status) {
 	speciesAmount dxdt;
-	dxdt[0] = (k[1] + k[2]) * status[2] - k[0] * status[0] * status[1];
-	dxdt[1] = k[1] * status[2] - k[0] * status[0] * status[1];
-	dxdt[2] = k[0] * status[0] * status[1] - (k[1] + k[2]) * status[2];
-	dxdt[3] = k[2] * status[2];
+	dxdt[0] = (reactConst[1] + reactConst[2]) * status[2] - reactConst[0] * status[0] * status[1];
+	dxdt[1] = reactConst[1] * status[2] - reactConst[0] * status[0] * status[1];
+	dxdt[2] = reactConst[0] * status[0] * status[1] - (reactConst[1] + reactConst[2]) * status[2];
+	dxdt[3] = reactConst[2] * status[2];
 	return dxdt;
 }
