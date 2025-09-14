@@ -1,8 +1,9 @@
+#pragma once
 #include <cstdint>
 #include <random>
 #include <climits>
 
-std::random_device seed_gen;
+static std::random_device seed_gen;
 class xorshift {
 	uint64_t seed;
 public:
@@ -20,11 +21,11 @@ public:
 	// [0,1)
 	inline double prob() { return double(operator()()) / 0xffffffff; }
 };
-xorshift myRand;
-double randbet(double lower, double upper) {
+extern xorshift myRand;
+inline double randbet(double lower, double upper) {
 	return lower + (upper - lower) * myRand.prob();
 }
 //指数分布に基づいて[lower, upper]のランダムな値を得る
-double randbetExp(double lower, double upper) { 
+inline double randbetExp(double lower, double upper) { 
 	return lower * exp(log(upper / lower) * myRand.prob());
 }
