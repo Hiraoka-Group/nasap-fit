@@ -30,7 +30,8 @@ signed main() {
 		skip:;
 	}
 	differentialEvolution diffEvo(csv_data_double); // Assuming setData is a method to set the data
-
+	diffEvo.putSim({0.0410171, 97.8908, 10.9259, 41.1699, 0.00143831, 3.93534, 0.0058751, 0.141529});
+	/*
 	diffEvo.setPop();
 	diffEvo.Optimize();
 	
@@ -43,10 +44,11 @@ signed main() {
 	
 	std::cout<<"Debug Info:"<<std::endl;
 	diffEvo.DEBUG();
-	
+	*/
 	
 }
 
 /*
 g++ main.cpp -o main && ./main
+cmake --build . && ./nasap_fit_cpp
 */

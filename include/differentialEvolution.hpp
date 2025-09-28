@@ -19,7 +19,6 @@
 
 struct differentialEvolution {
 	int loopsNumber = 10; //差分進化法を回す回数
-	int popSize = 128; //差分進化法のエージェント数
 private:
 	double endTime; //シミュレーション終了時間
 	struct individuals {
@@ -30,14 +29,22 @@ private:
 		double time;
 		std::vector<double>state;
 	};
+	struct stepResult {
+		speciesAmount newState;
+		double usedStepSize;
+	};
 	std::vector<datum> QASAP;  //実験データ
 	std::vector<individuals>populations; //エージェントの集団
 	std::vector<speciesAmount>simulation; //シミュレーションに用いる配列
+	std::vector<double>simTime; //シミュレーション時間
 
 	//シミュレーションにおける、次のステップの計算
-    speciesAmount calcNextStep(const std::array<double, constantSize>& reactConst, const speciesAmount& data);
+    stepResult calcNextStep(const std::array<double, constantSize>& reactConst, const speciesAmount& data);
     
-    double getSSR(const std::vector<speciesAmount>& simulatedValue);
+	std::array<double, constantSize> crossingOver(const std::array<double, constantSize>& baseV, const std::array<double, constantSize>& randV1, const std::array<double, constantSize>& randV2);
+
+	void simulate(const std::array<double, constantSize>& constant);
+	
 	//平方残差和の計算
 	double calcError(const std::array<double, constantSize>& constant);
 public:
@@ -50,5 +57,7 @@ public:
 	void Optimize();
     //最良個体の定数を返す
 	std::array<double, constantSize> best();
+
+	void putSim(const std::array<double, constantSize>& constant);
 	void DEBUG();
 };

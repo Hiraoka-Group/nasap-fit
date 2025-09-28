@@ -12,8 +12,11 @@ constexpr int trackedSpecies=4;
 constexpr int trackedIndex[] = { 27,26,28,25 };
 
 
-//シミュレーションの1ステップごとの時間差
-constexpr double timeStep = 1.0 / (1 << 8);
+//差分進化法のエージェント数
+constexpr int popSize = 4;
+
+constexpr double tolerableError=1e-10; //許容誤差
+constexpr double safetyConstant=0.9; //ステップサイズ更新の安全係数
 //差分進化法のパラメータ
 constexpr double scalar = 0.5, crossOver = 0.5;
 //反応速度定数の上限下限
