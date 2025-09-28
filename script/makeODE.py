@@ -2,10 +2,10 @@ import numpy as np
 import pandas as pd
 import csv
 import pprint
+from pathlib import Path
 
-
-inputFile="../data/classified_reactions_str.csv"
-outputFile="../include/ODE.hpp"
+inputFile = Path(__file__).parent.parent / 'data' / 'classified_reactions_str.csv'
+outputFile = Path(__file__).parent.parent / 'include' / 'ODE.hpp'
 df = pd.read_csv(inputFile, index_col=0)
 
 records=df.to_dict(orient="records")
@@ -17,31 +17,6 @@ for i in range(len(reaction_kinds)):
 
 species=0 #化学種の種類　これをもとに化学種の量のarrayを作る
 
-#常微分方程式の項を表現するクラス
-class term:
-    reactant1=""
-    reactant2=None
-    duplicate=0
-    kind=None
-    def __init__(self):
-        pass
-    def __init__(self,arg1,arg2,arg3,arg4):
-        self.reactant1=arg1
-        self.reactant2=arg2
-        self.duplicate=arg3
-        self.kind=arg4
-    def minus(self):
-        return term(self.reactant1,self.reactant2,-self.duplicate,self.kind)
-    def to_fomula(self):
-        ret=""
-        if self.reactant2 is None:
-            return f"({self.duplicate} * k[{typeToIndex[self.kind]}] * sp[{self.reactant1}])"
-        else:
-            return f"({self.duplicate} * k[{typeToIndex[self.kind]}] * sp[{self.reactant1}] * sp[{self.reactant2}])"
-#k[1] * sp[2] - k[0] * sp[0] * sp[1];
-
-
-    
 
 
 for dict in records:
@@ -51,8 +26,20 @@ for dict in records:
     species=max(species,dict["leaving_assem_id"])
 species=round(species)
 species+=1
-ODE=[[] for _ in range(species)] #常微分方程式の素
+ODE=[{} for _ in range(species)] #常微分方程式の素
 
+def add_dict(mp,key,value):
+    if key in mp:
+        mp[key]+=value
+    else:
+        mp[key]=value
+
+def to_fomula(tup,value):
+        ret=""
+        if tup[1] is None:
+            return f"({value} * k[{typeToIndex[tup[2]]}] * sp[{tup[0]}])"
+        else:
+            return f"({value} * k[{typeToIndex[tup[2]]}] * sp[{tup[0]}] * sp[{tup[1]}])"
 
 for dict in records:
     init=dict["init_assem_id"]
@@ -60,14 +47,14 @@ for dict in records:
     product=dict["product_assem_id"]
     leaving=None if pd.isna(dict["leaving_assem_id"]) else round(dict["leaving_assem_id"])
 
-    hoge=term(init,entering,dict["duplicate_count"],dict["kind"])
+    hoge=(init,entering,dict["kind"])
     
-    ODE[init].append(hoge.minus())
+    add_dict(ODE[init],hoge,-dict["duplicate_count"])
     if entering is not None:
-        ODE[entering].append(hoge.minus())
-    ODE[product].append(hoge)
+        add_dict(ODE[entering],hoge,-dict["duplicate_count"])
+    add_dict(ODE[product],hoge,dict["duplicate_count"])
     if leaving is not None:
-        ODE[leaving].append(hoge)
+        add_dict(ODE[leaving],hoge,dict["duplicate_count"])
 
 
 
@@ -82,12 +69,12 @@ with open(outputFile,"w") as f:
     for t in ODE:
         isFirst=True
         f.write("dxdt[" + str(ODE.index(t)) + "] = ")
-        for t2 in t:
+        for key,val in t.items():
             if isFirst:
                 isFirst=False
             else:
                 f.write(" + ")
-            f.write(t2.to_fomula())
+            f.write(to_fomula(key,val))
         f.write(";\n\t")
     
     f.write("return dxdt;\n}")

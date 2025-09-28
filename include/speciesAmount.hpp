@@ -2,6 +2,8 @@
 #include <array>
 #include <vector>
 #include "constants.hpp"
+
+
 class speciesAmount {
 	std::array<double, species>amount;
 public:;

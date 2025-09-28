@@ -12,6 +12,12 @@ public:
 		seed ^= (seed << 13); seed ^= (seed >> 7);
 		return seed ^= (seed << 17);
 	}
+	xorshift(uint64_t arg) {
+		seed=arg;
+		for(int i=0; i<8; i++){
+			seed ^= (seed << 13); seed ^= (seed >> 7); seed ^= (seed << 17);
+		}
+	}
 	// [0, 2^64-1)
 	inline uint32_t operator()() { return get64(); }
 	// [0, r)
