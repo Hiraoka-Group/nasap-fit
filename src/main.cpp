@@ -42,16 +42,17 @@ signed main(int argc, char** argv) {
 	
 	//diffEvo.setPop();
 	diffEvo.Optimize();
-	
-	std::cout<<"Optimized Constants:"<<std::endl;
-	auto arr = diffEvo.best();
-	for (auto t : arr) {
-		std::cout << t << " ";
+	if(proc_rank==0){
+		std::cout<<"Optimized Constants:"<<std::endl;
+		auto arr = diffEvo.best();
+		for (auto t : arr) {
+			std::cout << t << " ";
+		}
+		std::cout << std::endl;
+		
+		std::cout<<"Debug Info:"<<std::endl;
+		diffEvo.DEBUG();
 	}
-	std::cout << std::endl;
-	
-	std::cout<<"Debug Info:"<<std::endl;
-	diffEvo.DEBUG();
 	
 	MPI_Finalize();
 	
