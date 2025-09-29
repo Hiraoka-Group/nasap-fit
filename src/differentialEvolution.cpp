@@ -8,6 +8,8 @@
 #include <cassert>
 #include <fstream>
 
+#include <mpi.h>
+
 #include "../include/differentialEvolution.hpp"
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
@@ -16,6 +18,7 @@
 xorshift myRand;
 int cnt=0;
 double timeStep=0.001;
+extern int num_procs, proc_rank;
 
 void print(std::array<double, constantSize>constant){
     std::cout<<"ar: ";
@@ -161,11 +164,11 @@ void differentialEvolution::setPop(){
 }
 differentialEvolution::differentialEvolution(std::vector<std::vector<double>>& arg) {
     setData(arg);
-    myRand=xorshift(1);//あとで
+    myRand=xorshift(1+proc_rank);
     endTime = arg.back()[0];
     simulation = std::vector<speciesAmount>(1);
     populations = std::vector<individuals>(popSize);
-    for (int i = 0; i < popSize; i++) {//あとで
+    for (int i = proc_rank; i < popSize; i+=num_procs) {
         for (int j = 0; j < constantSize; j++) {
             populations[i].constant[j] = randbetExp(lowerLim, upperLim);
         }
@@ -174,34 +177,59 @@ differentialEvolution::differentialEvolution(std::vector<std::vector<double>>& a
 }
 
 void differentialEvolution::Optimize() {
-    /*
-    populations = std::vector<individuals>(popSize);
-    for (int i = 0; i < popSize; i++) {
-        for (int j = 0; j < constantSize; j++) {
-            populations[i].constant[j] = randbetExp(lowerLim, upperLim);
-        }
-        populations[i].error = calcError(populations[i].constant);
-    }
-        */
+    std::vector<differentialEvolution::individuals> popRecvContainer(popSize);
     for (int i = 0; i < loopsNumber; i++) {
-        std::cout<<i<<std::endl;
-        for (int j = 0; j < popSize; j++) {
+        if(proc_rank==0)std::cout<<i<<"\n";
+        
+
+        std::vector<std::array<int, 3>> lockahead;
+        std::vector<int> indicesToVisit;
+        auto pushIndex = [&](int idx){
+            if(idx%num_procs==proc_rank)return false;
+            else{
+                indicesToVisit.push_back(idx);
+                return true;
+            }
+        };
+        for (int j = proc_rank; j < popSize; j+=num_procs){
+            int xb = myRand(popSize), xr1=myRand(popSize), xr2=myRand(popSize);
+            while (xb == xr1) {xr1 = myRand(popSize);}
+            while (xb == xr2 || xr1 == xr2) {xr2 = myRand(popSize);}
+            lockahead.push_back({xb,xr1,xr2});
+            pushIndex(xb); pushIndex(xr1); pushIndex(xr2);
+        }
+        std::sort(
+            indicesToVisit.begin(),
+            indicesToVisit.end(),
+            [](int left,int right){
+                if(left%num_procs==right%num_procs)return left<right;
+                else return left%num_procs<right%num_procs;
+            }
+        );
+        indicesToVisit.erase(std::unique(indicesToVisit.begin(),indicesToVisit.end()),indicesToVisit.end());
+        MPI_Win win;
+        MPI_Win_create(populations.data(), sizeof(individuals)*popSize, 1, MPI_INFO_NULL, MPI_COMM_WORLD, &win);
+        MPI_Win_fence(0, win);
+        for(int idx : indicesToVisit){
+            assert(idx%num_procs!=proc_rank);
+            MPI_Get(&populations[idx], sizeof(individuals), MPI_BYTE, idx%num_procs, sizeof(individuals)*idx, sizeof(individuals), MPI_BYTE, win);
+        }
+        MPI_Win_fence(0, win);
+        MPI_Win_free(&win);
+        for (int j = proc_rank; j < popSize; j+=num_procs) {
             //突然変異
             //ベースベクトルとその他二つのベクトルのindex
-            int xb = myRand(popSize), xr1, xr2;
-            do {xr1 = myRand(popSize);} while (xb == xr1);
-            do {xr2 = myRand(popSize);} while (xb == xr1 || xr1 == xr2);
-            int jr = myRand(constantSize);
-            std::array<double, constantSize> v;
-            for (int k = 0; k < constantSize; k++) {
-                //交叉
-                if (jr == k || myRand.prob() < crossOver) {
-                    v[k] = populations[xb].constant[k] * exp(scalar * log(populations[xr1].constant[k] / populations[xr2].constant[k]));
-                    if(v[k]<lowerLim) v[k]=lowerLim;
-                    if(v[k]>upperLim) v[k]=upperLim;
-                }
-                else v[k] = populations[j].constant[k];
-            }
+            assert(!lockahead.empty());
+            auto [xb,xr1,xr2]=lockahead.back();
+            lockahead.pop_back();
+            //新しいベクトル、ベースベクトルとその他二つのベクトル
+            std::array<double, constantSize> v,baseV,randV1,randV2;
+            baseV=populations[xb].constant;
+            randV1=populations[xr1].constant;
+            randV2=populations[xr2].constant;
+            //交叉
+            v=crossingOver(baseV,randV1,randV2);
+
             double newError = calcError(v);
             if (newError < populations[j].error || !std::isfinite(populations[j].error)) {
                 populations[j].constant = v;
@@ -222,13 +250,13 @@ std::array<double, constantSize> differentialEvolution::best() {
     }
     return *ret;
 }
+
 void differentialEvolution::putSim(const std::array<double, constantSize>& constant){
     simulate(constant);
     std::cout<<"----------------------------\n";
     for (int i = 0; i < QASAP.size(); i++) {
-        std::cout<<QASAP[i].time<<"\n";
         assert(0 <= QASAP[i].time && QASAP[i].time <= simTime.back());
-        //std::cout<<"TIME : "<<QASAP[i].time<<"\n";
+        std::cout<<QASAP[i].time<<", ";
 
         int nearestIndex = std::upper_bound(simTime.begin(),simTime.end(),QASAP[i].time)-simTime.begin()-1;
         double nearestTime = simTime[nearestIndex];
@@ -243,7 +271,9 @@ void differentialEvolution::putSim(const std::array<double, constantSize>& const
         std::cout<<std::endl;
     }
 }
+
 void differentialEvolution::DEBUG() {
+    std::cout<<"Population Error and Constants:\n";
     for (int i = 0; i < popSize; i++) {
         std::cout<< populations[i].error << std::endl;
         for (int j = 0; j < constantSize; j++) {

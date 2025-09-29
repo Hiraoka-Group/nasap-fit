@@ -13,7 +13,7 @@ constexpr int trackedIndex[] = { 27,26,28,25 };
 
 
 //差分進化法のエージェント数
-constexpr int popSize = 4;
+constexpr int popSize = 32;
 
 constexpr double tolerableError=1e-10; //許容誤差
 constexpr double safetyConstant=0.9; //ステップサイズ更新の安全係数

@@ -18,7 +18,7 @@
 
 
 struct differentialEvolution {
-	int loopsNumber = 10; //差分進化法を回す回数
+	int loopsNumber = 20; //差分進化法を回す回数
 private:
 	double endTime; //シミュレーション終了時間
 	struct individuals {

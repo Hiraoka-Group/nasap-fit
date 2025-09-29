@@ -144,6 +144,8 @@ nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/build.make
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/compiler_depend.ts
+nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so
+nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable nasap_fit_cpp"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/nasap_fit_cpp.dir/link.txt --verbose=$(VERBOSE)
