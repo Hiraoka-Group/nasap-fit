@@ -11,13 +11,11 @@ constexpr int trackedSpecies=4;
 constexpr int trackedIndex[] = { 27,26,28,25 };
 
 
-
 //差分進化法のエージェント数
-constexpr int popSize = 64;
-//シミュレーションの許容誤差
-constexpr double tolerableAbsoluteError = 1e-10;
-//適応型ルンゲクッタ法の安全係数
-constexpr double safetyConstant=0.9;
+constexpr int popSize = 32;
+
+constexpr double tolerableError=1e-10; //許容誤差
+constexpr double safetyConstant=0.9; //ステップサイズ更新の安全係数
 //差分進化法のパラメータ
 constexpr double scalar = 0.5, crossOver = 0.5;
 //反応速度定数の上限下限

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <iomanip>
 #include <cfloat>
 #include <string>
@@ -6,7 +7,6 @@
 #include <vector>
 #include <cassert>
 #include <fstream>
-#include <algorithm>
 
 #include <mpi.h>
 
@@ -17,21 +17,9 @@
 
 
 xorshift myRand;
-extern int num_procs;//総プロセス数
-extern int proc_rank;//自分のプロセス番号
-extern std::vector<int> recvcounts,displs,recvcounts2,displs2;
-//シミュレーションの1ステップごとの時間差
-double timeStep = 1.0/(1<<9);
-
-//通信用メモリ
-double sendContainerDBL[popSize*constantSize], recvContainerDBL[popSize*constantSize], sendContainerDBL2[popSize*constantSize], recvContainerDBL2[popSize*constantSize];
-
-
-//プロセスが計算を担当しているエージェントの数
-inline int popsInCharge(){
-    return (popSize/num_procs)+(popSize%num_procs>proc_rank);
-}
-
+int cnt=0;
+double timeStep=0.001;
+extern int num_procs, proc_rank;
 
 void print(std::array<double, constantSize>constant){
     std::cout<<"ar: ";
@@ -41,6 +29,7 @@ void print(std::array<double, constantSize>constant){
     std::cout<<std::endl;
     return;
 }
+
 
 //シミュレーションにおける、次のステップの計算
 differentialEvolution::stepResult differentialEvolution::calcNextStep(const std::array<double, constantSize>& reactConst, const speciesAmount& data) {
@@ -63,31 +52,31 @@ differentialEvolution::stepResult differentialEvolution::calcNextStep(const std:
         slope6 = diffCoeff(reactConst, val6);
         val7 = val1 + timeStep * (slope1 * (35.0/384) + slope3 * (500.0/1113) + slope4 * (125.0/192) + slope5 * (-2187.0/6784) + slope6 * (11.0/84));
         slope7 = diffCoeff(reactConst, val7);
-        const speciesAmount& order5 = val7;
         order4= val1 + timeStep * (slope1 * (5179.0/57600) + slope3 * (7571.0/16695) + slope4 * (393.0/640) + slope5 * (-92097.0/339200) + slope6 * (187.0/2100) + slope7 * (1.0/40));
-        
+        const speciesAmount& order5 = val7;
+
         for(int i=0; i<species; i++){
             double e = std::abs(order4[i]-order5[i]);
             if(maxerror < e) maxerror=e;
         }
-        //timeStepの更新をスキップする場合
-        std::cout<<"maxerror: "<<maxerror<<"\n";
-        return {order5,timeStep,timeStep};
 
-        if(maxerror<=tolerableAbsoluteError){//ステップ成功
+        if(maxerror<=tolerableError){//ステップ成功
+            ret.usedStepSize=timeStep;
+            ret.newState=order5;
             double h_new;
             if(maxerror==0)h_new = timeStep * 2;
             else{
-                h_new=safetyConstant*timeStep*std::pow(tolerableAbsoluteError/maxerror,(1.0/5));
+                h_new=safetyConstant*timeStep*std::pow(tolerableError/maxerror,(1.0/5));
                 h_new=std::clamp(h_new, timeStep*0.25, timeStep*1.5);
             }
-            ret={order5,timeStep,h_new};
+            timeStep=h_new;
             return ret;
         }else{//ステップ失敗
-            //timeStep=safetyConstant*timeStep*std::pow(tolerableAbsoluteError/maxerror,(1.0/5));
+        timeStep=safetyConstant*timeStep*std::pow(tolerableError/maxerror,(1.0/5));
         }
     }
 }
+
 
 std::array<double, constantSize> differentialEvolution::crossingOver(const std::array<double, constantSize>& baseV, const std::array<double, constantSize>& randV1, const std::array<double, constantSize>& randV2){
     std::array<double, constantSize> v;
@@ -119,55 +108,36 @@ void differentialEvolution::simulate(const std::array<double, constantSize>& con
 
     //シミュレーション
     for (int k = 0; simTime.back() <= endTime; k++) {
-        for(int i=0; i<species; i++){
-            std::cout<<simulation[k][i]<<" ";
-        }
-        std::cout<<std::endl;
-        if(k>100)exit(0);
-
-        std::cout<<"stepsize: "<<timeStep<<"\n";
-        //std::cout<<"TIME: "<<simTime.back()<<"  ";
-        stepResult res = calcNextStep(constant, simulation[k]);
+        stepResult res=calcNextStep(constant, simulation[k]);
         simulation.push_back(res.newState);
         simTime.push_back(simTime.back()+res.usedStepSize);
-        //timeStep = res.newStepSize;
     }
 }
 
-double differentialEvolution::getSSR(const std::vector<speciesAmount>& simulatedValue) {
+//平方残差和の計算
+double differentialEvolution::calcError(const std::array<double, constantSize>& constant) {
+    simulation[0] = speciesAmount(); 
+    for (int i = 0; i < trackedSpecies; i++) {
+        simulation[0][trackedIndex[i]] = fullConc[i]*QASAP[0].state[i];
+    }
+    //シミュレーション
+    simulate(constant);
     double SSR = 0; 
     for (int i = 0; i < QASAP.size(); i++) {
-        assert(0 <= QASAP[i].time && QASAP[i].time < simTime.back());
-        int laterNearestIndex = std::upper_bound(simTime.begin(),simTime.end(),QASAP[i].time)-simTime.begin();
-        int earlierNearestIndex = (laterNearestIndex==0 ? 0 : laterNearestIndex-1);
-        auto internalDivision=[=](int index){
-            if(laterNearestIndex==earlierNearestIndex)return simulatedValue[laterNearestIndex][index];
-            double later=simTime[laterNearestIndex];
-            double earlier=simTime[earlierNearestIndex];
-            return simulatedValue[laterNearestIndex][index]*(QASAP[i].time-earlier)+simulatedValue[earlierNearestIndex][index]*(later-QASAP[i].time)/(later-earlier);
-        };
+        assert(0 <= QASAP[i].time && QASAP[i].time <= simTime.back());
+
+        int nearestIndex = std::upper_bound(simTime.begin(),simTime.end(),QASAP[i].time)-simTime.begin()-1;
+        double nearestTime = simTime[nearestIndex];
+        double difftime = QASAP[i].time - nearestTime;
+        timeStep=difftime;
+        stepResult res = calcNextStep(constant,simulation[nearestIndex]);
         for (int j = 0; j < trackedSpecies; j++) {
             size_t idx= trackedIndex[j];
             assert(0 <= idx && idx < species);
-            SSR += (QASAP[i].state[j] - internalDivision(idx)/fullConc[j]) * (QASAP[i].state[j] - internalDivision(idx)/fullConc[j]);
+            SSR += (QASAP[i].state[j] - res.newState[idx]/fullConc[j]) * (QASAP[i].state[j] - res.newState[idx]/fullConc[j]);
         }
     }
     return SSR;
-}
-//平方残差和の計算
-double differentialEvolution::calcError(const std::array<double, constantSize>& constant) {
-    simulate(constant);
-    double ret=getSSR(simulation);
-
-    if(!std::isfinite(ret)){
-        putSim(constant);
-        for(int i=0; i<constantSize; i++){
-            std::cout<<constant[i]<<" ";
-        }
-        std::cout<<std::endl;
-        assert(false);
-    }
-    return ret;
 }
 
 //実験データのセット
@@ -196,7 +166,7 @@ void differentialEvolution::setPop(){
 }
 differentialEvolution::differentialEvolution(std::vector<std::vector<double>>& arg) {
     setData(arg);
-    myRand=xorshift(proc_rank+1);
+    myRand=xorshift(1+proc_rank);
     endTime = arg.back()[0];
     simulation = std::vector<speciesAmount>(1);
     populations = std::vector<individuals>(popSize);
@@ -206,13 +176,13 @@ differentialEvolution::differentialEvolution(std::vector<std::vector<double>>& a
         }
         populations[i].error = calcError(populations[i].constant);
     }
-
 }
 
 void differentialEvolution::Optimize() {
     std::vector<differentialEvolution::individuals> popRecvContainer(popSize);
     for (int i = 0; i < loopsNumber; i++) {
         if(proc_rank==0)std::cout<<i<<"\n";
+        
 
         std::vector<std::array<int, 3>> lockahead;
         std::vector<int> indicesToVisit;
@@ -240,7 +210,7 @@ void differentialEvolution::Optimize() {
         );
         indicesToVisit.erase(std::unique(indicesToVisit.begin(),indicesToVisit.end()),indicesToVisit.end());
         MPI_Win win;
-        MPI_Win_create(populations.data(), sizeof(individuals)*popSize, sizeof(individuals), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
+        MPI_Win_create(populations.data(), sizeof(individuals)*popSize, 1, MPI_INFO_NULL, MPI_COMM_WORLD, &win);
         MPI_Win_fence(0, win);
         for(int idx : indicesToVisit){
             assert(idx%num_procs!=proc_rank);
@@ -248,7 +218,6 @@ void differentialEvolution::Optimize() {
         }
         MPI_Win_fence(0, win);
         MPI_Win_free(&win);
-
         for (int j = proc_rank; j < popSize; j+=num_procs) {
             //突然変異
             //ベースベクトルとその他二つのベクトルのindex
@@ -260,11 +229,9 @@ void differentialEvolution::Optimize() {
             baseV=populations[xb].constant;
             randV1=populations[xr1].constant;
             randV2=populations[xr2].constant;
+            //交叉
+            v=crossingOver(baseV,randV1,randV2);
 
-            for (int k = 0; k < constantSize; k++) {
-                //交叉
-                v=crossingOver(baseV,randV1,randV2);
-            }
             double newError = calcError(v);
             if (newError < populations[j].error || !std::isfinite(populations[j].error)) {
                 populations[j].constant = v;
@@ -292,9 +259,8 @@ void differentialEvolution::putSim(const std::array<double, constantSize>& const
     simulate(constant);
     std::cout<<"----------------------------\n";
     for (int i = 0; i < QASAP.size(); i++) {
-        std::cout<<QASAP[i].time<<"\n";
         assert(0 <= QASAP[i].time && QASAP[i].time <= simTime.back());
-        //std::cout<<"TIME : "<<QASAP[i].time<<"\n";
+        std::cout<<QASAP[i].time<<", ";
 
         int nearestIndex = std::upper_bound(simTime.begin(),simTime.end(),QASAP[i].time)-simTime.begin()-1;
         double nearestTime = simTime[nearestIndex];
@@ -311,6 +277,7 @@ void differentialEvolution::putSim(const std::array<double, constantSize>& const
 }
 
 void differentialEvolution::DEBUG() {
+    std::cout<<"Population Error and Constants:\n";
     for (int i = 0; i < popSize; i++) {
         std::cout<< populations[i].error << std::endl;
         for (int j = 0; j < constantSize; j++) {
