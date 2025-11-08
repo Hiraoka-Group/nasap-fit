@@ -2842,3 +2842,314 @@ events:
         
       exitCode: 0
 ...
+
+---
+events:
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindPkgConfig.cmake:69 (find_program)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:270 (find_package)"
+      - "CMakeLists.txt:13 (find_package)"
+    mode: "program"
+    variable: "PKG_CONFIG_EXECUTABLE"
+    description: "pkg-config executable"
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "pkg-config"
+      - "pkgconf"
+    candidate_directories:
+      - "/opt/cmake-4.1.1-linux-x86_64/bin/"
+      - "/home/aspi/.volta/bin/"
+      - "/home/linuxbrew/.linuxbrew/bin/"
+      - "/home/linuxbrew/.linuxbrew/sbin/"
+      - "/usr/local/bin/"
+      - "/usr/local/sbin/"
+      - "/home/aspi/.vscode-server/bin/7d842fb85a0275a4a8e4d7e040d2625abbf7f084/bin/remote-cli/"
+      - "/usr/sbin/"
+      - "/usr/bin/"
+      - "/sbin/"
+      - "/bin/"
+      - "/usr/games/"
+      - "/usr/local/games/"
+      - "/usr/lib/wsl/lib/"
+      - "/home/aspi/.vscode-server/extensions/ms-python.debugpy-2025.14.1-linux-x64/bundled/scripts/noConfigScripts/"
+      - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/usr/local/bin/"
+      - "/usr/local/sbin/"
+      - "/usr/local/"
+      - "/usr/bin/"
+      - "/usr/sbin/"
+      - "/usr/"
+      - "/bin/"
+      - "/sbin/"
+      - "/opt/cmake-4.1.1-linux-x86_64/bin/"
+      - "/opt/cmake-4.1.1-linux-x86_64/sbin/"
+      - "/opt/cmake-4.1.1-linux-x86_64/"
+      - "/usr/X11R6/bin/"
+      - "/usr/X11R6/sbin/"
+      - "/usr/X11R6/"
+      - "/usr/pkg/bin/"
+      - "/usr/pkg/sbin/"
+      - "/usr/pkg/"
+      - "/opt/bin/"
+      - "/opt/sbin/"
+      - "/opt/"
+    searched_directories:
+      - "/opt/cmake-4.1.1-linux-x86_64/bin/pkg-config"
+      - "/opt/cmake-4.1.1-linux-x86_64/bin/pkgconf"
+      - "/home/aspi/.volta/bin/pkg-config"
+      - "/home/aspi/.volta/bin/pkgconf"
+      - "/home/linuxbrew/.linuxbrew/bin/pkg-config"
+      - "/home/linuxbrew/.linuxbrew/bin/pkgconf"
+      - "/home/linuxbrew/.linuxbrew/sbin/pkg-config"
+      - "/home/linuxbrew/.linuxbrew/sbin/pkgconf"
+      - "/usr/local/bin/pkg-config"
+      - "/usr/local/bin/pkgconf"
+      - "/usr/local/sbin/pkg-config"
+      - "/usr/local/sbin/pkgconf"
+      - "/home/aspi/.vscode-server/bin/7d842fb85a0275a4a8e4d7e040d2625abbf7f084/bin/remote-cli/pkg-config"
+      - "/home/aspi/.vscode-server/bin/7d842fb85a0275a4a8e4d7e040d2625abbf7f084/bin/remote-cli/pkgconf"
+      - "/usr/sbin/pkg-config"
+      - "/usr/sbin/pkgconf"
+    found: "/usr/bin/pkg-config"
+    search_context:
+      ENV{PATH}:
+        - "/opt/cmake-4.1.1-linux-x86_64/bin"
+        - "/home/aspi/.volta/bin"
+        - "/home/linuxbrew/.linuxbrew/bin"
+        - "/home/linuxbrew/.linuxbrew/sbin"
+        - "/usr/local/bin"
+        - "/usr/local/sbin"
+        - "/home/aspi/.vscode-server/bin/7d842fb85a0275a4a8e4d7e040d2625abbf7f084/bin/remote-cli"
+        - "/opt/cmake-4.1.1-linux-x86_64/bin"
+        - "/home/aspi/.volta/bin"
+        - "/home/linuxbrew/.linuxbrew/bin"
+        - "/home/linuxbrew/.linuxbrew/sbin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/usr/lib/wsl/lib"
+        - "/home/aspi/.vscode-server/extensions/ms-python.debugpy-2025.14.1-linux-x64/bundled/scripts/noConfigScripts"
+        - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/opt/cmake-4.1.1-linux-x86_64"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1330 (_MPI_try_staged_settings)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1653 (_MPI_check_lang_works)"
+      - "CMakeLists.txt:13 (find_package)"
+    description: "The MPI test test_mpi for C in mode normal"
+    directories:
+      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-YyZCbI"
+      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-YyZCbI"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_C_test_mpi_normal"
+      cached: true
+      stdout: |
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-YyZCbI'
+        
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_d77f2/fast
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-YyZCbI'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_d77f2.dir/build.make CMakeFiles/cmTC_d77f2.dir/build
+        gmake[2]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-YyZCbI'
+        Building C object CMakeFiles/cmTC_d77f2.dir/test_mpi.c.o
+        /usr/bin/cc  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_d77f2.dir/test_mpi.c.o -c /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-YyZCbI/test_mpi.c
+        Linking C executable cmTC_d77f2
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d77f2.dir/link.txt --verbose=1
+        /usr/bin/cc CMakeFiles/cmTC_d77f2.dir/test_mpi.c.o -o cmTC_d77f2  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[2]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-YyZCbI'
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-YyZCbI'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1330 (_MPI_try_staged_settings)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1653 (_MPI_check_lang_works)"
+      - "CMakeLists.txt:13 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode normal"
+    directories:
+      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-X7QXoi"
+      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-X7QXoi"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_normal"
+      cached: true
+      stdout: |
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-X7QXoi'
+        
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_5add5/fast
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-X7QXoi'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_5add5.dir/build.make CMakeFiles/cmTC_5add5.dir/build
+        gmake[2]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-X7QXoi'
+        Building CXX object CMakeFiles/cmTC_5add5.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_5add5.dir/test_mpi.cpp.o -c /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-X7QXoi/test_mpi.cpp
+        Linking CXX executable cmTC_5add5
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5add5.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_5add5.dir/test_mpi.cpp.o -o cmTC_5add5  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[2]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-X7QXoi'
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-X7QXoi'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1680 (_MPI_try_staged_settings)"
+      - "CMakeLists.txt:13 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode MPICXX"
+    directories:
+      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Ko7xyy"
+      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Ko7xyy"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_MPICXX"
+      cached: true
+      stdout: |
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Ko7xyy'
+        
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_caa93/fast
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Ko7xyy'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_caa93.dir/build.make CMakeFiles/cmTC_caa93.dir/build
+        gmake[2]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Ko7xyy'
+        Building CXX object CMakeFiles/cmTC_caa93.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_caa93.dir/test_mpi.cpp.o -c /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Ko7xyy/test_mpi.cpp
+        Linking CXX executable cmTC_caa93
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_caa93.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_caa93.dir/test_mpi.cpp.o -o cmTC_caa93  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[2]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Ko7xyy'
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Ko7xyy'
+        
+      exitCode: 0
+...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1330 (_MPI_try_staged_settings)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1653 (_MPI_check_lang_works)"
+      - "CMakeLists.txt:13 (find_package)"
+    description: "The MPI test test_mpi for C in mode normal"
+    directories:
+      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-pZWoSz"
+      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-pZWoSz"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_C_test_mpi_normal"
+      cached: true
+      stdout: |
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-pZWoSz'
+        
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_1068f/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_1068f.dir/build.make CMakeFiles/cmTC_1068f.dir/build
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-pZWoSz'
+        Building C object CMakeFiles/cmTC_1068f.dir/test_mpi.c.o
+        /usr/bin/cc  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_1068f.dir/test_mpi.c.o -c /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-pZWoSz/test_mpi.c
+        Linking C executable cmTC_1068f
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1068f.dir/link.txt --verbose=1
+        /usr/bin/cc CMakeFiles/cmTC_1068f.dir/test_mpi.c.o -o cmTC_1068f  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-pZWoSz'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1330 (_MPI_try_staged_settings)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1653 (_MPI_check_lang_works)"
+      - "CMakeLists.txt:13 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode normal"
+    directories:
+      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-VNTdqw"
+      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-VNTdqw"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_normal"
+      cached: true
+      stdout: |
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-VNTdqw'
+        
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_8f2da/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_8f2da.dir/build.make CMakeFiles/cmTC_8f2da.dir/build
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-VNTdqw'
+        Building CXX object CMakeFiles/cmTC_8f2da.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_8f2da.dir/test_mpi.cpp.o -c /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-VNTdqw/test_mpi.cpp
+        Linking CXX executable cmTC_8f2da
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8f2da.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_8f2da.dir/test_mpi.cpp.o -o cmTC_8f2da  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-VNTdqw'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1680 (_MPI_try_staged_settings)"
+      - "CMakeLists.txt:13 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode MPICXX"
+    directories:
+      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-nuW5EU"
+      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-nuW5EU"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_MPICXX"
+      cached: true
+      stdout: |
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-nuW5EU'
+        
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_ce3ff/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_ce3ff.dir/build.make CMakeFiles/cmTC_ce3ff.dir/build
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-nuW5EU'
+        Building CXX object CMakeFiles/cmTC_ce3ff.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_ce3ff.dir/test_mpi.cpp.o -c /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-nuW5EU/test_mpi.cpp
+        Linking CXX executable cmTC_ce3ff
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ce3ff.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_ce3ff.dir/test_mpi.cpp.o -o cmTC_ce3ff  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-nuW5EU'
+        
+      exitCode: 0
+...
