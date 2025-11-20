@@ -1,0 +1,38 @@
+[
+{
+  "directory": "/home/aspi/Project/nasap-fit-cpp/build",
+  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/local/include/cppad -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -g -o CMakeFiles/nasap_fit_cpp.dir/src/CVODE_simulation.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/CVODE_simulation.cpp",
+  "file": "/home/aspi/Project/nasap-fit-cpp/src/CVODE_simulation.cpp",
+  "output": "CMakeFiles/nasap_fit_cpp.dir/src/CVODE_simulation.cpp.o"
+},
+{
+  "directory": "/home/aspi/Project/nasap-fit-cpp/build",
+  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/local/include/cppad -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -g -o CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/differentialEvolution.cpp",
+  "file": "/home/aspi/Project/nasap-fit-cpp/src/differentialEvolution.cpp",
+  "output": "CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o"
+},
+{
+  "directory": "/home/aspi/Project/nasap-fit-cpp/build",
+  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/local/include/cppad -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -g -o CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/dualNumber.cpp",
+  "file": "/home/aspi/Project/nasap-fit-cpp/src/dualNumber.cpp",
+  "output": "CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.o"
+},
+{
+  "directory": "/home/aspi/Project/nasap-fit-cpp/build",
+  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/local/include/cppad -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -g -o CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/main.cpp",
+  "file": "/home/aspi/Project/nasap-fit-cpp/src/main.cpp",
+  "output": "CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o"
+},
+{
+  "directory": "/home/aspi/Project/nasap-fit-cpp/build",
+  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/local/include/cppad -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -g -o CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp",
+  "file": "/home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp",
+  "output": "CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o"
+},
+{
+  "directory": "/home/aspi/Project/nasap-fit-cpp/build",
+  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/local/include/cppad -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -g -o CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/speciesAmount.cpp",
+  "file": "/home/aspi/Project/nasap-fit-cpp/src/speciesAmount.cpp",
+  "output": "CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o"
+}
+]

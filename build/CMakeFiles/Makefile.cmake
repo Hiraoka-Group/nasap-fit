@@ -14,6 +14,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCInformation.cmake"
   "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCXXInformation.cmake"
   "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCommonLanguageInclude.cmake"
+  "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeFindDependencyMacro.cmake"
   "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeGenericSystem.cmake"
   "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeInitializeConfigs.cmake"
   "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeLanguageInformation.cmake"
@@ -43,6 +44,10 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/Platform/Linux-Initialize.cmake"
   "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/Platform/Linux.cmake"
   "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/Platform/UnixPaths.cmake"
+  "/usr/local/lib/cmake/sundials/SUNDIALSConfig.cmake"
+  "/usr/local/lib/cmake/sundials/SUNDIALSConfigVersion.cmake"
+  "/usr/local/lib/cmake/sundials/SUNDIALSTargets-relwithdebinfo.cmake"
+  "/usr/local/lib/cmake/sundials/SUNDIALSTargets.cmake"
   )
 
 # The corresponding makefile is:

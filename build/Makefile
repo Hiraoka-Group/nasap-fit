@@ -129,6 +129,30 @@ nasap_fit_cpp/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/build
 .PHONY : nasap_fit_cpp/fast
 
+src/CVODE_simulation.o: src/CVODE_simulation.cpp.o
+.PHONY : src/CVODE_simulation.o
+
+# target to build an object file
+src/CVODE_simulation.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/CVODE_simulation.cpp.o
+.PHONY : src/CVODE_simulation.cpp.o
+
+src/CVODE_simulation.i: src/CVODE_simulation.cpp.i
+.PHONY : src/CVODE_simulation.i
+
+# target to preprocess a source file
+src/CVODE_simulation.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/CVODE_simulation.cpp.i
+.PHONY : src/CVODE_simulation.cpp.i
+
+src/CVODE_simulation.s: src/CVODE_simulation.cpp.s
+.PHONY : src/CVODE_simulation.s
+
+# target to generate assembly for a file
+src/CVODE_simulation.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/CVODE_simulation.cpp.s
+.PHONY : src/CVODE_simulation.cpp.s
+
 src/differentialEvolution.o: src/differentialEvolution.cpp.o
 .PHONY : src/differentialEvolution.o
 
@@ -152,6 +176,30 @@ src/differentialEvolution.s: src/differentialEvolution.cpp.s
 src/differentialEvolution.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.s
 .PHONY : src/differentialEvolution.cpp.s
+
+src/dualNumber.o: src/dualNumber.cpp.o
+.PHONY : src/dualNumber.o
+
+# target to build an object file
+src/dualNumber.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.o
+.PHONY : src/dualNumber.cpp.o
+
+src/dualNumber.i: src/dualNumber.cpp.i
+.PHONY : src/dualNumber.i
+
+# target to preprocess a source file
+src/dualNumber.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.i
+.PHONY : src/dualNumber.cpp.i
+
+src/dualNumber.s: src/dualNumber.cpp.s
+.PHONY : src/dualNumber.s
+
+# target to generate assembly for a file
+src/dualNumber.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.s
+.PHONY : src/dualNumber.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -234,9 +282,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... nasap_fit_cpp"
+	@echo "... src/CVODE_simulation.o"
+	@echo "... src/CVODE_simulation.i"
+	@echo "... src/CVODE_simulation.s"
 	@echo "... src/differentialEvolution.o"
 	@echo "... src/differentialEvolution.i"
 	@echo "... src/differentialEvolution.s"
+	@echo "... src/dualNumber.o"
+	@echo "... src/dualNumber.i"
+	@echo "... src/dualNumber.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
