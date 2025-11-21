@@ -1,0 +1,64 @@
+// 1. AD型配列を作成
+	std::vector<AD<double>> ax_vec(species);
+	for(int i=0; i<species; ++i) ax_vec[i]=sp[i];
+	// 2. 独立変数を宣言
+	CppAD::Independent(ax_vec);
+	speciesAmount<AD<double>> ax;
+	for(int i=0; i<species; ++i) ax[i]=ax_vec[i];
+
+	// 3. calcError は array を受け取るのでそのままでOK
+	speciesAmount<AD<double>> ay;
+	diffCoeff(k,ax,ay);
+
+	std::vector<AD<double>> ay_vec(species);
+	for(int i=0; i<species; ++i) ay_vec[i]=ay[i];
+
+	// 4. std::array から std::vector に変換して ADFun に渡す
+	CppAD::ADFun<double> f(ax_vec, ay_vec);
+
+	// 5. ヤコビ行列の計算
+	std::vector<double> x(species);
+	// initialize x with current state values so Jacobian is evaluated at y
+	for (int i = 0; i < species; ++i) x[i] = static_cast<double>(sp[i]);
+	std::vector<double> jac = f.Jacobian(x);
+
+	int row, col=0;
+	for(int i=0; i<nnz; ++i){
+		row = Ji[i];
+		while(Jp[col+1]<=i)col++;
+		if(detectDiff(Jx[i], jac[row*species+col])) {
+			std::cout<<"Error in Jacf(): "<<"Jx["<<i<<"] expected "<<Jx[i]<<" but got "<<jac[row*species+col]<<std::endl;
+			// 出力: CppAD が返したヤコビ行列（密行列）を表示
+			std::cout << "CppAD Jacobian (dense):\n";
+			for (int r = 0; r < species; ++r) {
+				for (int c = 0; c < species; ++c) {
+					std::cout <<std::setw(10)<<std::setprecision(3)<< jac[r * species + c];
+				}
+				std::cout << '\n';
+			}
+			row = 0; col = 0;
+			for (int j = 0; j < nnz; ++j) {
+				// find column c such that Jp[c] <= j < Jp[c+1]
+				while (col + 1 < species && Jp[col + 1] <= j) ++col;
+				row = Ji[j];
+				if(detectDiff(Jx[j], jac[row*species+col])) std::cout<<row<<","<<col<<": expected "<<Jx[j]<<", got "<<jac[row*species+col]<<std::endl;
+			}
+			/*
+			row = 0; col = 0;
+			std::vector<std::vector<double>> dense_jac(species, std::vector<double>(species, 0.0));
+			for (int j = 0; j < nnz; ++j) {
+				// find column c such that Jp[c] <= j < Jp[c+1]
+				while (col + 1 < species && Jp[col + 1] <= j) ++col;
+				row = Ji[j];
+				dense_jac[row][col] = Jx[j];
+			}
+			std::cout << "Expected Jacobian (dense):\n";
+			for (int r = 0; r < species; ++r) {
+				for (int c = 0; c < species; ++c) {
+					std::cout << std::setw(10) << std::setprecision(3) << dense_jac[r][c];
+				}
+				std::cout << '\n';
+			}*/
+			return -1;
+		}
+	}

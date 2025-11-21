@@ -3,19 +3,19 @@
 #include <vector>
 #include "constants.hpp"
 
-
+template<class T>
 class speciesAmount {
-	std::array<double, species>amount;
+	std::array<T, species>amount;
 public:;
 	speciesAmount();
-	speciesAmount(std::vector<double> arg);
-	double& operator[](int i);
-	const double& operator[](int i) const;
-	speciesAmount operator+(const speciesAmount& other);
-	speciesAmount operator/(const double num);
+	speciesAmount(std::vector<T> arg);
+	T& operator[](int i);
+	const T& operator[](int i) const;
+	speciesAmount<T> operator+(const speciesAmount<T>& other);
+	speciesAmount<T> operator/(const double num);
 	void Debug();
 };
-speciesAmount operator*(const speciesAmount& leftVal, const double rightVal);
-speciesAmount operator*(const double leftVal, const speciesAmount& rightVal);
+template<class T>speciesAmount<T> operator*(const speciesAmount<T>& leftVal, const double rightVal);
+template<class T>speciesAmount<T> operator*(const double leftVal, const speciesAmount<T>& rightVal);
 
 

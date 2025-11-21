@@ -5,7 +5,7 @@ import pprint
 from pathlib import Path
 
 inputFile = Path(__file__).parent.parent / 'data' / 'classified_reactions_str.csv'
-outputFile = Path(__file__).parent.parent / 'include' / 'ODE.hpp'
+outputFile = Path(__file__).parent.parent / 'include' / 'Rhsf.hpp'
 df = pd.read_csv(inputFile, index_col=0)
 
 records=df.to_dict(orient="records")
@@ -60,15 +60,17 @@ for dict in records:
 
 with open(outputFile,"w") as f:
     f.write(
-        "#pragma once\n" \
-        "#include <array>\n" \
-        "#include \"constants.hpp\"\n" \
-        "#include \"speciesAmount.hpp\"\n\n" \
-        "template<class T>\n" \
-        "inline void diffCoeff(const std::array<T, constantSize>& k, const speciesAmount<T>& sp, speciesAmount<T>& dxdt) {\n\t")
+        "#pragma once\n"                                                                              \
+        "#include <array>\n"                                                                          \
+        "#include <nvector/nvector_serial.h>\n"                                                       \
+        "#include \"constants.hpp\"\n\n"                                                              \
+        "int rhsf(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) {\n"                     \
+        "\tauto sp = N_VGetArrayPointer(y);\n"                                                        \
+        "\tauto ydotData = N_VGetArrayPointer(ydot);\n"                                               \
+        "\tstd::array<double, species> &k = *static_cast<std::array<double, species>*>(user_data);\n\t")
     for t in ODE:
         isFirst=True
-        f.write("dxdt[" + str(ODE.index(t)) + "] = ")
+        f.write("ydotData[" + str(ODE.index(t)) + "] = ")
         for key,val in t.items():
             if isFirst:
                 isFirst=False
@@ -76,5 +78,4 @@ with open(outputFile,"w") as f:
                 f.write(" + ")
             f.write(to_fomula(key,val))
         f.write(";\n\t")
-    
-    f.write("return dxdt;\n}")
+    f.write("return 0;\n}")

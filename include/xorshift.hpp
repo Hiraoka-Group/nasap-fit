@@ -13,6 +13,7 @@ public:
 		return seed ^= (seed << 17);
 	}
 	xorshift(uint64_t arg) {
+		assert(arg != 0);
 		seed=arg;
 		for(int i=0; i<8; i++){
 			seed ^= (seed << 13); seed ^= (seed >> 7); seed ^= (seed << 17);

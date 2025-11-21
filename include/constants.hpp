@@ -1,4 +1,8 @@
 #pragma once
+#include <string>
+
+const std::string inputfile = "../data/Table_S1.csv";
+
 //化学種の数
 constexpr int species = 29;
 //反応速度定数の数
@@ -12,11 +16,15 @@ constexpr int trackedIndex[] = { 27,26,28,25 };
 
 
 //差分進化法のエージェント数
-constexpr int popSize = 32;
+constexpr int popSize = 128;
 
-constexpr double tolerableError=1e-10; //許容誤差
-constexpr double safetyConstant=0.9; //ステップサイズ更新の安全係数
+//シミュレーションの許容絶対誤差
+constexpr double tolAbsError = 1e-9;
+//シミュレーションの許容相対誤差
+constexpr double tolRelError = 1e-6;
+//適応型ルンゲクッタ法の安全係数
+constexpr double safetyConstant=0.9;
 //差分進化法のパラメータ
 constexpr double scalar = 0.5, crossOver = 0.5;
 //反応速度定数の上限下限
-constexpr double upperLim = 1.6e2, lowerLim = 1e4;
+constexpr double upperLim = 1e2, lowerLim = 1e-3;
