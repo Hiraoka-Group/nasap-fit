@@ -129,30 +129,6 @@ nasap_fit_cpp/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/build
 .PHONY : nasap_fit_cpp/fast
 
-src/CVODE_simulation.o: src/CVODE_simulation.cpp.o
-.PHONY : src/CVODE_simulation.o
-
-# target to build an object file
-src/CVODE_simulation.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/CVODE_simulation.cpp.o
-.PHONY : src/CVODE_simulation.cpp.o
-
-src/CVODE_simulation.i: src/CVODE_simulation.cpp.i
-.PHONY : src/CVODE_simulation.i
-
-# target to preprocess a source file
-src/CVODE_simulation.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/CVODE_simulation.cpp.i
-.PHONY : src/CVODE_simulation.cpp.i
-
-src/CVODE_simulation.s: src/CVODE_simulation.cpp.s
-.PHONY : src/CVODE_simulation.s
-
-# target to generate assembly for a file
-src/CVODE_simulation.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/CVODE_simulation.cpp.s
-.PHONY : src/CVODE_simulation.cpp.s
-
 src/differentialEvolution.o: src/differentialEvolution.cpp.o
 .PHONY : src/differentialEvolution.o
 
@@ -225,6 +201,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/makeRhsf.o: src/makeRhsf.cpp.o
+.PHONY : src/makeRhsf.o
+
+# target to build an object file
+src/makeRhsf.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o
+.PHONY : src/makeRhsf.cpp.o
+
+src/makeRhsf.i: src/makeRhsf.cpp.i
+.PHONY : src/makeRhsf.i
+
+# target to preprocess a source file
+src/makeRhsf.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.i
+.PHONY : src/makeRhsf.cpp.i
+
+src/makeRhsf.s: src/makeRhsf.cpp.s
+.PHONY : src/makeRhsf.s
+
+# target to generate assembly for a file
+src/makeRhsf.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.s
+.PHONY : src/makeRhsf.cpp.s
+
 src/readcsv.o: src/readcsv.cpp.o
 .PHONY : src/readcsv.o
 
@@ -282,9 +282,6 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... nasap_fit_cpp"
-	@echo "... src/CVODE_simulation.o"
-	@echo "... src/CVODE_simulation.i"
-	@echo "... src/CVODE_simulation.s"
 	@echo "... src/differentialEvolution.o"
 	@echo "... src/differentialEvolution.i"
 	@echo "... src/differentialEvolution.s"
@@ -294,6 +291,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/makeRhsf.o"
+	@echo "... src/makeRhsf.i"
+	@echo "... src/makeRhsf.s"
 	@echo "... src/readcsv.o"
 	@echo "... src/readcsv.i"
 	@echo "... src/readcsv.s"
