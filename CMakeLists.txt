@@ -6,6 +6,11 @@ cmake_minimum_required(VERSION 3.10)
 # Project name
 project(nasap_fit_cpp)
 
+# Require C++20 for std::span and other C++20 features
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # ソースコードを収集
 file(GLOB SOURCES "src/*.cpp")
 

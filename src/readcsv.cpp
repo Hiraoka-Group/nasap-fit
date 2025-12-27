@@ -24,6 +24,9 @@ std::vector<std::string>parse(std::string_view line, char delimiter){
 std::vector<std::vector<std::string>> read_csv(const std::string& filename) {
     std::vector<std::vector<std::string>> data;
     std::ifstream file(filename);
+    if(file.fail()){
+        throw std::runtime_error("Could not open file: " + filename);
+    }
     std::string line;  
     while (std::getline(file, line)) {
         data.push_back(parse(line));

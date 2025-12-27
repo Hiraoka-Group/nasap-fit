@@ -1,0 +1,39 @@
+#NMRによって得られた濃度の時間変化データのパス(必須)(絶対パス or プロジェクトのルートに対する相対パス)
+QASAPDataFile: data/M9L6/concentration.csv
+#反応ネットワークを記述したファイルのパス(必須)(絶対パス or プロジェクトのルートに対する相対パス)
+reactionDataFile: data/M9L6/simply_classified_reactions.csv
+#化学種の数(必須)
+species: 505
+#反応速度定数の数(必須)
+constantSize: 3
+
+#concDatafileに記述されている各化学種についてのデータ(必須)
+trackedSpecies:
+  'PdPy*2':
+    100%concentration: 0.00203
+    index: 0
+  'L':
+    100%concentration: 0.0013533333333333334
+    index: 1
+  'Pd9L6':
+    100%concentration: 0.00022555555555555556
+    index: 504
+  'Py*':
+    100%concentration: 0.00406
+    index: 2
+#差分進化法のエージェント数(必須)
+popSize: 32
+#最大世代数(必須)
+maxGen: 200
+
+#シミュレーションの許容絶対誤差
+tolAbsError: 1e-9
+#シミュレーションの許容相対誤差
+tolRelError: 1e-6
+
+#差分進化法のパラメータ
+scalar: 0.5
+crossOver: 0.5
+#反応速度定数の上限下限
+upperLim: 1e4
+lowerLim: 1e-3

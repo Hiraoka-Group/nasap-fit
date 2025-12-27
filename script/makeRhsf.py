@@ -4,6 +4,7 @@ import csv
 import pprint
 from pathlib import Path
 
+#inputFile = Path(__file__).parent.parent / 'data' / 'M9L6' / 'simply_classified_reactions.csv'
 inputFile = Path(__file__).parent.parent / 'data' / 'classified_reactions_str.csv'
 outputFile = Path(__file__).parent.parent / 'include' / 'Rhsf.hpp'
 df = pd.read_csv(inputFile, index_col=0)
@@ -67,7 +68,7 @@ with open(outputFile,"w") as f:
         "int rhsf(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) {\n"                     \
         "\tauto sp = N_VGetArrayPointer(y);\n"                                                        \
         "\tauto ydotData = N_VGetArrayPointer(ydot);\n"                                               \
-        "\tstd::array<double, species> &k = *static_cast<std::array<double, species>*>(user_data);\n\t")
+        "\tstd::array<double, config::constantSize> &k = *static_cast<std::array<double, config::constantSize>*>(user_data);\n\t")
     for t in ODE:
         isFirst=True
         f.write("ydotData[" + str(ODE.index(t)) + "] = ")

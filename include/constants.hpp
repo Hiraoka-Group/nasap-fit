@@ -1,30 +1,39 @@
 #pragma once
 #include <string>
+#include <string_view>
 
-const std::string inputfile = "../data/Table_S1.csv";
+namespace config {
+const std::string QASAPFile = "../data/Table_S1.csv";
+const std::string reactNetworkFile = "../data/classified_reactions_str.csv";
 
 //化学種の数
 constexpr int species = 29;
 //反応速度定数の数
 constexpr int constantSize = 8;
-//Table_S1.csvにおいて、化学種の100%にあたる濃度
-constexpr double fullConc[] = {1.71e-3, 8.55e-4, 3.42e-3, 4.275e-4};
+
 //データにより与えられる化学種の数
-constexpr int trackedSpecies=4;
+const int trackedSpecies=4;
+//csvファイル内の化学種の名前
+const std::string_view trackedNames[] = { "1 (%)", "[PdPy*4]2+ (%)", "Py* (%)", "Pd214 cage (%)" };
 //データにより与えられる化学種のindex
-constexpr int trackedIndex[] = { 27,26,28,25 };
+const int trackedIndex[] = { 27, 26, 28, 25 };
+//Table_S1.csvにおいて、化学種の100%にあたる濃度
+const double fullConc[] = {0.0017099999999999999, 0.00085499999999999997, 0.0034199999999999999, 0.00042749999999999998};
 
 
 //差分進化法のエージェント数
-constexpr int popSize = 128;
+const int popSize = 128;
+//差分進化法の最大世代数
+const int maxGen = 200;
 
 //シミュレーションの許容絶対誤差
-constexpr double tolAbsError = 1e-9;
+const double tolAbsError = 1.0000000000000001e-09;
 //シミュレーションの許容相対誤差
-constexpr double tolRelError = 1e-6;
+const double tolRelError = 9.9999999999999995e-07;
 //適応型ルンゲクッタ法の安全係数
-constexpr double safetyConstant=0.9;
+const double safetyConstant=0.9;
 //差分進化法のパラメータ
-constexpr double scalar = 0.5, crossOver = 0.5;
+const double scalar = 0.5, crossOver = 0.5;
 //反応速度定数の上限下限
-constexpr double upperLim = 1e2, lowerLim = 1e-3;
+const double upperLim = 10000, lowerLim = 0.001;
+}

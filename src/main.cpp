@@ -22,53 +22,56 @@
 #include "../include/readcsv.hpp"
 #include "../include/ODE.hpp"
 
-int num_procs;//総プロセス数
+int num_procs=1;//総プロセス数
 int proc_rank;//自分のプロセス番号
 
-const extern std::string inputfile;
+int stepCount[61];
+
+const extern std::string config::QASAPFile;
 
 std::chrono::system_clock::time_point startTime,endTimeGlobal;
 
+xorshift myRand2(1);
+inline double randbetExp2(double lower, double upper) { 
+	return lower * exp(log(upper / lower) * myRand2.prob());
+}
+
 signed main(int argc, char** argv) {
-	startTime = std::chrono::system_clock::now();
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
-	
-	std::vector<std::vector<std::string>> csv_data = read_csv(inputfile);
+	std::vector<std::vector<std::string>> csv_data = read_csv(std::string(config::QASAPFile));
 	std::vector<std::vector<double>> csv_data_double;
+	bool isHeader = true;
 	for (const auto& row : csv_data) {
 		std::vector<double> row_double;
-		for (int i=0; i<trackedSpecies+1; i++) {
-			if(row[0]=="Time (min)") goto skip; //ヘッダー行をスキップ
+		for (int i=0; i<config::trackedSpecies+1; i++) {
+			if(isHeader){
+				isHeader=false;
+				goto dontPush; //ヘッダー行をスキップ
+			} 
 			row_double.push_back(std::stod(row[i]));
 		}
 		csv_data_double.push_back(row_double);
-		skip:;
+		dontPush:;
 	}
+	if(proc_rank==0)std::cout<<"Loaded "<<csv_data_double.size()<<" rows of data."<<std::endl;
 	differentialEvolution diffEvo(csv_data_double); // Assuming setData is a method to set the data
-	//diffEvo.putSim({0.410171, 978.908, 109.259, 411.699, 0.0143831, 39.3534, 0.058751, 1.41529});
-	//diffEvo.putCVODESim({0.410171, 978.908, 109.259, 411.699, 0.0143831, 39.3534, 0.058751, 1.41529});
 	
-
 	
-	#if 0
-	diffEvo.putSim({0.0913144, 93.7798, 0.001, 153.178, 331.427, 237.888, 0.001, 2.43555});
-	diffEvo.putCVODESim({0.0913144, 93.7798, 0.001, 153.178, 331.427, 237.888, 0.001, 2.43555});
+	startTime = std::chrono::system_clock::now();
 	
-	#else
-
 	diffEvo.Optimize();
 	endTimeGlobal = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTimeGlobal - startTime).count();
+
 	if(proc_rank==0)std::cout << "Optimization took " << duration << " milliseconds." << std::endl;
-	auto bestConstants = diffEvo.best();
-	if(proc_rank==0){
-		diffEvo.putSim(bestConstants);
-		diffEvo.putCVODESim(bestConstants);
-	}
 	
-	if(false){
+
+	
+	if(true){
+		auto bestConstants = diffEvo.best();
+		diffEvo.putCVODESim(bestConstants);
 		std::cout<<"Optimized Constants:"<<std::endl;
 		auto arr = diffEvo.best();
 		for (auto t : arr) {
@@ -76,6 +79,7 @@ signed main(int argc, char** argv) {
 		}
 		std::cout << std::endl;
 		std::cout<<"error: "<<diffEvo.calcError(arr)<<std::endl;
+		/*
 		if(proc_rank==0){
 			std::vector<double> jac = diffEvo.getJacobian(arr);
 			std::cout<<"Jacobian :"<<std::endl;
@@ -95,8 +99,8 @@ signed main(int argc, char** argv) {
 				std::cout<<std::endl;
 			}
 		}
+			*/
 	}
-	#endif
 
 	MPI_Finalize();
 	

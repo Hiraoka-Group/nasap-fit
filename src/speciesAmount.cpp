@@ -14,8 +14,8 @@ speciesAmount<T>::speciesAmount() {
 }
 template<class T>
 speciesAmount<T>::speciesAmount(std::vector<T> arg) {
-	assert(arg.size() == species);
-	for (int i = 0; i < species; i++) {
+	assert(arg.size() == config::species);
+	for (int i = 0; i < config::species; i++) {
 		amount[i] = arg[i];
 	}
 }
@@ -30,7 +30,7 @@ inline const T& speciesAmount<T>::operator[](int i) const {
 template<class T>
 speciesAmount<T> speciesAmount<T>::operator+(const speciesAmount<T>& other) {
 	speciesAmount<T> ret;
-	for (int i = 0; i < species; i++) {
+	for (int i = 0; i < config::species; i++) {
 		ret[i] = amount[i] + other.amount[i];
 	}
 	return ret;
@@ -38,7 +38,7 @@ speciesAmount<T> speciesAmount<T>::operator+(const speciesAmount<T>& other) {
 template<class T>
 speciesAmount<T> speciesAmount<T>::operator/(const double num) {
 	speciesAmount<T> ret;
-	for (int i = 0; i < species; i++) {
+	for (int i = 0; i < config::species; i++) {
 		ret.amount[i] = amount[i] / num;
 	}
 	return ret;
@@ -47,7 +47,7 @@ speciesAmount<T> speciesAmount<T>::operator/(const double num) {
 template<class T>
 speciesAmount<T> operator*(const speciesAmount<T>& leftVal, const double rightVal) {
 	speciesAmount<T> ret;
-	for (int i = 0; i < species; i++) {
+	for (int i = 0; i < config::species; i++) {
 		ret[i] = leftVal[i] * rightVal;
 	}
 	return ret;
@@ -56,7 +56,7 @@ speciesAmount<T> operator*(const speciesAmount<T>& leftVal, const double rightVa
 template<class T>
 speciesAmount<T> operator*(const double leftVal, const speciesAmount<T>& rightVal) {
 	speciesAmount<T> ret;
-	for (int i = 0; i < species; i++) {
+	for (int i = 0; i < config::species; i++) {
 		ret[i] = leftVal * rightVal[i];
 	}
 	return ret;

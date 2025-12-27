@@ -5,6 +5,7 @@ import pprint
 from collections import OrderedDict
 from pathlib import Path
 
+#inputFile = Path(__file__).parent.parent / 'data' / 'M9L6' / 'simply_classified_reactions.csv'
 inputFile = Path(__file__).parent.parent / 'data' / 'classified_reactions_str.csv'
 outputFile = Path(__file__).parent.parent / 'include' / 'Jacf.hpp'
 df = pd.read_csv(inputFile, index_col=0)
@@ -98,10 +99,10 @@ intro= \
 "#include <sundials/sundials_types.h>\n" \
 "#include <sunmatrix/sunmatrix_sparse.h>\n" \
 "#include \"constants.hpp\"\n\n" \
+f"constexpr size_t nonZeroElems={nnz};\n\n" \
 "int JacFn(sunrealtype t, N_Vector y, N_Vector fy, SUNMatrix Jac, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3){\n" \
 "\tauto sp = N_VGetArrayPointer(y);\n"  \
-"\tstd::array<double, constantSize> &k = *static_cast<std::array<double, constantSize>*>(user_data);\n" \
-f"\tsize_t nnz={nnz};\n\n" \
+"\tstd::array<double, config::constantSize> &k = *static_cast<std::array<double, config::constantSize>*>(user_data);\n" \
 "\tsunindextype* Jp = SUNSparseMatrix_IndexPointers(Jac);\n" \
 "\tsunindextype* Ji = SUNSparseMatrix_IndexValues(Jac);\n" \
 "\tsunrealtype* Jx = SUNSparseMatrix_Data(Jac);\n"
@@ -112,14 +113,14 @@ for num in numsInColumn:
     sum+=num
     JpAssign+=f", {sum}"
 JpAssign+="};\n"
-JpAssign+="\tfor(int i=0;i<30;i++) Jp[i]=Jp_vals[i]; \n"
+JpAssign+=f"\tfor(int i=0;i<{len(numsInColumn)+1};i++) Jp[i]=Jp_vals[i]; \n"
 
 JiAssign="\tstd::vector<int>Ji_vals ={"
 for key,val in matDict.items():
     row = key[0]
     JiAssign+=f"{row}, "
 JiAssign=JiAssign[:-2]+"};\n"
-JiAssign+="\tfor(int i=0;i<nnz;i++) Ji[i]=Ji_vals[i]; \n"
+JiAssign+="\tfor(int i=0;i<nonZeroElems;i++) Ji[i]=Ji_vals[i]; \n"
 
 JxAssign=""
 for i, (key, val) in enumerate(matDict.items()):
@@ -132,8 +133,6 @@ for i, (key, val) in enumerate(matDict.items()):
 
 afterword= "\treturn 0;\n}"
 
-for (key,val) in matDict.items():
-    print(key,val)
 
 
 with open(outputFile,"w") as f:

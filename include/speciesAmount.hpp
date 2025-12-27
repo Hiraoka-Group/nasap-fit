@@ -5,7 +5,7 @@
 
 template<class T>
 class speciesAmount {
-	std::array<T, species>amount;
+	std::array<T, config::species>amount;
 public:;
 	speciesAmount();
 	speciesAmount(std::vector<T> arg);

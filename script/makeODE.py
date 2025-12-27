@@ -4,7 +4,7 @@ import csv
 import pprint
 from pathlib import Path
 
-inputFile = Path(__file__).parent.parent / 'data' / 'classified_reactions_str.csv'
+inputFile = Path(__file__).parent.parent / 'data' / 'M9L6' / 'classified_reactions_str.csv'
 outputFile = Path(__file__).parent.parent / 'include' / 'ODE.hpp'
 df = pd.read_csv(inputFile, index_col=0)
 

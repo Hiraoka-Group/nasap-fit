@@ -1,0 +1,31 @@
+{
+  "concDatafile": "../data/M9L6/concentration.csv",
+  "species": 505,
+  "constantSize": 3,
+  "trackedSpecies": {
+    "PdPy*2": {
+      "100%conc": 0.00203,
+      "index": 0
+    },
+    "PdPyH*2": {
+      "100%conc": 0.0013533333333333334,
+      "index": 1
+    },
+    "PyridineHCl*2": {
+      "100%conc": 0.00022555555555555556,
+      "index": 504
+    },
+    "Pyridine*2": {
+      "100%conc": 0.00406,
+      "index": 2
+    }
+  },
+  "popSize": 32,
+  "maxGen": 200,
+  "tolAbsError": 1e-9,
+  "tolRelError": 1e-6,
+  "scalar": 0.5,
+  "crossOver": 0.5,
+  "upperLim": 1e4,
+  "lowerLim": 1e-3
+}
