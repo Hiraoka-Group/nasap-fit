@@ -327,7 +327,7 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     for (int i = 0; i < config::species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
-    int flag = CVodeInit(cvode_mem, rhsf, 0.0, y);
+    int flag = CVodeInit(cvode_mem, Rhsf::rhsf, 0.0, y);
     assert(flag == CV_SUCCESS);
     flag = CVodeSStolerances(cvode_mem, config::tolRelError, config::tolAbsError);
     assert(flag == CV_SUCCESS);
@@ -453,7 +453,7 @@ void differentialEvolution::putSim(const std::array<double, config::constantSize
         cout<<std::endl;
     }
 
-}//0.114008 71.0442 42.9166 1.74182 0.356338 100 6.12762 68.9364
+}
 
 void differentialEvolution::putCVODESim(const std::array<double, config::constantSize>& constant) {
     if(proc_rank!=0)return;

@@ -21,13 +21,13 @@
 #include "../include/differentialEvolution.hpp"
 #include "../include/readcsv.hpp"
 #include "../include/ODE.hpp"
+#include "../include/Rhsf.hpp"
 
 int num_procs=1;//総プロセス数
 int proc_rank;//自分のプロセス番号
 
 int stepCount[61];
 
-const extern std::string config::QASAPFile;
 
 std::chrono::system_clock::time_point startTime,endTimeGlobal;
 
@@ -40,10 +40,10 @@ signed main(int argc, char** argv) {
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
-	std::vector<std::vector<std::string>> csv_data = read_csv(std::string(config::QASAPFile));
+	std::vector<std::vector<std::string>> QASAPdata = read_csv(std::string(config::QASAPFile));
 	std::vector<std::vector<double>> csv_data_double;
 	bool isHeader = true;
-	for (const auto& row : csv_data) {
+	for (const auto& row : QASAPdata) {
 		std::vector<double> row_double;
 		for (int i=0; i<config::trackedSpecies+1; i++) {
 			if(isHeader){
@@ -56,6 +56,9 @@ signed main(int argc, char** argv) {
 		dontPush:;
 	}
 	if(proc_rank==0)std::cout<<"Loaded "<<csv_data_double.size()<<" rows of data."<<std::endl;
+
+	Rhsf::makeRhsf();
+
 	differentialEvolution diffEvo(csv_data_double); // Assuming setData is a method to set the data
 	
 	
@@ -104,7 +107,7 @@ signed main(int argc, char** argv) {
 
 	MPI_Finalize();
 	
-}
+}//0.0349428 7370.47 966.895 138.205 0.359602 972.249 0.00584204 0.144209
 
 /*
 g++ main.cpp -o main && ./main

@@ -130,6 +130,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o: /home/aspi/Project
   /usr/include/c++/12/cctype \
   /usr/include/c++/12/cerrno \
   /usr/include/c++/12/cfloat \
+  /usr/include/c++/12/charconv \
   /usr/include/c++/12/chrono \
   /usr/include/c++/12/climits \
   /usr/include/c++/12/clocale \
@@ -183,6 +184,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o: /home/aspi/Project
   /usr/include/c++/12/random \
   /usr/include/c++/12/ratio \
   /usr/include/c++/12/set \
+  /usr/include/c++/12/span \
   /usr/include/c++/12/sstream \
   /usr/include/c++/12/stack \
   /usr/include/c++/12/stdexcept \
@@ -895,6 +897,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o: /home/aspi/Project/nasap-fit-cpp/sr
   /home/aspi/Project/nasap-fit-cpp/include/ODE.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/speciesAmount.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/xorshift.hpp \
+  /home/aspi/Project/nasap-fit-cpp/include/Rhsf.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/constants.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/differentialEvolution.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/readcsv.hpp \
@@ -1018,6 +1021,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o: /home/aspi/Project/nasap-fit-cpp/sr
   /usr/include/c++/12/cctype \
   /usr/include/c++/12/cerrno \
   /usr/include/c++/12/cfloat \
+  /usr/include/c++/12/charconv \
   /usr/include/c++/12/chrono \
   /usr/include/c++/12/climits \
   /usr/include/c++/12/clocale \
@@ -1070,6 +1074,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o: /home/aspi/Project/nasap-fit-cpp/sr
   /usr/include/c++/12/random \
   /usr/include/c++/12/ratio \
   /usr/include/c++/12/set \
+  /usr/include/c++/12/span \
   /usr/include/c++/12/sstream \
   /usr/include/c++/12/stack \
   /usr/include/c++/12/stdexcept \
@@ -1665,13 +1670,18 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o: /home/aspi/Project/nasap-fit-cpp/sr
   /usr/local/include/sunlinsol/sunlinsol_spgmr.h
 
 CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/makeRhsf.cpp \
+  /home/aspi/Project/nasap-fit-cpp/include/Rhsf.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/constants.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/readcsv.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
+  /usr/include/assert.h \
+  /usr/include/c++/12/algorithm \
   /usr/include/c++/12/array \
   /usr/include/c++/12/backward/binders.h \
+  /usr/include/c++/12/bit \
+  /usr/include/c++/12/bits/algorithmfwd.h \
   /usr/include/c++/12/bits/alloc_traits.h \
   /usr/include/c++/12/bits/allocator.h \
   /usr/include/c++/12/bits/basic_ios.h \
@@ -1714,20 +1724,26 @@ CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o: /home/aspi/Project/nasap-fit-cp
   /usr/include/c++/12/bits/predefined_ops.h \
   /usr/include/c++/12/bits/ptr_traits.h \
   /usr/include/c++/12/bits/range_access.h \
+  /usr/include/c++/12/bits/ranges_algo.h \
+  /usr/include/c++/12/bits/ranges_algobase.h \
   /usr/include/c++/12/bits/ranges_base.h \
   /usr/include/c++/12/bits/ranges_cmp.h \
+  /usr/include/c++/12/bits/ranges_util.h \
   /usr/include/c++/12/bits/refwrap.h \
   /usr/include/c++/12/bits/std_abs.h \
+  /usr/include/c++/12/bits/stl_algo.h \
   /usr/include/c++/12/bits/stl_algobase.h \
   /usr/include/c++/12/bits/stl_bvector.h \
   /usr/include/c++/12/bits/stl_construct.h \
   /usr/include/c++/12/bits/stl_function.h \
+  /usr/include/c++/12/bits/stl_heap.h \
   /usr/include/c++/12/bits/stl_iterator.h \
   /usr/include/c++/12/bits/stl_iterator_base_funcs.h \
   /usr/include/c++/12/bits/stl_iterator_base_types.h \
   /usr/include/c++/12/bits/stl_map.h \
   /usr/include/c++/12/bits/stl_multimap.h \
   /usr/include/c++/12/bits/stl_pair.h \
+  /usr/include/c++/12/bits/stl_tempbuf.h \
   /usr/include/c++/12/bits/stl_tree.h \
   /usr/include/c++/12/bits/stl_uninitialized.h \
   /usr/include/c++/12/bits/stl_vector.h \
@@ -1735,11 +1751,13 @@ CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o: /home/aspi/Project/nasap-fit-cp
   /usr/include/c++/12/bits/streambuf_iterator.h \
   /usr/include/c++/12/bits/string_view.tcc \
   /usr/include/c++/12/bits/stringfwd.h \
+  /usr/include/c++/12/bits/uniform_int_dist.h \
   /usr/include/c++/12/bits/uses_allocator.h \
   /usr/include/c++/12/bits/utility.h \
   /usr/include/c++/12/bits/vector.tcc \
   /usr/include/c++/12/cctype \
   /usr/include/c++/12/cerrno \
+  /usr/include/c++/12/charconv \
   /usr/include/c++/12/clocale \
   /usr/include/c++/12/compare \
   /usr/include/c++/12/concepts \
@@ -1762,14 +1780,18 @@ CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o: /home/aspi/Project/nasap-fit-cp
   /usr/include/c++/12/initializer_list \
   /usr/include/c++/12/ios \
   /usr/include/c++/12/iosfwd \
+  /usr/include/c++/12/iostream \
   /usr/include/c++/12/istream \
   /usr/include/c++/12/map \
   /usr/include/c++/12/new \
   /usr/include/c++/12/numbers \
   /usr/include/c++/12/ostream \
+  /usr/include/c++/12/pstl/execution_defs.h \
+  /usr/include/c++/12/pstl/glue_algorithm_defs.h \
   /usr/include/c++/12/pstl/pstl_config.h \
   /usr/include/c++/12/span \
   /usr/include/c++/12/stdexcept \
+  /usr/include/c++/12/stdlib.h \
   /usr/include/c++/12/streambuf \
   /usr/include/c++/12/string \
   /usr/include/c++/12/string_view \
@@ -1875,9 +1897,18 @@ CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o: /home/aspi/Project/nasap-fit-cp
   /usr/include/x86_64-linux-gnu/sys/select.h \
   /usr/include/x86_64-linux-gnu/sys/single_threaded.h \
   /usr/include/x86_64-linux-gnu/sys/types.h \
+  /usr/lib/gcc/x86_64-linux-gnu/12/include/float.h \
   /usr/lib/gcc/x86_64-linux-gnu/12/include/stdarg.h \
   /usr/lib/gcc/x86_64-linux-gnu/12/include/stddef.h \
-  /usr/lib/gcc/x86_64-linux-gnu/12/include/stdint.h
+  /usr/lib/gcc/x86_64-linux-gnu/12/include/stdint.h \
+  /usr/local/include/nvector/nvector_serial.h \
+  /usr/local/include/sundials/priv/sundials_context_impl.h \
+  /usr/local/include/sundials/sundials_config.h \
+  /usr/local/include/sundials/sundials_context.h \
+  /usr/local/include/sundials/sundials_errors.h \
+  /usr/local/include/sundials/sundials_export.h \
+  /usr/local/include/sundials/sundials_nvector.h \
+  /usr/local/include/sundials/sundials_types.h
 
 CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp \
   /home/aspi/Project/nasap-fit-cpp/include/readcsv.hpp \
@@ -2946,6 +2977,8 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 
 /usr/local/include/cppad/utility/check_simple_vector.hpp:
 
+/usr/local/include/cppad/local/var_op/zmul_op.hpp:
+
 /usr/lib/gcc/x86_64-linux-gnu/12/libstdc++.so:
 
 /usr/include/x86_64-linux-gnu/c++/12/bits/ctype_inline.h:
@@ -3168,10 +3201,6 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 
 /usr/include/c++/12/list:
 
-/usr/include/x86_64-linux-gnu/c++/12/bits/gthr.h:
-
-/usr/local/include/cppad/core/atomic/three/hes_sparsity.hpp:
-
 /usr/local/include/cppad/core/capacity_order.hpp:
 
 /usr/local/include/cppad/core/unary_minus.hpp:
@@ -3273,6 +3302,12 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 /usr/include/c++/12/istream:
 
 /usr/include/c++/12/ostream:
+
+/usr/local/include/cppad/local/op_code_dyn.hpp:
+
+/usr/local/include/cppad/core/convert.hpp:
+
+/usr/local/include/cppad/local/val_graph/vector_op.hpp:
 
 /usr/include/c++/12/bits/random.h:
 
@@ -3460,8 +3495,6 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 
 /usr/include/c++/12/bits/ranges_util.h:
 
-/usr/include/c++/12/backward/binders.h:
-
 /usr/include/x86_64-linux-gnu/bits/types/time_t.h:
 
 /home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp:
@@ -3483,12 +3516,6 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 /usr/local/include/cppad/core/ad_to_string.hpp:
 
 /usr/local/include/cppad/local/val_graph/dyn_type.hpp:
-
-/usr/local/include/cppad/local/op_code_dyn.hpp:
-
-/usr/local/include/cppad/core/convert.hpp:
-
-/usr/local/include/cppad/local/val_graph/vector_op.hpp:
 
 /home/aspi/Project/nasap-fit-cpp/src/speciesAmount.cpp:
 
@@ -3560,6 +3587,10 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 
 /usr/local/include/cppad/local/var_op/acosh_op.hpp:
 
+/usr/local/include/cppad/core/atomic/three/hes_sparsity.hpp:
+
+/usr/include/x86_64-linux-gnu/c++/12/bits/gthr.h:
+
 /usr/include/c++/12/numeric:
 
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
@@ -3623,6 +3654,10 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 /usr/local/include/cppad/core/arithmetic.hpp:
 
 /usr/include/c++/12/limits:
+
+/usr/include/c++/12/backward/binders.h:
+
+/usr/include/c++/12/charconv:
 
 /usr/include/c++/12/cstdint:
 
@@ -3760,6 +3795,10 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
 
+/usr/local/include/cppad/utility.hpp:
+
+/usr/include/c++/12/bits/stl_uninitialized.h:
+
 /usr/local/include/cppad/local/val_graph/call_op.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/waitflags.h:
@@ -3842,10 +3881,6 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 
 /usr/local/include/cppad/base_require.hpp:
 
-/usr/include/x86_64-linux-gnu/c++/12/bits/messages_members.h:
-
-/usr/include/c++/12/ext/aligned_buffer.h:
-
 /usr/local/include/sundials/sundials_convertibleto.hpp:
 
 /usr/local/include/cppad/local/sweep/for_jac.hpp:
@@ -3863,6 +3898,10 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 /usr/local/lib/libcppad_lib.so:
 
 /usr/include/c++/12/iostream:
+
+/usr/include/c++/12/ext/aligned_buffer.h:
+
+/usr/include/x86_64-linux-gnu/c++/12/bits/messages_members.h:
 
 /usr/include/c++/12/bits/stl_set.h:
 
@@ -4013,8 +4052,6 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 /usr/local/include/cppad/core/ad_valued.hpp:
 
 /usr/local/include/cppad/core/add.hpp:
-
-/usr/local/include/cppad/local/var_op/zmul_op.hpp:
 
 /usr/local/include/cppad/core/add_eq.hpp:
 
@@ -4477,7 +4514,3 @@ CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o:
 /usr/local/include/cppad/local/var_op/sin_op.hpp:
 
 /usr/local/include/cppad/local/var_op/tanh_op.hpp:
-
-/usr/include/c++/12/bits/stl_uninitialized.h:
-
-/usr/local/include/cppad/utility.hpp:
