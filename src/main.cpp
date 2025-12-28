@@ -31,10 +31,7 @@ int stepCount[61];
 
 std::chrono::system_clock::time_point startTime,endTimeGlobal;
 
-xorshift myRand2(1);
-inline double randbetExp2(double lower, double upper) { 
-	return lower * exp(log(upper / lower) * myRand2.prob());
-}
+//rshift myRand(1);
 
 signed main(int argc, char** argv) {
 	MPI_Init(&argc, &argv);

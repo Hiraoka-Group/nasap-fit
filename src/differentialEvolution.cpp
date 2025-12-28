@@ -23,7 +23,7 @@
 #include "../include/Rhsf.hpp"
 #include "../include/Jacf.hpp"
 
-xorshift myRand;
+xorshift myRand(1);
 int cnt=0;
 extern int num_procs, proc_rank;
     

@@ -25,12 +25,7 @@ namespace Rhsf {
 		double calculate(std::span<const double> sp, std::span<const double> k) const;
 	};
 
-	// 定義は .cpp に移し、ヘッダでは外部宣言のみとする
-	// extern std::vector<std::vector<term>> terms;
 	extern std::map<std::string, int> termIndex;
-
-	// 関数宣言（定義は .cpp に置く）
-	// bool is_stoiable(std::string_view s);
 
 	// call this function to setup Rhsf::terms from CSV data
 	void makeRhsf();
