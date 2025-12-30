@@ -61,6 +61,7 @@ for dict in records:
 
 with open(outputFile,"w") as f:
     f.write(
+        "#if USE_PREGENERATED_RHSF==0\n\n"                                                              \
         "#pragma once\n"                                                                              \
         "#include <array>\n"                                                                          \
         "#include <nvector/nvector_serial.h>\n"                                                       \

@@ -8,6 +8,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o
  /home/aspi/Project/nasap-fit-cpp/include/speciesAmount.hpp
  /home/aspi/Project/nasap-fit-cpp/include/xorshift.hpp
  /home/aspi/Project/nasap-fit-cpp/include/Jacf.hpp
+ /home/aspi/Project/nasap-fit-cpp/include/Rhsf.hpp
  /home/aspi/Project/nasap-fit-cpp/include/differentialEvolution.hpp
  /home/aspi/Project/nasap-fit-cpp/include/jacBuilder.hpp
  /home/aspi/Project/nasap-fit-cpp/include/rhsfBuilder.hpp
