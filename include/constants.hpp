@@ -2,6 +2,9 @@
 #include <string>
 #include <string_view>
 
+#define USE_PREGENERATED_RHSF (0)
+#define USE_PREGENERATED_JACOBIAN (0)
+
 namespace config {
 const std::string QASAPFile = "../data/Table_S1.csv";
 const std::string reactNetworkFile = "../data/classified_reactions_str.csv";

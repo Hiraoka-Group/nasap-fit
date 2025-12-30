@@ -22,6 +22,7 @@
 #include "../include/ODE.hpp"
 #include "../include/Rhsf.hpp"
 #include "../include/Jacf.hpp"
+#include "../include/jacobian.hpp" 
 
 xorshift myRand(1);
 int cnt=0;
@@ -327,16 +328,31 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     for (int i = 0; i < config::species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
-    int flag = CVodeInit(cvode_mem, Rhsf::rhsf, 0.0, y);
+
+    #if USE_PREGENERATED_RHSF
+        int flag = CVodeInit(cvode_mem, rhsf, 0.0, y);
+    #else
+        int flag = CVodeInit(cvode_mem, Rhsf::rhsf, 0.0, y);
+    #endif
+    
     assert(flag == CV_SUCCESS);
     flag = CVodeSStolerances(cvode_mem, config::tolRelError, config::tolAbsError);
     assert(flag == CV_SUCCESS);
-    SUNMatrix J = SUNSparseMatrix(config::species, config::species, nonZeroElems, CSC_MAT, sunctx);
+    SUNMatrix J;
+    #if USE_PREGENERATED_JACOBIAN
+        flag = CVodeSetJacFn(cvode_mem, JacFn);
+        J = SUNSparseMatrix(config::species, config::species, nonZeroElems, CSC_MAT, sunctx);
+
+    #else
+        flag = CVodeSetJacFn(cvode_mem, jacobian::JacFn);
+        J = SUNSparseMatrix(config::species, config::species, jacobian::nonZeros, CSC_MAT, sunctx);
+    #endif
+    assert(flag == CV_SUCCESS);
+    
     SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
     flag = CVodeSetLinearSolver(cvode_mem, LS, J);
     assert(flag == CV_SUCCESS);
-    flag = CVodeSetJacFn(cvode_mem, JacFn);
-    assert(flag == CV_SUCCESS);
+
     flag = CVodeSetMaxNumSteps(cvode_mem, 10000);
     assert(flag == CV_SUCCESS);
     
@@ -359,7 +375,7 @@ void differentialEvolution::Optimize(){
     MPI_Win win;
     MPI_Win_create(populations.data(), sizeof(individuals)*config::popSize, 1, MPI_INFO_NULL, MPI_COMM_WORLD, &win);
     for (int i = 0; i < config::maxGen; i++) {
-        if(proc_rank==3)cout<<"loop : "<<i<<"\n";
+        if(proc_rank==0)cout<<"loop : "<<i<<"\n";
         double temp=0;
         
         vector<std::array<int, 3>> lockahead;

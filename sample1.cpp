@@ -23,18 +23,4 @@ bool is_int_from_chars(std::string s){
 }
 
 int main() {
-    // Your code logic here
-    cout<<"       "<<":"<<is_int_from_chars("       ")<<endl; // Testing stoi with leading/trailing spaces
-    cout<<"-12345:"<<is_int_from_chars("-12345")<<endl;
-    cout<<"  +6789:"<<is_int_from_chars("+6789")<<endl;
-    cout<<"42abc:"<<is_int_from_chars("42abc")<<endl;
-    cout<<"abc42:"<<is_int_from_chars("abc42")<<endl;
-    cout<<"  123:"<<is_int_from_chars("  123")<<endl;
-    cout<<"123  :"<<is_int_from_chars("123  ")<<endl;
-    cout<<"0123:"<<is_int_from_chars("0123")<<endl;
-    cout<<"0.0:"<<is_int_from_chars("0.0")<<endl;
-    cout<<".123:"<<is_int_from_chars(".123")<<endl;
-    cout<<"123.:"<<is_int_from_chars("123.")<<endl;
-    cout<<"6.022e23:"<<is_int_from_chars("6.022e23")<<endl;
-    return 0;
 }

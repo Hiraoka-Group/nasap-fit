@@ -22,6 +22,7 @@
 #include "../include/readcsv.hpp"
 #include "../include/ODE.hpp"
 #include "../include/Rhsf.hpp"
+#include "../include/jacobian.hpp"
 
 int num_procs=1;//総プロセス数
 int proc_rank;//自分のプロセス番号
@@ -54,7 +55,9 @@ signed main(int argc, char** argv) {
 	}
 	if(proc_rank==0)std::cout<<"Loaded "<<csv_data_double.size()<<" rows of data."<<std::endl;
 
-	Rhsf::makeRhsf();
+	
+		Rhsf::makeRhsf();
+		jacobian::makeJacobian();
 
 	differentialEvolution diffEvo(csv_data_double); // Assuming setData is a method to set the data
 	

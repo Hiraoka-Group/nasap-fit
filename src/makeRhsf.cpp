@@ -1,4 +1,5 @@
 #include <string>
+#include <cstring>
 #include <vector>
 #include <span>
 #include <fstream>
@@ -15,22 +16,22 @@
 #include "../include/Rhsf.hpp"
 
 namespace Rhsf{
-
-    //一次反応かどうか
-    bool term::isFirstOrder() const {
-        return reactant2 == -1;
-    }; 
-
-    double term::calculate(std::span<const double> sp, std::span<const double> k) const {
-        if (isFirstOrder()) {
-            return duplicacy * k[rateConstant] * sp[reactant1];
-        } else {
-            return duplicacy * k[rateConstant] * sp[reactant1] * sp[reactant2];
-        }
-    }
-
-    std::vector<std::vector<term>> terms; //各生成物ごとの反応項リスト
+    
+    std::vector<term> terms; //反応項リスト
     std::map<std::string, int> termIndex; //反応速度定数名からindexへのマップ
+    std::array<double, config::constantSize> rateConstants; //反応速度定数配列
+    std::array<double, config::species+1> speciesData; //初期種量配列
+
+
+    auto term::operator<=>(const term& other) const {
+        if(reactant2 == other.reactant2){
+            if(reactant1 == other.reactant1){
+                return add_to <=> other.add_to;
+            }
+            return reactant1 <=> other.reactant1;
+        }
+        return reactant2 <=> other.reactant2;
+    }
 
     std::string strip(std::string s){
         size_t start = s.find_first_not_of(" \t\n\r");
@@ -46,13 +47,14 @@ namespace Rhsf{
         return res.ec == std::errc() && res.ptr == s.data()+s.size();
     }
     void makeRhsf(){
+        speciesData[config::species]=1.0; //ダミー種の初期量は1.0に設定
         std::vector<std::vector<std::string>> csv_data = read_csv(std::string(config::reactNetworkFile));
-        std::vector<std::map<std::tuple<int, int, int>,int>> ODE(config::species); //key:(init,entering, kind), value: duplicacy
-        terms.resize(config::species);
-        auto addTerm = [](std::map<std::tuple<int, int, int>,int> &mp,int init, int entering, int kind, int duplicate_count){
-            std::tuple<int, int, int> key = std::make_tuple(init, entering, kind);
-            if (mp.contains(key)) mp[key] += duplicate_count;
-            else mp[key] = duplicate_count; 
+        std::map<std::tuple<int, int, int, int>,int> ODE; //key:(add_to, init,entering, kind), value: duplicacy
+        terms.resize(0);
+        auto addTerm = [&](int add_to, int init, int entering, int kind, int duplicate_count){
+            std::tuple<int, int, int, int> key = std::make_tuple(add_to, init, entering, kind);
+            if (ODE.contains(key)) ODE[key] += duplicate_count;
+            else ODE[key] = duplicate_count; 
         };
         std::vector<std::map<std::string, std::string>> DataDict;
         for (size_t i = 1; i < csv_data.size(); ++i) {
@@ -73,51 +75,48 @@ namespace Rhsf{
         }
         for (const auto& mp : DataDict) {
             int init = std::stoi(mp.at("init_assem_id"));
-            int entering = is_stoiable(mp.at("entering_assem_id")) ? std::stoi(mp.at("entering_assem_id")) : -1;
+            int entering = is_stoiable(mp.at("entering_assem_id")) ? std::stoi(mp.at("entering_assem_id")) : config::species;
             int product = std::stoi(mp.at("product_assem_id"));
-            int leaving = is_stoiable(mp.at("leaving_assem_id")) ? std::stoi(mp.at("leaving_assem_id")) : -1;
+            int leaving = is_stoiable(mp.at("leaving_assem_id")) ? std::stoi(mp.at("leaving_assem_id")) : config::species;
             int kind = termIndex.at(mp.at("kind"));
             int duplicacy = std::stoi(mp.at("duplicate_count"));
             
-            addTerm(ODE[init], init, entering, kind, -duplicacy);
-            if (entering != -1) {
-                addTerm(ODE[entering], init, entering, kind, -duplicacy);
+            addTerm(init, init, entering, kind, -duplicacy);
+            if (entering != config::species) {
+                addTerm(entering, init, entering, kind, -duplicacy);
             }
-            addTerm(ODE[product], init, entering, kind, duplicacy);
-            if (leaving != -1) {
-                addTerm(ODE[leaving], init, entering, kind, duplicacy);
-            }
-        }
-        for (int i = 0; i < config::species; ++i) {
-            for (const auto& [key, duplicacy] : ODE[i]) {
-                int init = std::get<0>(key);
-                int entering = std::get<1>(key);
-                int kind = std::get<2>(key);
-                Rhsf::term t;
-                t.duplicacy = duplicacy;
-                t.reactant1 = init;
-                t.reactant2 = entering;
-                t.rateConstant = kind;
-                Rhsf::terms[i].push_back(t);
-                //実装メモ
-                //kindは文字列なので、適宜数値に変換する処理が必要
+            addTerm(product, init, entering, kind, duplicacy);
+            if (leaving != config::species) {
+                addTerm(leaving, init, entering, kind, duplicacy);
             }
         }
-
+        for (const auto& [key, duplicacy] : ODE) {
+            int add_to = std::get<0>(key);
+            int init = std::get<1>(key);
+            int entering = std::get<2>(key);
+            int kind = std::get<3>(key);
+            Rhsf::term t;
+            t.add_to = add_to;
+            t.duplicacy = duplicacy;
+            t.reactant1 = init;
+            t.reactant2 = entering;
+            t.rateConstant = kind;
+            Rhsf::terms.push_back(t);
+        }
+        std::sort(Rhsf::terms.begin(), Rhsf::terms.end());
         
     }
     int rhsf(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) {
         sunrealtype* sp_ptr = N_VGetArrayPointer(y);
         auto ydotData = N_VGetArrayPointer(ydot);
-        std::array<double, config::constantSize> &k = *static_cast<std::array<double, config::constantSize>*>(user_data);
-        std::span<const double> yspan(sp_ptr, config::species);
-        std::span<const double> kspan(k.data(), k.size());
-        for (int i = 0; i < config::species; ++i) {
-            double sum = 0.0;
-            for (const auto& term : Rhsf::terms[i]) {
-                sum += term.calculate(yspan, kspan);
-            }
-            ydotData[i] = sum;
+        // コピー: y -> speciesData (memcpy)
+        std::memcpy(Rhsf::speciesData.data(), sp_ptr, config::species * sizeof(double));
+        // コピー: user_data(k) -> rateConstants (memcpy)
+        std::memcpy(Rhsf::rateConstants.data(), user_data, config::constantSize * sizeof(double));
+        std::fill(ydotData, ydotData + config::species, 0.0);
+        std::span<double> ydotspan(ydotData, config::species);
+        for (const auto& term : Rhsf::terms) {
+            term.calculate(ydotspan);
         }
 
         return 0;

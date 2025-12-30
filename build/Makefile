@@ -177,6 +177,30 @@ src/dualNumber.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.s
 .PHONY : src/dualNumber.cpp.s
 
+src/jacobian.o: src/jacobian.cpp.o
+.PHONY : src/jacobian.o
+
+# target to build an object file
+src/jacobian.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o
+.PHONY : src/jacobian.cpp.o
+
+src/jacobian.i: src/jacobian.cpp.i
+.PHONY : src/jacobian.i
+
+# target to preprocess a source file
+src/jacobian.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.i
+.PHONY : src/jacobian.cpp.i
+
+src/jacobian.s: src/jacobian.cpp.s
+.PHONY : src/jacobian.s
+
+# target to generate assembly for a file
+src/jacobian.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.s
+.PHONY : src/jacobian.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -288,6 +312,9 @@ help:
 	@echo "... src/dualNumber.o"
 	@echo "... src/dualNumber.i"
 	@echo "... src/dualNumber.s"
+	@echo "... src/jacobian.o"
+	@echo "... src/jacobian.i"
+	@echo "... src/jacobian.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
