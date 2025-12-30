@@ -177,29 +177,29 @@ src/dualNumber.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.s
 .PHONY : src/dualNumber.cpp.s
 
-src/jacobian.o: src/jacobian.cpp.o
-.PHONY : src/jacobian.o
+src/jacBuilder.o: src/jacBuilder.cpp.o
+.PHONY : src/jacBuilder.o
 
 # target to build an object file
-src/jacobian.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o
-.PHONY : src/jacobian.cpp.o
+src/jacBuilder.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o
+.PHONY : src/jacBuilder.cpp.o
 
-src/jacobian.i: src/jacobian.cpp.i
-.PHONY : src/jacobian.i
+src/jacBuilder.i: src/jacBuilder.cpp.i
+.PHONY : src/jacBuilder.i
 
 # target to preprocess a source file
-src/jacobian.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.i
-.PHONY : src/jacobian.cpp.i
+src/jacBuilder.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.i
+.PHONY : src/jacBuilder.cpp.i
 
-src/jacobian.s: src/jacobian.cpp.s
-.PHONY : src/jacobian.s
+src/jacBuilder.s: src/jacBuilder.cpp.s
+.PHONY : src/jacBuilder.s
 
 # target to generate assembly for a file
-src/jacobian.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.s
-.PHONY : src/jacobian.cpp.s
+src/jacBuilder.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.s
+.PHONY : src/jacBuilder.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -225,30 +225,6 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
-src/makeRhsf.o: src/makeRhsf.cpp.o
-.PHONY : src/makeRhsf.o
-
-# target to build an object file
-src/makeRhsf.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o
-.PHONY : src/makeRhsf.cpp.o
-
-src/makeRhsf.i: src/makeRhsf.cpp.i
-.PHONY : src/makeRhsf.i
-
-# target to preprocess a source file
-src/makeRhsf.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.i
-.PHONY : src/makeRhsf.cpp.i
-
-src/makeRhsf.s: src/makeRhsf.cpp.s
-.PHONY : src/makeRhsf.s
-
-# target to generate assembly for a file
-src/makeRhsf.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.s
-.PHONY : src/makeRhsf.cpp.s
-
 src/readcsv.o: src/readcsv.cpp.o
 .PHONY : src/readcsv.o
 
@@ -272,6 +248,30 @@ src/readcsv.s: src/readcsv.cpp.s
 src/readcsv.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.s
 .PHONY : src/readcsv.cpp.s
+
+src/rhsfBuilder.o: src/rhsfBuilder.cpp.o
+.PHONY : src/rhsfBuilder.o
+
+# target to build an object file
+src/rhsfBuilder.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o
+.PHONY : src/rhsfBuilder.cpp.o
+
+src/rhsfBuilder.i: src/rhsfBuilder.cpp.i
+.PHONY : src/rhsfBuilder.i
+
+# target to preprocess a source file
+src/rhsfBuilder.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.i
+.PHONY : src/rhsfBuilder.cpp.i
+
+src/rhsfBuilder.s: src/rhsfBuilder.cpp.s
+.PHONY : src/rhsfBuilder.s
+
+# target to generate assembly for a file
+src/rhsfBuilder.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.s
+.PHONY : src/rhsfBuilder.cpp.s
 
 src/speciesAmount.o: src/speciesAmount.cpp.o
 .PHONY : src/speciesAmount.o
@@ -312,18 +312,18 @@ help:
 	@echo "... src/dualNumber.o"
 	@echo "... src/dualNumber.i"
 	@echo "... src/dualNumber.s"
-	@echo "... src/jacobian.o"
-	@echo "... src/jacobian.i"
-	@echo "... src/jacobian.s"
+	@echo "... src/jacBuilder.o"
+	@echo "... src/jacBuilder.i"
+	@echo "... src/jacBuilder.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
-	@echo "... src/makeRhsf.o"
-	@echo "... src/makeRhsf.i"
-	@echo "... src/makeRhsf.s"
 	@echo "... src/readcsv.o"
 	@echo "... src/readcsv.i"
 	@echo "... src/readcsv.s"
+	@echo "... src/rhsfBuilder.o"
+	@echo "... src/rhsfBuilder.i"
+	@echo "... src/rhsfBuilder.s"
 	@echo "... src/speciesAmount.o"
 	@echo "... src/speciesAmount.i"
 	@echo "... src/speciesAmount.s"

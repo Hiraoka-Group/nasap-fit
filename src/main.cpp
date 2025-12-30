@@ -21,8 +21,8 @@
 #include "../include/differentialEvolution.hpp"
 #include "../include/readcsv.hpp"
 #include "../include/ODE.hpp"
-#include "../include/Rhsf.hpp"
-#include "../include/jacobian.hpp"
+#include "../include/rhsfBuilder.hpp"
+#include "../include/jacBuilder.hpp"
 
 int num_procs=1;//総プロセス数
 int proc_rank;//自分のプロセス番号

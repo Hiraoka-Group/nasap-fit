@@ -20,9 +20,10 @@
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
 #include "../include/ODE.hpp"
+#include "../include/rhsfBuilder.hpp"
+#include "../include/jacBuilder.hpp"
+#include "../include/Jacf.hpp" 
 #include "../include/Rhsf.hpp"
-#include "../include/Jacf.hpp"
-#include "../include/jacobian.hpp" 
 
 xorshift myRand(1);
 int cnt=0;
