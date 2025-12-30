@@ -329,30 +329,16 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
         NV_Ith_S(y, i) = initialState[i];
     }
 
-    #if USE_PREGENERATED_RHSF
-        int flag = CVodeInit(cvode_mem, rhsf, 0.0, y);
-    #else
-        int flag = CVodeInit(cvode_mem, Rhsf::rhsf, 0.0, y);
-    #endif
-    
+    int flag = CVodeInit(cvode_mem, rhsfBuilder::rhsf, 0.0, y);
     assert(flag == CV_SUCCESS);
     flag = CVodeSStolerances(cvode_mem, config::tolRelError, config::tolAbsError);
     assert(flag == CV_SUCCESS);
-    SUNMatrix J;
-    #if USE_PREGENERATED_JACOBIAN
-        flag = CVodeSetJacFn(cvode_mem, JacFn);
-        J = SUNSparseMatrix(config::species, config::species, nonZeroElems, CSC_MAT, sunctx);
-
-    #else
-        flag = CVodeSetJacFn(cvode_mem, jacobian::JacFn);
-        J = SUNSparseMatrix(config::species, config::species, jacobian::nonZeros, CSC_MAT, sunctx);
-    #endif
-    assert(flag == CV_SUCCESS);
-    
+    SUNMatrix J = SUNSparseMatrix(config::species, config::species, jacBuilder::nonZeros, CSC_MAT, sunctx);
     SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
     flag = CVodeSetLinearSolver(cvode_mem, LS, J);
     assert(flag == CV_SUCCESS);
-
+    flag = CVodeSetJacFn(cvode_mem, jacBuilder::JacFn);
+    assert(flag == CV_SUCCESS);
     flag = CVodeSetMaxNumSteps(cvode_mem, 10000);
     assert(flag == CV_SUCCESS);
     

@@ -11,7 +11,7 @@
 
 #include "../include/constants.hpp"
 
-namespace Rhsf {
+namespace rhsfBuilder {
 	extern std::array<double, config::constantSize> rateConstants; //反応速度定数配列
     extern std::array<double, config::species+1> speciesData; //初期種量配列
 
@@ -31,10 +31,10 @@ namespace Rhsf {
 
 
 	// call this function to setup Rhsf::terms from CSV data
-	void makeRhsf();
+	void buildRhsf();
 
 
 	int rhsf(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data);
 
-} // namespace Rhsf
+} // namespace rhsfBuilder
 

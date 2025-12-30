@@ -56,8 +56,8 @@ signed main(int argc, char** argv) {
 	if(proc_rank==0)std::cout<<"Loaded "<<csv_data_double.size()<<" rows of data."<<std::endl;
 
 	
-		Rhsf::makeRhsf();
-		jacobian::makeJacobian();
+		rhsfBuilder::buildRhsf();
+		jacBuilder::buildJacobian();
 
 	differentialEvolution diffEvo(csv_data_double); // Assuming setData is a method to set the data
 	

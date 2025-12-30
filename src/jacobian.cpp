@@ -15,7 +15,7 @@
 #include "../include/readcsv.hpp"
 #include "../include/jacobian.hpp"
 
-namespace jacobian{
+namespace jacBuilder{
     int nonZeros=0;
 
     std::vector<std::vector<term>> terms; //反応項リスト
@@ -47,7 +47,7 @@ namespace jacobian{
         auto res = std::from_chars(s.data(), s.data()+s.size(), v);
         return res.ec == std::errc() && res.ptr == s.data()+s.size();
     }
-    void makeJacobian(){
+    void buildJacobian(){
         terms.clear();
         idxPointer.clear();
         idxValue.clear();
@@ -163,9 +163,9 @@ namespace jacobian{
         for(int i=0;i<nonZeros;i++) Ji[i]=idxValue[i];
 
         // コピー: y -> speciesData (memcpy)
-        std::memcpy(jacobian::speciesData.data(), sp_ptr, config::species * sizeof(double));
+        std::memcpy(jacBuilder::speciesData.data(), sp_ptr, config::species * sizeof(double));
         // コピー: user_data(k) -> rateConstants (memcpy)
-        std::memcpy(jacobian::rateConstants.data(), user_data, config::constantSize * sizeof(double));
+        std::memcpy(jacBuilder::rateConstants.data(), user_data, config::constantSize * sizeof(double));
         int idx=0;
         for(const auto& termList : terms){
             double val=0.0;

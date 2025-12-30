@@ -12,7 +12,7 @@
 
 #include "../include/constants.hpp"
 
-namespace jacobian {
+namespace jacBuilder {
     extern int nonZeros; //ヤコビ行列の非ゼロ要素数
 
     extern std::array<double, config::constantSize> rateConstants; //反応速度定数配列
@@ -32,7 +32,7 @@ namespace jacobian {
 	};
 
 		// call this function to setup jacobian data from CSV data
-	void makeJacobian();
+	void buildJacobian();
 
 	int JacFn(sunrealtype t, N_Vector y, N_Vector fy, SUNMatrix Jac, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
 }

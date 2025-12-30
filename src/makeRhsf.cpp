@@ -15,7 +15,7 @@
 #include "../include/readcsv.hpp"
 #include "../include/Rhsf.hpp"
 
-namespace Rhsf{
+namespace rhsfBuilder{
     
     std::vector<term> terms; //反応項リスト
     std::map<std::string, int> termIndex; //反応速度定数名からindexへのマップ
@@ -46,7 +46,7 @@ namespace Rhsf{
         auto res = std::from_chars(s.data(), s.data()+s.size(), v);
         return res.ec == std::errc() && res.ptr == s.data()+s.size();
     }
-    void makeRhsf(){
+    void buildRhsf(){
         speciesData[config::species]=1.0; //ダミー種の初期量は1.0に設定
         std::vector<std::vector<std::string>> csv_data = read_csv(std::string(config::reactNetworkFile));
         std::map<std::tuple<int, int, int, int>,int> ODE; //key:(add_to, init,entering, kind), value: duplicacy
@@ -95,27 +95,27 @@ namespace Rhsf{
             int init = std::get<1>(key);
             int entering = std::get<2>(key);
             int kind = std::get<3>(key);
-            Rhsf::term t;
+            rhsfBuilder::term t;
             t.add_to = add_to;
             t.duplicacy = duplicacy;
             t.reactant1 = init;
             t.reactant2 = entering;
             t.rateConstant = kind;
-            Rhsf::terms.push_back(t);
+            rhsfBuilder::terms.push_back(t);
         }
-        std::sort(Rhsf::terms.begin(), Rhsf::terms.end());
+        std::sort(rhsfBuilder::terms.begin(), rhsfBuilder::terms.end());
         
     }
     int rhsf(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) {
         sunrealtype* sp_ptr = N_VGetArrayPointer(y);
         auto ydotData = N_VGetArrayPointer(ydot);
         // コピー: y -> speciesData (memcpy)
-        std::memcpy(Rhsf::speciesData.data(), sp_ptr, config::species * sizeof(double));
+        std::memcpy(rhsfBuilder::speciesData.data(), sp_ptr, config::species * sizeof(double));
         // コピー: user_data(k) -> rateConstants (memcpy)
-        std::memcpy(Rhsf::rateConstants.data(), user_data, config::constantSize * sizeof(double));
+        std::memcpy(rhsfBuilder::rateConstants.data(), user_data, config::constantSize * sizeof(double));
         std::fill(ydotData, ydotData + config::species, 0.0);
         std::span<double> ydotspan(ydotData, config::species);
-        for (const auto& term : Rhsf::terms) {
+        for (const auto& term : rhsfBuilder::terms) {
             term.calculate(ydotspan);
         }
 
