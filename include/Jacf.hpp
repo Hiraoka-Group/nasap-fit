@@ -1,3 +1,6 @@
+#if USE_PREGENERATED_JACOBIAN
+#pragma once
+
 #include <array>
 #include <vector>
 #include <nvector/nvector_serial.h>
@@ -328,3 +331,5 @@ int JacFn(sunrealtype t, N_Vector y, N_Vector fy, SUNMatrix Jac, void *user_data
 	Jx[308] = (-1 * k[0] * sp[0]) + (-2 * k[0] * sp[1]) + (-2 * k[0] * sp[2]) + (-2 * k[2] * sp[3]) + (-3 * k[0] * sp[4]) + (-2 * k[2] * sp[5]) + (-1 * k[0] * sp[5]) + (-2 * k[2] * sp[6]) + (-1 * k[0] * sp[6]) + (-4 * k[0] * sp[7]) + (-2 * k[2] * sp[8]) + (-2 * k[0] * sp[8]) + (-2 * k[0] * sp[9]) + (-2 * k[2] * sp[9]) + (-4 * k[4] * sp[10]) + (-2 * k[2] * sp[11]) + (-2 * k[0] * sp[11]) + (-2 * k[0] * sp[12]) + (-2 * k[2] * sp[12]) + (-4 * k[4] * sp[13]) + (-3 * k[0] * sp[14]) + (-2 * k[2] * sp[14]) + (-4 * k[4] * sp[15]) + (-1 * k[0] * sp[15]) + (-4 * k[4] * sp[16]) + (-1 * k[0] * sp[16]) + (-3 * k[0] * sp[17]) + (-2 * k[2] * sp[17]) + (-3 * k[0] * sp[18]) + (-2 * k[2] * sp[18]) + (-2 * k[0] * sp[19]) + (-4 * k[4] * sp[19]) + (-4 * k[4] * sp[20]) + (-2 * k[0] * sp[20]) + (-6 * k[4] * sp[21]) + (-4 * k[4] * sp[22]) + (-2 * k[0] * sp[22]) + (-2 * k[0] * sp[23]) + (-4 * k[4] * sp[23]) + (-6 * k[4] * sp[24]) + (-1 * k[0] * sp[24]) + (-8 * k[6] * sp[25]);
 	return 0;
 }
+
+#endif // #ifndef JACF_HPP_INCLUDED

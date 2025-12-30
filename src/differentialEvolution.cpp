@@ -20,9 +20,10 @@
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
 #include "../include/ODE.hpp"
+#include "../include/rhsfBuilder.hpp"
+#include "../include/jacBuilder.hpp"
+#include "../include/Jacf.hpp" 
 #include "../include/Rhsf.hpp"
-#include "../include/Jacf.hpp"
-#include "../include/jacobian.hpp" 
 
 xorshift myRand(1);
 int cnt=0;
@@ -328,17 +329,32 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     for (int i = 0; i < config::species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
-
-    int flag = CVodeInit(cvode_mem, rhsfBuilder::rhsf, 0.0, y);
+    
+    #if USE_PREGENERATED_RHSF
+        int flag = CVodeInit(cvode_mem, rhsf, 0.0, y);
+    #else
+        int flag = CVodeInit(cvode_mem, rhsfBuilder::rhsf, 0.0, y);
+    #endif
     assert(flag == CV_SUCCESS);
+
     flag = CVodeSStolerances(cvode_mem, config::tolRelError, config::tolAbsError);
     assert(flag == CV_SUCCESS);
-    SUNMatrix J = SUNSparseMatrix(config::species, config::species, jacBuilder::nonZeros, CSC_MAT, sunctx);
-    SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
-    flag = CVodeSetLinearSolver(cvode_mem, LS, J);
+
+    #if USE_PREGENERATED_JACOBIAN
+        SUNMatrix J = SUNSparseMatrix(config::species, config::species, nonZeroElems, CSC_MAT, sunctx);
+        SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
+        flag = CVodeSetLinearSolver(cvode_mem, LS, J);
+        assert(flag == CV_SUCCESS);
+        flag = CVodeSetJacFn(cvode_mem, JacFn);
+    #else
+        SUNMatrix J = SUNSparseMatrix(config::species, config::species, jacBuilder::nonZeros, CSC_MAT, sunctx);
+        SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
+        flag = CVodeSetLinearSolver(cvode_mem, LS, J);
+        assert(flag == CV_SUCCESS);
+        flag = CVodeSetJacFn(cvode_mem, jacBuilder::JacFn);
+    #endif
     assert(flag == CV_SUCCESS);
-    flag = CVodeSetJacFn(cvode_mem, jacBuilder::JacFn);
-    assert(flag == CV_SUCCESS);
+
     flag = CVodeSetMaxNumSteps(cvode_mem, 10000);
     assert(flag == CV_SUCCESS);
     

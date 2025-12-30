@@ -14,6 +14,19 @@ DEFAULT_OUTPUT = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "include", "con
 def format_double(x):
     return format(float(x), '.17g')
 
+#bool型の受け取りと検証
+def require_bool(name, x):
+    if x is None:
+        raise ValueError(f"{name} is required")
+    if isinstance(x, bool):
+        return x
+    s = str(x).strip().lower()
+    if s in ('1', 'true', 'yes', 'y'):
+        return True
+    if s in ('0', 'false', 'no', 'n'):
+        return False
+    raise ValueError(f"{name} must be one of 1,true,yes,y or 0,false,no,n (got {x!r})")
+
 #整数値の取得と検証
 def require_int(name, x, min_value=0):
     if x is None:
@@ -221,6 +234,9 @@ def main(cfg_path=DEFAULT_INPUT, out_path=DEFAULT_OUTPUT):
     cross = optional_float('crossOver', cfg.get('crossOver'), default=0.5, min_value=0.0, max_value=1.0)
     upper = optional_float('upperLim', cfg.get('upperLim'), default=1e4, min_value=0.0)
     lower = optional_float('lowerLim', cfg.get('lowerLim'), default=1e-3, min_value=0.0)
+
+    usePreGeneratedRhsf = require_bool('usePreGeneratedRhsf', cfg.get('usePreGeneratedRhsf', True))
+    usePreGeneratedJacobian = require_bool('usePreGeneratedJacobian', cfg.get('usePreGeneratedJacobian', True))
     
 
     tracked = cfg.get('trackedSpecies') or {}
@@ -252,6 +268,9 @@ def main(cfg_path=DEFAULT_INPUT, out_path=DEFAULT_OUTPUT):
     lines.append('#pragma once')
     lines.append('#include <string>')
     lines.append('#include <string_view>')
+    lines.append('')
+    lines.append(f'#define USE_PREGENERATED_RHSF ({1 if usePreGeneratedRhsf else 0})')
+    lines.append(f'#define USE_PREGENERATED_JACOBIAN ({1 if usePreGeneratedJacobian else 0})')
     lines.append('')
     lines.append('namespace config {')
     lines.append(f'const std::string QASAPFile = "../{QASAP_path}";')

@@ -93,6 +93,8 @@ for key,val in matDict.items():
     numsInColumn[col]+=1
 
 intro= \
+"#if USE_PREGENERATED_JACOBIAN==0\n\n" \
+"#pragma once\n" \
 "#include <array>\n" \
 "#include <vector>\n" \
 "#include <nvector/nvector_serial.h>\n" \

@@ -100,19 +100,19 @@ CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/aspi/Project/nasap-fit-cpp/src/dualNumber.cpp -o CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.s
 
-CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o: CMakeFiles/nasap_fit_cpp.dir/flags.make
-CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/jacobian.cpp
-CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o: CMakeFiles/nasap_fit_cpp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o -MF CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o.d -o CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/jacobian.cpp
+CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o: CMakeFiles/nasap_fit_cpp.dir/flags.make
+CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/jacBuilder.cpp
+CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o: CMakeFiles/nasap_fit_cpp.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o -MF CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o.d -o CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/jacBuilder.cpp
 
-CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/aspi/Project/nasap-fit-cpp/src/jacobian.cpp > CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.i
+CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/aspi/Project/nasap-fit-cpp/src/jacBuilder.cpp > CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.i
 
-CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/aspi/Project/nasap-fit-cpp/src/jacobian.cpp -o CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.s
+CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/aspi/Project/nasap-fit-cpp/src/jacBuilder.cpp -o CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.s
 
 CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o: CMakeFiles/nasap_fit_cpp.dir/flags.make
 CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/main.cpp
@@ -128,24 +128,10 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/aspi/Project/nasap-fit-cpp/src/main.cpp -o CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.s
 
-CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o: CMakeFiles/nasap_fit_cpp.dir/flags.make
-CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/makeRhsf.cpp
-CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o: CMakeFiles/nasap_fit_cpp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o -MF CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o.d -o CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/makeRhsf.cpp
-
-CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/aspi/Project/nasap-fit-cpp/src/makeRhsf.cpp > CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.i
-
-CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/aspi/Project/nasap-fit-cpp/src/makeRhsf.cpp -o CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.s
-
 CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o: CMakeFiles/nasap_fit_cpp.dir/flags.make
 CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp
 CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o: CMakeFiles/nasap_fit_cpp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o -MF CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o.d -o CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp
 
 CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.i: cmake_force
@@ -155,6 +141,20 @@ CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.i: cmake_force
 CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp -o CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.s
+
+CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o: CMakeFiles/nasap_fit_cpp.dir/flags.make
+CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/rhsfBuilder.cpp
+CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o: CMakeFiles/nasap_fit_cpp.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o -MF CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o.d -o CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/rhsfBuilder.cpp
+
+CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/aspi/Project/nasap-fit-cpp/src/rhsfBuilder.cpp > CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.i
+
+CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/aspi/Project/nasap-fit-cpp/src/rhsfBuilder.cpp -o CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.s
 
 CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o: CMakeFiles/nasap_fit_cpp.dir/flags.make
 CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/speciesAmount.cpp
@@ -174,10 +174,10 @@ CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.s: cmake_force
 nasap_fit_cpp_OBJECTS = \
 "CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o" \
 "CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.o" \
-"CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o" \
+"CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o" \
 "CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o" \
-"CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o" \
 "CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o" \
+"CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o" \
 "CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o"
 
 # External object files for target nasap_fit_cpp
@@ -185,10 +185,10 @@ nasap_fit_cpp_EXTERNAL_OBJECTS =
 
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.o
-nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/jacobian.cpp.o
+nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o
-nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/makeRhsf.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o
+nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/build.make
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/compiler_depend.ts
