@@ -1,6 +1,6 @@
 #if USE_PREGENERATED_RHSF
-#pragma once
 
+#pragma once
 #include <array>
 #include <nvector/nvector_serial.h>
 #include "constants.hpp"
@@ -41,4 +41,4 @@ int rhsf(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) {
 	return 0;
 }
 
-#endif // USE_PREGENERATED_RHSF==0
+#endif // USE_PREGENERATED_RHSF

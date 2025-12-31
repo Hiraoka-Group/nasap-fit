@@ -1,5 +1,5 @@
 #NMRによって得られた濃度の時間変化データのパス(必須)(絶対パス or プロジェクトのルートに対する相対パス)
-QASAPDataFile: data/M9L6/concentration.csv
+QASAPDataFile: data/M9L6/concentration_percentage.csv
 #反応ネットワークを記述したファイルのパス(必須)(絶対パス or プロジェクトのルートに対する相対パス)
 reactionDataFile: data/M9L6/simply_classified_reactions.csv
 #化学種の数(必須)
@@ -37,3 +37,8 @@ crossOver: 0.5
 #反応速度定数の上限下限
 upperLim: 1e4
 lowerLim: 1e-3
+
+#微分方程式の右辺値関数(rhsf)をpythonによって事前に生成したかどうか(任意、デフォルト:true)
+usePreGeneratedRhsf: true
+#rhsfのjacobian関数をpythonによって事前に生成したかどうか(任意、デフォルト:true)
+usePreGeneratedJacobian: true

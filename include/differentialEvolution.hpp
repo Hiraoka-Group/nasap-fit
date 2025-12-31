@@ -82,7 +82,7 @@ private:
 	differentialEvolution(std::vector<std::vector<double>>& arg);
 	void Optimize();
     //最良個体の定数を返す
-	std::array<double, config::constantSize> best();
+	void best(std::array<double, config::constantSize>& ret, double& minerror);
 
 	void putSim(const std::array<double, config::constantSize>& constant);
 

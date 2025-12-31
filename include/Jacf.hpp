@@ -1,6 +1,6 @@
 #if USE_PREGENERATED_JACOBIAN
-#pragma once
 
+#pragma once
 #include <array>
 #include <vector>
 #include <nvector/nvector_serial.h>
@@ -332,4 +332,4 @@ int JacFn(sunrealtype t, N_Vector y, N_Vector fy, SUNMatrix Jac, void *user_data
 	return 0;
 }
 
-#endif // #ifndef JACF_HPP_INCLUDED
+#endif // USE_PREGENERATED_JACOBIAN

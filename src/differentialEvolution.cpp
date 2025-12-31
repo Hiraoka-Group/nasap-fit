@@ -377,7 +377,7 @@ void differentialEvolution::Optimize(){
     MPI_Win win;
     MPI_Win_create(populations.data(), sizeof(individuals)*config::popSize, 1, MPI_INFO_NULL, MPI_COMM_WORLD, &win);
     for (int i = 0; i < config::maxGen; i++) {
-        if(proc_rank==0)cout<<"loop : "<<i<<"\n";
+        if(proc_rank==0)cout<<"current generation : "<<i<<" / "<<config::maxGen<<"\n";
         double temp=0;
         
         vector<std::array<int, 3>> lockahead;
@@ -438,16 +438,32 @@ void differentialEvolution::Optimize(){
 }
 
 //最良個体の定数を返す
-std::array<double, config::constantSize> differentialEvolution::best() {
-    double minerror = DBL_MAX;
-    std::array<double, config::constantSize> *ret = nullptr;
+void differentialEvolution::best(std::array<double, config::constantSize>& ret, double& minerror) {
+    minerror = DBL_MAX;
     for (auto& t : populations) {
         if (minerror > t.error) {
             minerror = t.error;
-            ret = &t.constant;
+            ret = t.constant;
         }
     }
-    return *ret;
+    individuals myind={ret, minerror};
+    individuals buf[num_procs];
+    MPI_Allgather(
+        &myind,
+        sizeof(individuals), 
+        MPI_BYTE, 
+        buf, 
+        sizeof(individuals), 
+        MPI_BYTE, 
+        MPI_COMM_WORLD
+    );
+
+    for(int i=0; i<num_procs; i++){
+        if(minerror > buf[i].error){
+            minerror = buf[i].error;
+            ret = buf[i].constant;
+        }
+    }
 }
 
 void differentialEvolution::putSim(const std::array<double, config::constantSize>& constant) {

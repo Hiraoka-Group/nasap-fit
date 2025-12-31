@@ -72,38 +72,25 @@ signed main(int argc, char** argv) {
 	
 
 	
-	if(true){
-		auto bestConstants = diffEvo.best();
-		diffEvo.putCVODESim(bestConstants);
+	
+	std::array<double, config::constantSize> bestConstants;
+	double minerror;
+	diffEvo.best(bestConstants, minerror);
+	
+	if(proc_rank==0){
 		std::cout<<"Optimized Constants:"<<std::endl;
-		auto arr = diffEvo.best();
-		for (auto t : arr) {
-			std::cout << t << " ";
+		std::vector<std::string>kinds(config::constantSize);
+		for(const auto& [key, val] : rhsfBuilder::termIndex){
+			kinds[val]=key;
 		}
-		std::cout << std::endl;
-		std::cout<<"error: "<<diffEvo.calcError(arr)<<std::endl;
-		/*
-		if(proc_rank==0){
-			std::vector<double> jac = diffEvo.getJacobian(arr);
-			std::cout<<"Jacobian :"<<std::endl;
-			for(double val : jac){
-				std::cout<<std::setw(15)<<std::setprecision(7)<<val<<" ";
-			}
-			std::cout<<std::endl;
+		for(int i=0;i<config::constantSize;i++){
+			std::cout<<kinds[i]<<": "<<bestConstants[i]<<std::endl;
 		}
-		
-		std::vector<std::vector<double>> hessian = diffEvo.getHessian(arr);
-		if(proc_rank==0)std::cout<<"Hessian Matrix :"<<std::endl;
-		if(proc_rank==0){
-			for(const std::vector<double>& row : hessian){
-				for(double val : row){
-					std::cout<<std::setw(15)<<std::setprecision(7)<<val<<" ";
-				}
-				std::cout<<std::endl;
-			}
-		}
-			*/
+		std::cout<<std::endl;
+		std::cout<<"error: "<<minerror<<std::endl;
 	}
+	diffEvo.putCVODESim(bestConstants);
+	
 
 	MPI_Finalize();
 	

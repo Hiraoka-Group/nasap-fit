@@ -12,6 +12,7 @@
 #include "../include/constants.hpp"
 
 namespace rhsfBuilder {
+	extern std::map<std::string, int> termIndex; //反応速度定数名からindexへのマップ
 	extern std::array<double, config::constantSize> rateConstants; //反応速度定数配列
     extern std::array<double, config::species+1> speciesData; //初期種量配列
 

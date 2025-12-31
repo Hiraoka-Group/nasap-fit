@@ -4,80 +4,76 @@ import csv
 import pprint
 from pathlib import Path
 
-#inputFile = Path(__file__).parent.parent / 'data' / 'M9L6' / 'simply_classified_reactions.csv'
-inputFile = Path(__file__).parent.parent / 'data' / 'classified_reactions_str.csv'
-outputFile = Path(__file__).parent.parent / 'include' / 'Rhsf.hpp'
-df = pd.read_csv(inputFile, index_col=0)
+def make_rhsf(input_path: Path | None = None) -> None:
+    base = Path(__file__).parent.parent
+    inputFile = Path(input_path) if input_path else base / 'data' / 'classified_reactions_str.csv'
+    outputFile = base / 'include' / 'Rhsf.hpp'
+    df = pd.read_csv(inputFile, index_col=0)
 
-records=df.to_dict(orient="records")
-reaction_kinds=df["kind"].unique() #反応速度定数の種類
-reaction_kinds.sort()
-typeToIndex={} #反応タイプから速度定数のindexへの変換
-for i in range(len(reaction_kinds)):
-    typeToIndex[reaction_kinds[i]]=i
+    records = df.to_dict(orient="records")
+    reaction_kinds = list(df["kind"])
+    reaction_kinds = [rk.strip() if isinstance(rk, str) else rk for rk in reaction_kinds]
+    reaction_kinds = list(dict.fromkeys(reaction_kinds).keys())
+    reaction_kinds.sort()
 
-species=0 #化学種の種類　これをもとに化学種の量のarrayを作る
+    typeToIndex = {reaction_kinds[i]: i for i in range(len(reaction_kinds))}
 
+    species = 0
+    for rec in records:
+        species = max(species, rec["init_assem_id"])
+        species = max(species, rec["entering_assem_id"])
+        species = max(species, rec["product_assem_id"])
+        species = max(species, rec["leaving_assem_id"])
+    species = round(species) + 1
 
+    ODE = [dict() for _ in range(species)]
 
-for dict in records:
-    species=max(species,dict["init_assem_id"])
-    species=max(species,dict["entering_assem_id"])
-    species=max(species,dict["product_assem_id"])
-    species=max(species,dict["leaving_assem_id"])
-species=round(species)
-species+=1
-ODE=[{} for _ in range(species)] #常微分方程式の素
+    def add_dict(mp: dict, key, value: float):
+        mp[key] = mp.get(key, 0) + value
 
-def add_dict(mp,key,value):
-    if key in mp:
-        mp[key]+=value
-    else:
-        mp[key]=value
-
-def to_fomula(tup,value):
-        ret=""
+    def to_formula(tup, value):
         if tup[1] is None:
             return f"({value} * k[{typeToIndex[tup[2]]}] * sp[{tup[0]}])"
         else:
             return f"({value} * k[{typeToIndex[tup[2]]}] * sp[{tup[0]}] * sp[{tup[1]}])"
 
-for dict in records:
-    init=dict["init_assem_id"]
-    entering=None if pd.isna(dict["entering_assem_id"]) else round(dict["entering_assem_id"])
-    product=dict["product_assem_id"]
-    leaving=None if pd.isna(dict["leaving_assem_id"]) else round(dict["leaving_assem_id"])
+    for rec in records:
+        init = rec["init_assem_id"]
+        entering = None if pd.isna(rec["entering_assem_id"]) else round(rec["entering_assem_id"])
+        product = rec["product_assem_id"]
+        leaving = None if pd.isna(rec["leaving_assem_id"]) else round(rec["leaving_assem_id"])
 
-    hoge=(init,entering,dict["kind"])
-    
-    add_dict(ODE[init],hoge,-dict["duplicate_count"])
-    if entering is not None:
-        add_dict(ODE[entering],hoge,-dict["duplicate_count"])
-    add_dict(ODE[product],hoge,dict["duplicate_count"])
-    if leaving is not None:
-        add_dict(ODE[leaving],hoge,dict["duplicate_count"])
+        key = (init, entering, rec["kind"])
+        add_dict(ODE[init], key, -rec["duplicate_count"])
+        if entering is not None:
+            add_dict(ODE[entering], key, -rec["duplicate_count"])
+        add_dict(ODE[product], key, rec["duplicate_count"])
+        if leaving is not None:
+            add_dict(ODE[leaving], key, rec["duplicate_count"])
+
+    with open(outputFile, "w") as f:
+        f.write(
+            "#if USE_PREGENERATED_RHSF\n\n"
+            "#pragma once\n"
+            "#include <array>\n"
+            "#include <nvector/nvector_serial.h>\n"
+            "#include \"constants.hpp\"\n\n"
+            "int rhsf(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) {\n"
+            "\tauto sp = N_VGetArrayPointer(y);\n"
+            "\tauto ydotData = N_VGetArrayPointer(ydot);\n"
+            "\tstd::array<double, config::constantSize> &k = *static_cast<std::array<double, config::constantSize>*>(user_data);\n\t"
+        )
+        for idx, t in enumerate(ODE):
+            f.write(f"ydotData[{idx}] = ")
+            first = True
+            for key, val in t.items():
+                if not first:
+                    f.write(" + ")
+                first = False
+                f.write(to_formula(key, val))
+            f.write(";\n\t")
+        f.write("return 0;\n}\n\n#endif // USE_PREGENERATED_RHSF\n")
 
 
-
-with open(outputFile,"w") as f:
-    f.write(
-        "#if USE_PREGENERATED_RHSF==0\n\n"                                                              \
-        "#pragma once\n"                                                                              \
-        "#include <array>\n"                                                                          \
-        "#include <nvector/nvector_serial.h>\n"                                                       \
-        "#include \"constants.hpp\"\n\n"                                                              \
-        "int rhsf(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) {\n"                     \
-        "\tauto sp = N_VGetArrayPointer(y);\n"                                                        \
-        "\tauto ydotData = N_VGetArrayPointer(ydot);\n"                                               \
-        "\tstd::array<double, config::constantSize> &k = *static_cast<std::array<double, config::constantSize>*>(user_data);\n\t")
-    for t in ODE:
-        isFirst=True
-        f.write("ydotData[" + str(ODE.index(t)) + "] = ")
-        for key,val in t.items():
-            if isFirst:
-                isFirst=False
-            else:
-                f.write(" + ")
-            f.write(to_fomula(key,val))
-        f.write(";\n\t")
-    f.write("return 0;\n}")
+if __name__ == "__main__":
+    make_rhsf()

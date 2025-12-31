@@ -4,9 +4,12 @@ import sys
 import yaml
 import csv
 
-# filepath: /home/aspi/Project/nasap-fit-cpp/script/readConfig.py
+import makeRhsf
+import makeJacobian
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+rootFolder_path = os.path.dirname(SCRIPT_DIR)  # project root
+
 DEFAULT_INPUT = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "data", "M9L6", "config.yaml"))
 DEFAULT_OUTPUT = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "include", "constants.hpp"))
 
@@ -323,7 +326,6 @@ def main(cfg_path=DEFAULT_INPUT, out_path=DEFAULT_OUTPUT):
     # Additional validation of input files
     try:
         # resolve relative paths relative to config file directory
-        rootFolder_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         QASAP_path = QASAP_path if os.path.isabs(str(QASAP_path)) else os.path.normpath(os.path.join(rootFolder_path, str(QASAP_path)))
         reaction_path = reaction_path if os.path.isabs(str(reaction_path)) else os.path.normpath(os.path.join(rootFolder_path, str(reaction_path)))
 
@@ -334,6 +336,13 @@ def main(cfg_path=DEFAULT_INPUT, out_path=DEFAULT_OUTPUT):
         print("Validation error:", file=sys.stderr)
         print(str(e), file=sys.stderr)
         sys.exit(1)
+    # Generate Rhsf.hpp and Jacf.hpp if enabled
+    if usePreGeneratedRhsf:
+        makeRhsf.make_rhsf(reaction_path)
+        print("Generated Rhsf.hpp")
+    if usePreGeneratedJacobian:
+        makeJacobian.make_jacobian(reaction_path)
+        print("Generated Jacf.hpp")
 
     
 

@@ -28,3 +28,4 @@ constexpr double safetyConstant=0.9;
 constexpr double scalar = 0.5, crossOver = 0.5;
 //反応速度定数の上限下限
 constexpr double upperLim = 1e4, lowerLim = 1e-3;
+

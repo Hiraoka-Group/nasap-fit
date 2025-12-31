@@ -2,8 +2,8 @@
 #include <string>
 #include <string_view>
 
-#define USE_PREGENERATED_RHSF (0)
-#define USE_PREGENERATED_JACOBIAN (0)
+#define USE_PREGENERATED_RHSF (1)
+#define USE_PREGENERATED_JACOBIAN (1)
 
 namespace config {
 const std::string QASAPFile = "../data/Table_S1.csv";
