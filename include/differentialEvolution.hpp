@@ -70,10 +70,6 @@ private:
 	void addStepCountCV(const std::array<double, config::constantSize>& constant);
 	void addStepCountDP(const std::array<double, config::constantSize>& constant);
 
-	std::vector<double> getJacobian(const std::array<double, config::constantSize>& point);
-	//ヘッセ行列の計算
-	std::vector<std::vector<double>> getHessian(const std::array<double, config::constantSize>& point);
-
     //実験データのセット
     void setData(std::vector<std::vector<double>>& arg);
 

@@ -10,7 +10,6 @@
 
 #include <mpi.h>
 
-#include <cppad/cppad.hpp>
 /*
 # pragma GCC target("avx2")
 # pragma GCC optimize("O2")

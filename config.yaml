@@ -1,0 +1,47 @@
+#NMRによって得られた濃度の時間変化データのパス(必須)(絶対パス or プロジェクトのルートに対する相対パス)
+QASAPDataFile: data/Table_S1.csv
+#反応ネットワークを記述したファイルのパス(必須)(絶対パス or プロジェクトのルートに対する相対パス)
+reactionDataFile: data/classified_reactions_str.csv
+#化学種の数(必須)
+species: 29
+#反応速度定数の数(必須)
+constantSize: 8
+
+
+#concDatafileに記述されている各化学種についてのデータ(必須)
+trackedSpecies:
+  '1 (%)':
+    100%concentration: 1.71e-3
+    index: 27
+  '[PdPy*4]2+ (%)':
+    100%concentration: 8.55e-4
+    index: 26
+  'Py* (%)':
+    100%concentration: 3.42e-3
+    index: 28
+  'Pd214 cage (%)':
+    100%concentration: 4.275e-4
+    index: 25
+#差分進化法のエージェント数(必須)
+popSize: 128
+#最大世代数(必須)
+maxGen: 200
+
+#シミュレーションの許容絶対誤差
+tolAbsError: 1e-9
+#シミュレーションの許容相対誤差
+tolRelError: 1e-6
+
+#差分進化法のパラメータ(任意、デフォルト:scalar=0.5,crossOver=0.5)
+scalar: 0.5
+crossOver: 0.5
+#反応速度定数の探索範囲の上限下限(任意、デフォルト:upperLim=1e4,lowerLim=1e-3)
+upperLim: 1e4
+lowerLim: 1e-3
+
+#微分方程式の右辺値関数(rhsf)をpythonによって事前に生成するかどうか(任意、デフォルト:true)
+#コンパイルが長すぎる場合や、コンパイルに失敗する場合はfalseに設定してください
+usePreGeneratedRhsf: true
+#rhsfのjacobian関数をpythonによって事前に生成するかどうか(任意、デフォルト:true)
+#コンパイルが長すぎる場合や、コンパイルに失敗する場合はfalseに設定してください
+usePreGeneratedJacobian: true

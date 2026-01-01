@@ -5,7 +5,6 @@
 #include "../include/speciesAmount.hpp"
 #include "../include/ODE.hpp"
 
-#include <cppad/cppad.hpp>
 
 
 template<class T>
@@ -63,11 +62,7 @@ speciesAmount<T> operator*(const double leftVal, const speciesAmount<T>& rightVa
 }
 
 
-typedef CppAD::AD<double> ADdouble;
 //明示的なインスタンス化
 template class speciesAmount<double>;
 template speciesAmount<double> operator*(const speciesAmount<double>& leftVal, const double rightVal);
 template speciesAmount<double> operator*(const double leftVal, const speciesAmount<double>& rightVal);
-template class speciesAmount<ADdouble>;
-template speciesAmount<ADdouble> operator*(const speciesAmount<ADdouble>& leftVal, const double rightVal);
-template speciesAmount<ADdouble> operator*(const double leftVal, const speciesAmount<ADdouble>& rightVal);

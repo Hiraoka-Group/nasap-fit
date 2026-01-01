@@ -32,15 +32,10 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE 
         ${PROJECT_SOURCE_DIR}/include
         ${MPI_INCLUDE_PATH}
-        /usr/local/include/cppad
         ${SUNDIALS_INCLUDE_DIR}
         /usr/include/suitesparse
 )
-# CppADのヘッダ検索パスを追加
-include_directories(/usr/local/include/cppad)
 
-# CppADライブラリをリンク
-target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libcppad_lib.so)
 
 # MPIライブラリをリンク
 target_link_libraries(${PROJECT_NAME} PRIVATE MPI::MPI_CXX)

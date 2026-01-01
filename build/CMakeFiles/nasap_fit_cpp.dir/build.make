@@ -192,7 +192,6 @@ nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/build.make
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/compiler_depend.ts
-nasap_fit_cpp: /usr/local/lib/libcppad_lib.so
 nasap_fit_cpp: /usr/local/lib/libsundials_core.so
 nasap_fit_cpp: /usr/local/lib/libsundials_sunlinsolklu.so
 nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/libklu.so

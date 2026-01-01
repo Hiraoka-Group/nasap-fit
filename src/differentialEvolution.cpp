@@ -11,7 +11,6 @@
 #include <queue>
 
 #include <mpi.h>
-#include <cppad/cppad.hpp>
 #include <sunmatrix/sunmatrix_sparse.h>
 #include <sunlinsol/sunlinsol_klu.h>
 
@@ -34,14 +33,10 @@ using std::cout;
 using std::endl;
 using std::flush;
 using std::sqrt;
-using CppAD::sqrt;
 
 //5分毎のステップ数カウント
 extern int stepCount[61];
 
-inline double castToDouble(const CppAD::AD<double>& x){
-    return CppAD::Value(CppAD::Var2Par(x));
-}
 inline double castToDouble(const double& x){
     return x;
 }
@@ -235,61 +230,7 @@ T differentialEvolution::calcError(const std::array<T, config::constantSize>& co
     return SSR;
 }
 
-std::vector<double> differentialEvolution::getJacobian(const std::array<double, config::constantSize>& point){
-    using CppAD::AD;
 
-    // 1. AD型配列を作成
-    std::vector<AD<double>> ax_vec(point.begin(), point.end());
-    // 2. 独立変数を宣言
-    CppAD::Independent(ax_vec);
-    std::array<AD<double>, config::constantSize> ax;
-    for(int i=0; i<config::constantSize; ++i) ax[i]=ax_vec[i];
-
-    // 3. calcError は array を受け取るのでそのままでOK
-    std::vector<AD<double>> ay(1);
-    ay[0] = calcError(ax);
-
-    // 4. std::array から std::vector に変換して ADFun に渡す
-    CppAD::ADFun<double> f(ax_vec, ay);
-
-    // 5. ヤコビ行列の計算
-    std::vector<double> x(point.begin(), point.end());
-    std::vector<double> jac = f.Jacobian(x);
-
-    return jac;
-}
-
-//ヘッセ行列の計算
-std::vector<std::vector<double>> differentialEvolution::getHessian(const std::array<double, config::constantSize>& point){
-    using CppAD::AD;
-
-    // 1. AD型配列を作成
-    std::vector<AD<double>> ax_vec(point.begin(), point.end());
-    // 2. 独立変数を宣言
-    CppAD::Independent(ax_vec);
-    std::array<AD<double>, config::constantSize> ax;
-    for(int i=0; i<config::constantSize; ++i) ax[i]=ax_vec[i];
-
-    // 3. calcError は array を受け取るのでそのままでOK
-    std::vector<AD<double>> ay(1);
-    ay[0] = calcError(ax);
-
-    // 4. std::array から std::vector に変換して ADFun に渡す
-    CppAD::ADFun<double> f(ax_vec, ay);
-
-    // 5. ヘッセ行列の計算
-    std::vector<double> x(point.begin(), point.end());
-    std::vector<double> hes = f.Hessian(x,0);
-
-    // 6. 2次元配列に整形
-    std::vector<std::vector<double>> H(config::constantSize, std::vector<double>(config::constantSize));
-    for (int i = 0, k = 0; i < config::constantSize; ++i){
-        for (int j = 0; j < config::constantSize; ++j, ++k){
-            H[i][j] = hes[k];
-        }
-    }
-    return H;
-}
 
 //実験データのセット
 void differentialEvolution::setData(std::vector<std::vector<double>>& arg) {
@@ -469,7 +410,12 @@ void differentialEvolution::best(std::array<double, config::constantSize>& ret, 
 void differentialEvolution::putSim(const std::array<double, config::constantSize>& constant) {
     if(proc_rank!=0)return;
     const std::vector<speciesAmount<double>>& simulation = simulate(constant);
-    cout <<"Time (min),1 (%),[PdPy*4]2+ (%),Py* (%),Pd214 cage (%),"<<std::endl;
+    cout <<"Time (min)";
+    for (int j = 0; j < config::trackedSpecies; j++) {
+        cout<<","<<config::trackedNames[j]<<" (%)";
+    }
+    cout<<std::endl;
+
     for (int i = 0; i<QASAP.size(); i++) {
         double t = QASAP[i].time;
         assert(0 <= t && t <= endTime);
@@ -533,12 +479,8 @@ void differentialEvolution::DEBUG() {
 }
 
 //明示的なインスタンス化
-typedef CppAD::AD<double> ADdouble;
 template differentialEvolution::stepResult<double> differentialEvolution::calcNextStep(const std::array<double, config::constantSize>& reactConst, const speciesAmount<double>& data, double stepSize);
 template std::vector<speciesAmount<double>> differentialEvolution::simulate(const std::array<double, config::constantSize>& constant);
 template double differentialEvolution::calcError(const std::array<double, config::constantSize>& constant);
-template differentialEvolution::stepResult<ADdouble> differentialEvolution::calcNextStep(const std::array<ADdouble, config::constantSize>& reactConst, const speciesAmount<ADdouble>& data, double stepSize);
-template std::vector<speciesAmount<ADdouble>> differentialEvolution::simulate(const std::array<ADdouble, config::constantSize>& constant);
-template ADdouble differentialEvolution::calcError(const std::array<ADdouble, config::constantSize>& constant);
 
 template double differentialEvolution::calcErrorDP(const std::array<double, config::constantSize>& constant);
