@@ -12,8 +12,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o.d"
   "CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o"
   "CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.o.d"
-  "CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o"
-  "CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o.d"
   "nasap_fit_cpp"
   "nasap_fit_cpp.pdb"
 )

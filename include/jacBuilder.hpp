@@ -15,8 +15,8 @@
 namespace jacBuilder {
     extern int nonZeros; //ヤコビ行列の非ゼロ要素数
 
-    extern std::array<double, config::constantSize> rateConstants; //反応速度定数配列
-    extern std::array<double, config::species+1> speciesData; //初期種量配列
+	extern std::vector<double> rateConstants; //反応速度定数配列
+	extern std::vector<double> speciesData; //初期種量配列
 
 	struct term {
 		int duplicacy;     // 重複度

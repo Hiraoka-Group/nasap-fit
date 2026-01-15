@@ -20,6 +20,10 @@ find_package(MPI REQUIRED)
 find_package(SUNDIALS REQUIRED)
 find_library(KLU_LIBRARY klu HINTS /usr/lib/x86_64-linux-gnu)
 
+# CasADiを探す
+find_package(casadi REQUIRED)
+
+
 
 
 # 実行ファイルを作成
@@ -49,6 +53,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE MPI::MPI_CXX)
 target_link_libraries(${PROJECT_NAME} PRIVATE sundials_cvode)
 target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_core.so)
 target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_sunlinsolklu.so)
+
+# ライブラリとインクルードパスをリンク
+target_link_libraries(${PROJECT_NAME} PRIVATE casadi)
 
 if (KLU_LIBRARY)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${KLU_LIBRARY})

@@ -273,30 +273,6 @@ src/rhsfBuilder.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.s
 .PHONY : src/rhsfBuilder.cpp.s
 
-src/speciesAmount.o: src/speciesAmount.cpp.o
-.PHONY : src/speciesAmount.o
-
-# target to build an object file
-src/speciesAmount.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o
-.PHONY : src/speciesAmount.cpp.o
-
-src/speciesAmount.i: src/speciesAmount.cpp.i
-.PHONY : src/speciesAmount.i
-
-# target to preprocess a source file
-src/speciesAmount.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.i
-.PHONY : src/speciesAmount.cpp.i
-
-src/speciesAmount.s: src/speciesAmount.cpp.s
-.PHONY : src/speciesAmount.s
-
-# target to generate assembly for a file
-src/speciesAmount.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.s
-.PHONY : src/speciesAmount.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -324,9 +300,6 @@ help:
 	@echo "... src/rhsfBuilder.o"
 	@echo "... src/rhsfBuilder.i"
 	@echo "... src/rhsfBuilder.s"
-	@echo "... src/speciesAmount.o"
-	@echo "... src/speciesAmount.i"
-	@echo "... src/speciesAmount.s"
 .PHONY : help
 
 

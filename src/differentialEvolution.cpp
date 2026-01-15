@@ -16,7 +16,6 @@
 #include <sunlinsol/sunlinsol_klu.h>
 
 #include "../include/differentialEvolution.hpp"
-#include "../include/speciesAmount.hpp"
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
 #include "../include/ODE.hpp"
@@ -47,59 +46,11 @@ inline double castToDouble(const double& x){
 }
 
 
-//シミュレーションにおける、次のステップの計算
-template<class T>
-differentialEvolution::stepResult<T> differentialEvolution::calcNextStep(const std::array<T, config::constantSize>& reactConst, const speciesAmount<T>& data, double stepSize) {
-    stepResult<T> ret;
-    speciesAmount<T> val1, val2, val3, val4,val5,val6,val7, slope1, slope2, slope3, slope4, slope5, slope6, slope7, order4_diff, order5_diff;
-    double totalError, h_new;
-    while(1){
-        if(stepSize<=1e-12)stepSize=1e-12;
-        totalError=0.0;
-        val1 = data;
-        diffCoeff(reactConst, val1, slope1);
-        val2 = val1 + stepSize * slope1 * (1.0/5);
-        diffCoeff(reactConst, val2, slope2);
-        val3 = val1 + stepSize * (slope1 * (3.0/40) + slope2 * (9.0/40));
-        diffCoeff(reactConst, val3, slope3);
-        val4 = val1 + stepSize * (slope1 * (44.0/45) + slope2 * (-56.0/15) + slope3 * (32.0/9));
-        diffCoeff(reactConst, val4, slope4);
-        val5 = val1 + stepSize * (slope1 * (19372.0/6561) + slope2 * (-25360.0/2187) + slope3 * (64448.0/6561) + slope4 * (-212.0/729));
-        diffCoeff(reactConst, val5, slope5);
-        val6 = val1 + stepSize * (slope1 * (9017.0/3168) + slope2 * (-355.0/33) + slope3 * (46732.0/5247) + slope4 * (49.0/176) + slope5 * (-5103.0/18656));
-        diffCoeff(reactConst, val6, slope6);
-        order5_diff = stepSize * (slope1 * (35.0/384) + slope3 * (500.0/1113) + slope4 * (125.0/192) + slope5 * (-2187.0/6784) + slope6 * (11.0/84));
-        val7 = val1 + order5_diff;
-        diffCoeff(reactConst, val7, slope7);
-        order4_diff = stepSize * (slope1 * (5179.0/57600) + slope3 * (7571.0/16695) + slope4 * (393.0/640) + slope5 * (-92097.0/339200) + slope6 * (187.0/2100) + slope7 * (1.0/40));
-        const speciesAmount<T>& order5 = val7;
-
-        for(int i=0; i<config::species; i++){
-            double e = castToDouble(order4_diff[i]-order5_diff[i]);
-            totalError+=e*e;
-        }
-        totalError=sqrt(totalError/config::species);
-        if(totalError<=config::tolAbsError){//ステップ成功
-            ret.usedStepSize=stepSize;
-            ret.newState=order5;
-            if(totalError==0)h_new = stepSize * 2;
-            else{
-                h_new=config::safetyConstant*stepSize*std::pow(config::tolAbsError/totalError,(1.0/5));
-                h_new=std::clamp(h_new, stepSize*0.25, stepSize*2.0);
-            }
-            ret.newStepSize=h_new;
-            return ret;
-        }else{//ステップ失敗
-        h_new=config::safetyConstant*stepSize*std::pow(config::tolAbsError/totalError,(1.0/5));
-        h_new=std::clamp(h_new, stepSize*0.1, stepSize*0.9);
-        stepSize=h_new;
-        }
-    }
-}
+// Removed DP (explicit Runge-Kutta) integration routines: using CVODE instead.
 
 
-std::array<double, config::constantSize> differentialEvolution::crossingOver(const std::array<double, config::constantSize>& baseV, const std::array<double, config::constantSize>& randV1, const std::array<double, config::constantSize>& randV2){
-    std::array<double, config::constantSize> v;
+std::vector<double> differentialEvolution::crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2){
+    std::vector<double> v(config::constantSize);
     int jr = myRand(config::constantSize);
     for (int k = 0; k < config::constantSize; k++) {
         //交叉
@@ -113,49 +64,10 @@ std::array<double, config::constantSize> differentialEvolution::crossingOver(con
     }
     return v;
 }
-template<class T>
-std::vector<speciesAmount<T>> differentialEvolution::simulate(const std::array<T, config::constantSize>& constant){
-
-    std::vector<speciesAmount<T>> simulation = {speciesAmount<T>()}; 
-    for (int i = 0; i < config::species; i++) {
-        simulation[0][i] = initialState[i];
-    }
-    simTime={0.0};
-    double currentStepSize=0.001;
-    //シミュレーション
-    for (int k = 0; simTime.back() <= endTime; k++) {
-        stepResult<T> res=calcNextStep(constant, simulation[k], currentStepSize);
-        simulation.push_back(res.newState);
-        simTime.push_back(simTime.back()+res.usedStepSize);
-        currentStepSize = res.newStepSize;
-    }
-    return simulation;
-}
-
-template<class T>
-T differentialEvolution::calcErrorDP(const std::array<T, config::constantSize>& constant) {
-    if(proc_rank!=0)return 0;
-    const std::vector<speciesAmount<double>>& simulation = simulate(constant);
-    double SSR = 0;
-    for (int i = 0; i<QASAP.size(); i++) {
-        double t = QASAP[i].time;
-        assert(0 <= t && t <= endTime);
-
-        int nearestIndex = std::upper_bound(simTime.begin(),simTime.end(),t)-simTime.begin()-1;
-        double nearestTime = simTime[nearestIndex];
-        double difftime = t - nearestTime;
-        stepResult res = calcNextStep(constant,simulation[nearestIndex],difftime);
-        for (int j = 0; j < config::trackedSpecies; j++) {
-            size_t idx= config::trackedIndex[j];
-            assert(0 <= idx && idx < config::species);
-            SSR += (res.newState[idx]/config::fullConc[j] - QASAP[i].state[j]) * (res.newState[idx]/config::fullConc[j] - QASAP[i].state[j]);
-        }
-    }
-    return SSR;
-}
+// simulate/calcNextStep/calcErrorDP removed — CVODE based `calcError` is used instead.
 
 //
-void differentialEvolution::addStepCountCV(const std::array<double, config::constantSize>& constant){
+void differentialEvolution::addStepCountCV(const std::vector<double>& constant){
     int flag=CV_SUCCESS;
 
 
@@ -165,7 +77,7 @@ void differentialEvolution::addStepCountCV(const std::array<double, config::cons
     }
     
     CVodeReInit(cvode_mem, 0.0, y);
-    CVodeSetUserData(cvode_mem, (void*)&constant);
+    CVodeSetUserData(cvode_mem, (void*)constant.data());
     
     
     
@@ -188,18 +100,9 @@ void differentialEvolution::addStepCountCV(const std::array<double, config::cons
         nsteps_prev=nsteps;
     }
 }
-void differentialEvolution::addStepCountDP(const std::array<double, config::constantSize>& constant){
-    if(proc_rank!=0)return;
-    const std::vector<speciesAmount<double>>& simulation = simulate(constant);
-    for (double t : simTime) {
-        if(t==0)continue;
-        stepCount[int(t/5)]++;
-    }
-}
-
 //平方残差和の計算
 template<class T>
-T differentialEvolution::calcError(const std::array<T, config::constantSize>& constant) {
+T differentialEvolution::calcError(const std::vector<T>& constant) {
     int flag=CV_SUCCESS;
 
     N_Vector y = N_VNew_Serial(config::species, sunctx);
@@ -208,10 +111,8 @@ T differentialEvolution::calcError(const std::array<T, config::constantSize>& co
     }
     
     CVodeReInit(cvode_mem, 0.0, y);
-    CVodeSetUserData(cvode_mem, (void*)&constant);
+    CVodeSetUserData(cvode_mem, (void*)constant.data());
     
-    //シミュレーション
-    //const std::vector<speciesAmount<T>>& simulation = simulate(constant);
     T SSR = 0;
     double tret=0.0;
     for (int i = 0; i < QASAP.size(); i++) {
@@ -235,59 +136,19 @@ T differentialEvolution::calcError(const std::array<T, config::constantSize>& co
     return SSR;
 }
 
-std::vector<double> differentialEvolution::getJacobian(const std::array<double, config::constantSize>& point){
-    using CppAD::AD;
-
-    // 1. AD型配列を作成
-    std::vector<AD<double>> ax_vec(point.begin(), point.end());
-    // 2. 独立変数を宣言
-    CppAD::Independent(ax_vec);
-    std::array<AD<double>, config::constantSize> ax;
-    for(int i=0; i<config::constantSize; ++i) ax[i]=ax_vec[i];
-
-    // 3. calcError は array を受け取るのでそのままでOK
-    std::vector<AD<double>> ay(1);
-    ay[0] = calcError(ax);
-
-    // 4. std::array から std::vector に変換して ADFun に渡す
-    CppAD::ADFun<double> f(ax_vec, ay);
-
-    // 5. ヤコビ行列の計算
-    std::vector<double> x(point.begin(), point.end());
-    std::vector<double> jac = f.Jacobian(x);
-
+std::vector<double> differentialEvolution::getJacobian(const std::vector<double>& point){
+    int n = (int)point.size();
+    std::vector<double> jac(n);
+    //Jacobianの実装は後回し
     return jac;
 }
 
 //ヘッセ行列の計算
-std::vector<std::vector<double>> differentialEvolution::getHessian(const std::array<double, config::constantSize>& point){
-    using CppAD::AD;
-
-    // 1. AD型配列を作成
-    std::vector<AD<double>> ax_vec(point.begin(), point.end());
-    // 2. 独立変数を宣言
-    CppAD::Independent(ax_vec);
-    std::array<AD<double>, config::constantSize> ax;
-    for(int i=0; i<config::constantSize; ++i) ax[i]=ax_vec[i];
-
-    // 3. calcError は array を受け取るのでそのままでOK
-    std::vector<AD<double>> ay(1);
-    ay[0] = calcError(ax);
-
-    // 4. std::array から std::vector に変換して ADFun に渡す
-    CppAD::ADFun<double> f(ax_vec, ay);
-
-    // 5. ヘッセ行列の計算
-    std::vector<double> x(point.begin(), point.end());
-    std::vector<double> hes = f.Hessian(x,0);
-
-    // 6. 2次元配列に整形
-    std::vector<std::vector<double>> H(config::constantSize, std::vector<double>(config::constantSize));
-    for (int i = 0, k = 0; i < config::constantSize; ++i){
-        for (int j = 0; j < config::constantSize; ++j, ++k){
-            H[i][j] = hes[k];
-        }
-    }
+std::vector<std::vector<double>> differentialEvolution::getHessian(const std::vector<double>& point){
+    // numeric central differences for Hessian
+    int n = (int)point.size();
+    std::vector<std::vector<double>> H(n, std::vector<double>(n, 0.0));
+    //Hessianの実装は後回し
     return H;
 }
 
@@ -308,10 +169,15 @@ void differentialEvolution::setPop(){
         return;
     }
     populations = vector<individuals>(config::popSize);
+    // ensure flat buffers exist
+    populationsFlat.assign(config::popSize * config::constantSize, 0.0);
+    populationsErrorFlat.assign(config::popSize, DBL_MAX);
     for(int i=0; i<config::popSize; i++){
         ifs >> populations[i].error;
+        populationsErrorFlat[i] = populations[i].error;
         for(int j=0; j<config::constantSize; j++){
             ifs >> populations[i].constant[j];
+            populationsFlat[i * config::constantSize + j] = populations[i].constant[j];
         }
     }
 }
@@ -319,6 +185,11 @@ void differentialEvolution::setPop(){
 differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     myRand=xorshift(1+proc_rank);
     setData(arg);
+    // allocate initialState according to runtime species
+    initialState.assign(config::species, 0.0);
+    // allocate flat population buffers
+    populationsFlat.assign(config::popSize * config::constantSize, 0.0);
+    populationsErrorFlat.assign(config::popSize, DBL_MAX);
     for (int i = 0; i < config::trackedSpecies; i++) {
         initialState[config::trackedIndex[i]] = config::fullConc[i]*QASAP[0].state[i];
     }
@@ -362,8 +233,11 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     populations = std::vector<individuals>(config::popSize);
     for (int i = proc_rank; i < config::popSize; i+=num_procs) {
         for (int j = 0; j < config::constantSize; j++) {
-            populations[i].constant[j] = randbetExp(config::lowerLim, config::upperLim);
+            double v = randbetExp(config::lowerLim, config::upperLim);
+            populations[i].constant[j] = v;
+            populationsFlat[i * config::constantSize + j] = v;
         }
+        populationsErrorFlat[i] = DBL_MAX;
         //populations[i].error = calcError(populations[i].constant);
     }
 }
@@ -374,8 +248,9 @@ void differentialEvolution::Optimize(){
         if (temp <= 0) return false;
         return myRand.prob() < exp((oldE - newE) / temp);
     };
-    MPI_Win win;
-    MPI_Win_create(populations.data(), sizeof(individuals)*config::popSize, 1, MPI_INFO_NULL, MPI_COMM_WORLD, &win);
+    MPI_Win winConst, winErr;
+    MPI_Win_create(populationsFlat.data(), sizeof(double)*config::popSize*config::constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
+    MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*config::popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
     for (int i = 0; i < config::maxGen; i++) {
         if(proc_rank==0)cout<<"current generation : "<<i<<" / "<<config::maxGen<<"\n";
         double temp=0;
@@ -406,13 +281,22 @@ void differentialEvolution::Optimize(){
             }
         );
         indicesToVisit.erase(std::unique(indicesToVisit.begin(),indicesToVisit.end()),indicesToVisit.end());
-        MPI_Win_fence(0, win);
+        MPI_Win_fence(0, winConst);
+        MPI_Win_fence(0, winErr);
         for(int idx : indicesToVisit){
-            assert(idx%num_procs!=proc_rank);
-            MPI_Get(&populations[idx], sizeof(individuals), MPI_BYTE, idx%num_procs, sizeof(individuals)*idx, sizeof(individuals), MPI_BYTE, win);
+            if(idx%num_procs==proc_rank) continue;
+            // fetch constants into local populations[idx].constant buffer
+            MPI_Get(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, idx%num_procs, idx * config::constantSize, config::constantSize, MPI_DOUBLE, winConst);
+            // fetch error value
+            MPI_Get(&populations[idx].error, 1, MPI_DOUBLE, idx%num_procs, idx, 1, MPI_DOUBLE, winErr);
+            // note: data will be available after the following fences
+        }
+        MPI_Win_fence(0, winConst);
+        MPI_Win_fence(0, winErr);
+        for(int idx : indicesToVisit){
+            if(idx%num_procs==proc_rank) continue;
             errors.push_back(populations[idx].error);
         }
-        MPI_Win_fence(0, win);
 
         for (int j = proc_rank; j < config::popSize; j+=num_procs) {
             //突然変異
@@ -421,7 +305,7 @@ void differentialEvolution::Optimize(){
             auto [xb,xr1,xr2]=lockahead.back();
             lockahead.pop_back();
             //新しいベクトル、ベースベクトルとその他二つのベクトル
-            std::array<double, config::constantSize> v,baseV,randV1,randV2;
+            std::vector<double> v,baseV,randV1,randV2;
             baseV=populations[xb].constant;
             randV1=populations[xr1].constant;
             randV2=populations[xr2].constant;
@@ -431,72 +315,54 @@ void differentialEvolution::Optimize(){
             if (transProb(temp, populations[j].error, newError) || !std::isfinite(populations[j].error)) {
                 populations[j].constant = v;
                 populations[j].error = newError;
+                // update flat buffers for MPI
+                for (int kk = 0; kk < config::constantSize; ++kk) populationsFlat[j * config::constantSize + kk] = populations[j].constant[kk];
+                populationsErrorFlat[j] = newError;
             }
         }
     }
-    MPI_Win_free(&win);
+    MPI_Win_free(&winConst);
+    MPI_Win_free(&winErr);
 }
 
 //最良個体の定数を返す
-void differentialEvolution::best(std::array<double, config::constantSize>& ret, double& minerror) {
+void differentialEvolution::best(std::vector<double>& ret, double& minerror) {
+    // find local best
     minerror = DBL_MAX;
+    std::vector<double> localBest(config::constantSize);
     for (auto& t : populations) {
         if (minerror > t.error) {
             minerror = t.error;
-            ret = t.constant;
+            localBest = t.constant;
         }
     }
-    individuals myind={ret, minerror};
-    individuals buf[num_procs];
-    MPI_Allgather(
-        &myind,
-        sizeof(individuals), 
-        MPI_BYTE, 
-        buf, 
-        sizeof(individuals), 
-        MPI_BYTE, 
-        MPI_COMM_WORLD
-    );
-
-    for(int i=0; i<num_procs; i++){
-        if(minerror > buf[i].error){
-            minerror = buf[i].error;
-            ret = buf[i].constant;
-        }
+    // gather all minerrors
+    std::vector<double> all_minerrors(num_procs);
+    MPI_Allgather(&minerror, 1, MPI_DOUBLE, all_minerrors.data(), 1, MPI_DOUBLE, MPI_COMM_WORLD);
+    // find global minimum and its owner
+    double globalMin = all_minerrors[0];
+    int owner = 0;
+    for (int i = 1; i < num_procs; ++i) {
+        if (all_minerrors[i] < globalMin) { globalMin = all_minerrors[i]; owner = i; }
     }
+    minerror = globalMin;
+    // owner broadcasts the best constants
+    ret.assign(config::constantSize, 0.0);
+    if ((int)localBest.size() != config::constantSize) localBest.resize(config::constantSize);
+    if (proc_rank == owner) ret = localBest;
+    MPI_Bcast(ret.data(), config::constantSize, MPI_DOUBLE, owner, MPI_COMM_WORLD);
 }
 
-void differentialEvolution::putSim(const std::array<double, config::constantSize>& constant) {
-    if(proc_rank!=0)return;
-    const std::vector<speciesAmount<double>>& simulation = simulate(constant);
-    cout <<"Time (min),1 (%),[PdPy*4]2+ (%),Py* (%),Pd214 cage (%),"<<std::endl;
-    for (int i = 0; i<QASAP.size(); i++) {
-        double t = QASAP[i].time;
-        assert(0 <= t && t <= endTime);
-        cout<<t<<", ";
 
-        int nearestIndex = std::upper_bound(simTime.begin(),simTime.end(),t)-simTime.begin()-1;
-        double nearestTime = simTime[nearestIndex];
-        double difftime = t - nearestTime;
-        stepResult res = calcNextStep(constant,simulation[nearestIndex],difftime);
-        for (int j = 0; j < config::trackedSpecies; j++) {
-            size_t idx= config::trackedIndex[j];
-            assert(0 <= idx && idx < config::species);
-            cout<<res.newState[idx]/config::fullConc[j] <<", ";
-        }
-        cout<<std::endl;
-    }
 
-}
-
-void differentialEvolution::putCVODESim(const std::array<double, config::constantSize>& constant) {
+void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
     if(proc_rank!=0)return;
     N_Vector y = N_VNew_Serial(config::species, sunctx);
     for (int i = 0; i < config::species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
     CVodeReInit(cvode_mem, 0.0, y);
-    CVodeSetUserData(cvode_mem, (void*)&constant);
+    CVodeSetUserData(cvode_mem, (void*)constant.data());
     
     cout <<"Time (min),1 (%),[PdPy*4]2+ (%),Py* (%),Pd214 cage (%),"<<std::endl;
     bool flag=CV_SUCCESS;
@@ -532,13 +398,3 @@ void differentialEvolution::DEBUG() {
     }
 }
 
-//明示的なインスタンス化
-typedef CppAD::AD<double> ADdouble;
-template differentialEvolution::stepResult<double> differentialEvolution::calcNextStep(const std::array<double, config::constantSize>& reactConst, const speciesAmount<double>& data, double stepSize);
-template std::vector<speciesAmount<double>> differentialEvolution::simulate(const std::array<double, config::constantSize>& constant);
-template double differentialEvolution::calcError(const std::array<double, config::constantSize>& constant);
-template differentialEvolution::stepResult<ADdouble> differentialEvolution::calcNextStep(const std::array<ADdouble, config::constantSize>& reactConst, const speciesAmount<ADdouble>& data, double stepSize);
-template std::vector<speciesAmount<ADdouble>> differentialEvolution::simulate(const std::array<ADdouble, config::constantSize>& constant);
-template ADdouble differentialEvolution::calcError(const std::array<ADdouble, config::constantSize>& constant);
-
-template double differentialEvolution::calcErrorDP(const std::array<double, config::constantSize>& constant);

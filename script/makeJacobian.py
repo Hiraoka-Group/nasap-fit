@@ -88,7 +88,7 @@ def make_jacobian(inputFile: Path | str = None):
     f"constexpr size_t nonZeroElems={nnz};\n\n" \
     "int JacFn(sunrealtype t, N_Vector y, N_Vector fy, SUNMatrix Jac, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3){\n" \
     "\tauto sp = N_VGetArrayPointer(y);\n"  \
-    "\tstd::array<double, config::constantSize> &k = *static_cast<std::array<double, config::constantSize>*>(user_data);\n" \
+    "\tstd::vector<double> &k = *static_cast<std::vector<double>*>(user_data);\n" \
     "\tsunindextype* Jp = SUNSparseMatrix_IndexPointers(Jac);\n" \
     "\tsunindextype* Ji = SUNSparseMatrix_IndexValues(Jac);\n" \
     "\tsunrealtype* Jx = SUNSparseMatrix_Data(Jac);\n"

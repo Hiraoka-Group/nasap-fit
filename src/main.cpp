@@ -73,7 +73,7 @@ signed main(int argc, char** argv) {
 
 	
 	
-	std::array<double, config::constantSize> bestConstants;
+	std::vector<double> bestConstants(config::constantSize);
 	double minerror;
 	diffEvo.best(bestConstants, minerror);
 	

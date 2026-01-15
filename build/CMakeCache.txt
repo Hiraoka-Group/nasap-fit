@@ -318,6 +318,9 @@ PKG_CONFIG_EXECUTABLE:FILEPATH=/usr/bin/pkg-config
 //The directory containing a CMake configuration file for SUNDIALS.
 SUNDIALS_DIR:PATH=/usr/local/lib/cmake/sundials
 
+//The directory containing a CMake configuration file for casadi.
+casadi_DIR:PATH=/usr/local/lib/cmake/casadi
+
 //Value Computed by CMake
 nasap_fit_cpp_BINARY_DIR:STATIC=/home/aspi/Project/nasap-fit-cpp/build
 

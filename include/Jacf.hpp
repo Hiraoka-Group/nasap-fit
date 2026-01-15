@@ -12,7 +12,8 @@ constexpr size_t nonZeroElems=309;
 
 int JacFn(sunrealtype t, N_Vector y, N_Vector fy, SUNMatrix Jac, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3){
 	auto sp = N_VGetArrayPointer(y);
-	std::array<double, config::constantSize> &k = *static_cast<std::array<double, config::constantSize>*>(user_data);
+	if(user_data==nullptr) return -1;
+	double* k = static_cast<double*>(user_data);
 	sunindextype* Jp = SUNSparseMatrix_IndexPointers(Jac);
 	sunindextype* Ji = SUNSparseMatrix_IndexValues(Jac);
 	sunrealtype* Jx = SUNSparseMatrix_Data(Jac);
