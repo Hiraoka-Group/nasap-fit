@@ -29,6 +29,7 @@ namespace rhsfBuilder {
 
 		auto operator<=>(const term&) const;
 	};
+	extern std::vector<term> terms; //反応項リスト
 
 
 	// call this function to setup Rhsf::terms from CSV data

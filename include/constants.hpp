@@ -10,12 +10,10 @@ const std::string QASAPFile = "../data/Table_S1.csv";
 const std::string reactNetworkFile = "../data/classified_reactions_str.csv";
 
 //化学種の数（ランタイムで設定可能）
-inline int species = 29;
+inline const int species = 29;
 //反応速度定数の数（ランタイムで設定可能）
 inline int constantSize = 8;
 
-inline void setSpecies(int s){ species = s; }
-inline void setConstantSize(int c){ constantSize = c; }
 
 //データにより与えられる化学種の数
 const int trackedSpecies=4;

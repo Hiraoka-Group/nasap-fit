@@ -17,10 +17,10 @@
 #include <sunlinsol/sunlinsol_pcg.h>
 #include <sunlinsol/sunlinsol_spgmr.h>
 #include <sundials/sundials_context.hpp>
+#include <casadi/casadi.hpp>
 
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
-#include "../include/ODE.hpp"
 
 
 struct differentialEvolution {
@@ -35,6 +35,9 @@ private:
 		double time;
 		std::vector<double>state;
 	};
+	casadi::Function integrator_;  // build_integrator の結果
+    casadi::Function res_fun_;     // 残差評価用
+    casadi::Function jac_fun_;     // ヤコビアン評価用
 
 	std::vector<double> initialState; //初期状態（ランタイムサイズ）
 	std::vector<datum> QASAP;  //実験データ
@@ -46,6 +49,9 @@ private:
 	sundials::Context sunctx;
 	void* cvode_mem = CVodeCreate(CV_BDF, sunctx);
 
+	// jac_fun_と res_fun_のセットアップ
+	void setUpJacobian();
+
 	std::vector<double> crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2);
 
 public:
@@ -55,18 +61,22 @@ public:
 
 	void addStepCountCV(const std::vector<double>& constant);
 
-	std::vector<double> getJacobian(const std::vector<double>& point);
-	//ヘッセ行列の計算
+	// ヘッセ行列の計算
 	std::vector<std::vector<double>> getHessian(const std::vector<double>& point);
 
-	//実験データのセット
+	// 実験データのセット
 	void setData(std::vector<std::vector<double>>& arg);
 
 	void setPop();
-	//Constructor
+	// Constructor
 	differentialEvolution(std::vector<std::vector<double>>& arg);
+
+	// Levenberg-Marquardt法による最適化の実行
+	void runLM(int idx);
+
+	// 差分進化法の実行
 	void Optimize();
-	//最良個体の定数を返す
+	// 最良個体の定数を返す
 	void best(std::vector<double>& ret, double& minerror);
 
 	void putCVODESim(const std::vector<double>& constant);

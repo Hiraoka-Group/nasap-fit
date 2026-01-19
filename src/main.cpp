@@ -20,7 +20,6 @@
 #include "../include/constants.hpp"
 #include "../include/differentialEvolution.hpp"
 #include "../include/readcsv.hpp"
-#include "../include/ODE.hpp"
 #include "../include/rhsfBuilder.hpp"
 #include "../include/jacBuilder.hpp"
 
@@ -35,9 +34,9 @@ std::chrono::system_clock::time_point startTime,endTimeGlobal;
 //rshift myRand(1);
 
 signed main(int argc, char** argv) {
-	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+	//MPI_Init(&argc, &argv);
+	//MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+    //MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
 	std::vector<std::vector<std::string>> QASAPdata = read_csv(std::string(config::QASAPFile));
 	std::vector<std::vector<double>> csv_data_double;
 	bool isHeader = true;
@@ -88,11 +87,13 @@ signed main(int argc, char** argv) {
 		}
 		std::cout<<std::endl;
 		std::cout<<"error: "<<minerror<<std::endl;
+		//diffEvo.putJacobian(bestConstants);
 	}
 	diffEvo.putCVODESim(bestConstants);
 	
+	
 
-	MPI_Finalize();
+	//MPI_Finalize();
 	
 }//0.0349428 7370.47 966.895 138.205 0.359602 972.249 0.00584204 0.144209
 

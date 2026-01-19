@@ -153,30 +153,6 @@ src/differentialEvolution.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.s
 .PHONY : src/differentialEvolution.cpp.s
 
-src/dualNumber.o: src/dualNumber.cpp.o
-.PHONY : src/dualNumber.o
-
-# target to build an object file
-src/dualNumber.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.o
-.PHONY : src/dualNumber.cpp.o
-
-src/dualNumber.i: src/dualNumber.cpp.i
-.PHONY : src/dualNumber.i
-
-# target to preprocess a source file
-src/dualNumber.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.i
-.PHONY : src/dualNumber.cpp.i
-
-src/dualNumber.s: src/dualNumber.cpp.s
-.PHONY : src/dualNumber.s
-
-# target to generate assembly for a file
-src/dualNumber.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.s
-.PHONY : src/dualNumber.cpp.s
-
 src/jacBuilder.o: src/jacBuilder.cpp.o
 .PHONY : src/jacBuilder.o
 
@@ -285,9 +261,6 @@ help:
 	@echo "... src/differentialEvolution.o"
 	@echo "... src/differentialEvolution.i"
 	@echo "... src/differentialEvolution.s"
-	@echo "... src/dualNumber.o"
-	@echo "... src/dualNumber.i"
-	@echo "... src/dualNumber.s"
 	@echo "... src/jacBuilder.o"
 	@echo "... src/jacBuilder.i"
 	@echo "... src/jacBuilder.s"

@@ -10,15 +10,15 @@
 #include <set>
 #include <queue>
 
+#include <Eigen/Dense>
 #include <mpi.h>
-#include <cppad/cppad.hpp>
 #include <sunmatrix/sunmatrix_sparse.h>
 #include <sunlinsol/sunlinsol_klu.h>
+#include <casadi/casadi.hpp>
 
 #include "../include/differentialEvolution.hpp"
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
-#include "../include/ODE.hpp"
 #include "../include/rhsfBuilder.hpp"
 #include "../include/jacBuilder.hpp"
 #include "../include/Jacf.hpp" 
@@ -28,22 +28,15 @@ xorshift myRand(1);
 int cnt=0;
 extern int num_procs, proc_rank;
     
+using namespace casadi;
 using std::vector;
 using std::cout;
 using std::endl;
 using std::flush;
 using std::sqrt;
-using CppAD::sqrt;
 
 //5分毎のステップ数カウント
 extern int stepCount[61];
-
-inline double castToDouble(const CppAD::AD<double>& x){
-    return CppAD::Value(CppAD::Var2Par(x));
-}
-inline double castToDouble(const double& x){
-    return x;
-}
 
 
 // Removed DP (explicit Runge-Kutta) integration routines: using CVODE instead.
@@ -136,13 +129,84 @@ T differentialEvolution::calcError(const std::vector<T>& constant) {
     return SSR;
 }
 
-std::vector<double> differentialEvolution::getJacobian(const std::vector<double>& point){
-    int n = (int)point.size();
-    std::vector<double> jac(n);
-    //Jacobianの実装は後回し
-    return jac;
-}
+Function build_integrator(std::string name,const std::vector<double>& tout) {
+    // 状態変数
+    MX sp = MX::sym("sp", config::species);
+    // パラメータ（反応速度定数）
+    MX k = MX::sym("k", config::constantSize);
 
+    // 反応速度
+    MX xdot = MX::zeros(config::species);
+    //ODE
+    // Build xdot from rhsfBuilder::terms (mass-action style terms)
+    for (const rhsfBuilder::term &t : rhsfBuilder::terms) {
+        // start with the rate constant multiplier
+        MX term;
+        if(t.reactant2 != config::species)
+            term = t.duplicacy * k(t.rateConstant) * sp(t.reactant1) * sp(t.reactant2);
+        else{
+            term = t.duplicacy * k(t.rateConstant) * sp(t.reactant1);
+        }
+        // add contribution to the target species (signed by t.coeff)
+        xdot(t.add_to) = xdot(t.add_to) + term;
+    }
+    // DAE 定義
+    MXDict dae;
+    dae["x"] = sp;
+    dae["p"] = k;
+    dae["ode"] = xdot;
+
+    // integrator options
+    Dict opts;
+    opts["abstol"] = config::tolAbsError;
+    opts["reltol"] = config::tolRelError;
+
+    return integrator(
+        name,
+        "cvodes",
+        dae,
+        0.0,          // t0
+        tout,        // grid
+        opts
+    );
+};
+
+void differentialEvolution::setUpJacobian() {
+    // Levenberg-Marquardt refinement of populations[idx]
+    std::vector<double> t_obs;//観測時間点
+
+    MX x0 = MX::zeros(config::species);
+    for (int i = 0; i < config::species; i++) {
+        x0(i) = initialState[i];
+    }
+    for (const auto& datum : QASAP) {
+        t_obs.push_back(datum.time);
+    }
+    integrator_ = build_integrator("F", t_obs);
+    MX params = MX::sym("params", config::constantSize);
+    MXDict arg;
+    arg["p"]  = params;
+    arg["x0"] = x0;
+    
+    MXDict res = integrator_(arg);
+    MX xf(res.at("xf"));
+
+    // 残差ベクトル r(theta)
+    MX r = MX::zeros(QASAP.size() * config::trackedSpecies);
+    for (int i = 0; i < QASAP.size(); i++) {
+        MX x = xf(Slice(), i);
+        for (int j = 0; j < config::trackedSpecies; j++) {
+            MX sim_val = x(config::trackedIndex[j]) / config::fullConc[j];
+            MX exp_val = QASAP[i].state[j];
+            r(i * config::trackedSpecies + j) = sim_val - exp_val;
+        }
+    }
+    MX J = jacobian(r, params);
+
+    res_fun_ = Function("res_fun_", MXIList{params}, MXIList{r});
+    jac_fun_ = Function("jac_fun_", MXIList{params}, MXIList{J});
+    return;
+}
 //ヘッセ行列の計算
 std::vector<std::vector<double>> differentialEvolution::getHessian(const std::vector<double>& point){
     // numeric central differences for Hessian
@@ -195,6 +259,9 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     }
     endTime = arg.back()[0];
 
+    //setting up jac_fun_ and res_fun_
+    setUpJacobian();
+    
     //seting up CVODE
     N_Vector y = N_VNew_Serial(config::species, sunctx);
     for (int i = 0; i < config::species; ++i) {
