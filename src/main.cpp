@@ -59,10 +59,10 @@ signed main(int argc, char** argv) {
 	jacBuilder::buildJacobian();
 
 	differentialEvolution diffEvo(csv_data_double); // Assuming setData is a method to set the data
-	
+	diffEvo.runLM(0);
 	
 	startTime = std::chrono::system_clock::now();
-	
+	return 0;
 	diffEvo.Optimize();
 	endTimeGlobal = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTimeGlobal - startTime).count();

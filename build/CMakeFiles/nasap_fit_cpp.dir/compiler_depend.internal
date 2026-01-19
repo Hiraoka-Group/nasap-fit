@@ -1059,6 +1059,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o
  /usr/include/c++/12/bits/cxxabi_forced.h
  /usr/include/c++/12/bits/cxxabi_init_exception.h
  /usr/include/c++/12/bits/deque.tcc
+ /usr/include/c++/12/bits/enable_special_members.h
  /usr/include/c++/12/bits/erase_if.h
  /usr/include/c++/12/bits/exception.h
  /usr/include/c++/12/bits/exception_defines.h
@@ -1067,6 +1068,8 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o
  /usr/include/c++/12/bits/functexcept.h
  /usr/include/c++/12/bits/functional_hash.h
  /usr/include/c++/12/bits/hash_bytes.h
+ /usr/include/c++/12/bits/hashtable.h
+ /usr/include/c++/12/bits/hashtable_policy.h
  /usr/include/c++/12/bits/invoke.h
  /usr/include/c++/12/bits/ios_base.h
  /usr/include/c++/12/bits/istream.tcc
@@ -1141,6 +1144,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o
  /usr/include/c++/12/bits/stringfwd.h
  /usr/include/c++/12/bits/uniform_int_dist.h
  /usr/include/c++/12/bits/unique_ptr.h
+ /usr/include/c++/12/bits/unordered_map.h
  /usr/include/c++/12/bits/uses_allocator.h
  /usr/include/c++/12/bits/uses_allocator_args.h
  /usr/include/c++/12/bits/utility.h
@@ -1157,6 +1161,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o
  /usr/include/c++/12/compare
  /usr/include/c++/12/complex
  /usr/include/c++/12/concepts
+ /usr/include/c++/12/cstdarg
  /usr/include/c++/12/cstddef
  /usr/include/c++/12/cstdint
  /usr/include/c++/12/cstdio
@@ -1226,6 +1231,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o
  /usr/include/c++/12/tuple
  /usr/include/c++/12/type_traits
  /usr/include/c++/12/typeinfo
+ /usr/include/c++/12/unordered_map
  /usr/include/c++/12/utility
  /usr/include/c++/12/vector
  /usr/include/ctype.h
@@ -1400,6 +1406,147 @@ CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o
  /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/topology_inln.h
  /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/win.h
  /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/win_inln.h
+ /usr/local/include/casadi/casadi.hpp
+ /usr/local/include/casadi/core/archiver.hpp
+ /usr/local/include/casadi/core/blazing_spline.hpp
+ /usr/local/include/casadi/core/calculus.hpp
+ /usr/local/include/casadi/core/callback.hpp
+ /usr/local/include/casadi/core/casadi_common.hpp
+ /usr/local/include/casadi/core/casadi_enum.hpp
+ /usr/local/include/casadi/core/casadi_export.h
+ /usr/local/include/casadi/core/casadi_interrupt.hpp
+ /usr/local/include/casadi/core/casadi_limits.hpp
+ /usr/local/include/casadi/core/casadi_logger.hpp
+ /usr/local/include/casadi/core/casadi_meta.hpp
+ /usr/local/include/casadi/core/casadi_misc.hpp
+ /usr/local/include/casadi/core/casadi_types.hpp
+ /usr/local/include/casadi/core/code_generator.hpp
+ /usr/local/include/casadi/core/conic.hpp
+ /usr/local/include/casadi/core/core.hpp
+ /usr/local/include/casadi/core/dae_builder.hpp
+ /usr/local/include/casadi/core/dm.hpp
+ /usr/local/include/casadi/core/dm_fwd.hpp
+ /usr/local/include/casadi/core/dple.hpp
+ /usr/local/include/casadi/core/exception.hpp
+ /usr/local/include/casadi/core/expm.hpp
+ /usr/local/include/casadi/core/external.hpp
+ /usr/local/include/casadi/core/filesystem.hpp
+ /usr/local/include/casadi/core/function.hpp
+ /usr/local/include/casadi/core/generic_expression.hpp
+ /usr/local/include/casadi/core/generic_matrix.hpp
+ /usr/local/include/casadi/core/generic_shared.hpp
+ /usr/local/include/casadi/core/generic_shared_internal.hpp
+ /usr/local/include/casadi/core/generic_type.hpp
+ /usr/local/include/casadi/core/global_options.hpp
+ /usr/local/include/casadi/core/im.hpp
+ /usr/local/include/casadi/core/im_fwd.hpp
+ /usr/local/include/casadi/core/importer.hpp
+ /usr/local/include/casadi/core/integration_tools.hpp
+ /usr/local/include/casadi/core/integrator.hpp
+ /usr/local/include/casadi/core/interpolant.hpp
+ /usr/local/include/casadi/core/linsol.hpp
+ /usr/local/include/casadi/core/matrix_decl.hpp
+ /usr/local/include/casadi/core/matrix_fwd.hpp
+ /usr/local/include/casadi/core/mx.hpp
+ /usr/local/include/casadi/core/nlp_builder.hpp
+ /usr/local/include/casadi/core/nlp_tools.hpp
+ /usr/local/include/casadi/core/nlpsol.hpp
+ /usr/local/include/casadi/core/nonzeros.hpp
+ /usr/local/include/casadi/core/options.hpp
+ /usr/local/include/casadi/core/optistack.hpp
+ /usr/local/include/casadi/core/polynomial.hpp
+ /usr/local/include/casadi/core/printable.hpp
+ /usr/local/include/casadi/core/resource.hpp
+ /usr/local/include/casadi/core/rootfinder.hpp
+ /usr/local/include/casadi/core/runtime/casadi_axpy.hpp
+ /usr/local/include/casadi/core/runtime/casadi_bfgs.hpp
+ /usr/local/include/casadi/core/runtime/casadi_bilin.hpp
+ /usr/local/include/casadi/core/runtime/casadi_bound_consistency.hpp
+ /usr/local/include/casadi/core/runtime/casadi_cache.hpp
+ /usr/local/include/casadi/core/runtime/casadi_clear.hpp
+ /usr/local/include/casadi/core/runtime/casadi_clip_max.hpp
+ /usr/local/include/casadi/core/runtime/casadi_clip_min.hpp
+ /usr/local/include/casadi/core/runtime/casadi_convexify.hpp
+ /usr/local/include/casadi/core/runtime/casadi_copy.hpp
+ /usr/local/include/casadi/core/runtime/casadi_cvx.hpp
+ /usr/local/include/casadi/core/runtime/casadi_de_boor.hpp
+ /usr/local/include/casadi/core/runtime/casadi_dense_lsqr.hpp
+ /usr/local/include/casadi/core/runtime/casadi_densify.hpp
+ /usr/local/include/casadi/core/runtime/casadi_dot.hpp
+ /usr/local/include/casadi/core/runtime/casadi_feasiblesqpmethod.hpp
+ /usr/local/include/casadi/core/runtime/casadi_file_slurp.hpp
+ /usr/local/include/casadi/core/runtime/casadi_fill.hpp
+ /usr/local/include/casadi/core/runtime/casadi_finite_diff.hpp
+ /usr/local/include/casadi/core/runtime/casadi_flip.hpp
+ /usr/local/include/casadi/core/runtime/casadi_iamax.hpp
+ /usr/local/include/casadi/core/runtime/casadi_interpn.hpp
+ /usr/local/include/casadi/core/runtime/casadi_interpn_grad.hpp
+ /usr/local/include/casadi/core/runtime/casadi_interpn_interpolate.hpp
+ /usr/local/include/casadi/core/runtime/casadi_interpn_weights.hpp
+ /usr/local/include/casadi/core/runtime/casadi_ipqp.hpp
+ /usr/local/include/casadi/core/runtime/casadi_jac.hpp
+ /usr/local/include/casadi/core/runtime/casadi_kkt.hpp
+ /usr/local/include/casadi/core/runtime/casadi_kron.hpp
+ /usr/local/include/casadi/core/runtime/casadi_ldl.hpp
+ /usr/local/include/casadi/core/runtime/casadi_logsumexp.hpp
+ /usr/local/include/casadi/core/runtime/casadi_low.hpp
+ /usr/local/include/casadi/core/runtime/casadi_lsqr.hpp
+ /usr/local/include/casadi/core/runtime/casadi_masked_norm_inf.hpp
+ /usr/local/include/casadi/core/runtime/casadi_max_viol.hpp
+ /usr/local/include/casadi/core/runtime/casadi_mmax.hpp
+ /usr/local/include/casadi/core/runtime/casadi_mmin.hpp
+ /usr/local/include/casadi/core/runtime/casadi_mtimes.hpp
+ /usr/local/include/casadi/core/runtime/casadi_mv.hpp
+ /usr/local/include/casadi/core/runtime/casadi_mv_dense.hpp
+ /usr/local/include/casadi/core/runtime/casadi_nd_boor_dual_eval.hpp
+ /usr/local/include/casadi/core/runtime/casadi_nd_boor_eval.hpp
+ /usr/local/include/casadi/core/runtime/casadi_newton.hpp
+ /usr/local/include/casadi/core/runtime/casadi_nlp.hpp
+ /usr/local/include/casadi/core/runtime/casadi_norm_1.hpp
+ /usr/local/include/casadi/core/runtime/casadi_norm_2.hpp
+ /usr/local/include/casadi/core/runtime/casadi_norm_inf.hpp
+ /usr/local/include/casadi/core/runtime/casadi_norm_inf_mul.hpp
+ /usr/local/include/casadi/core/runtime/casadi_ocp_block.hpp
+ /usr/local/include/casadi/core/runtime/casadi_oracle.hpp
+ /usr/local/include/casadi/core/runtime/casadi_oracle_callback.hpp
+ /usr/local/include/casadi/core/runtime/casadi_polyval.hpp
+ /usr/local/include/casadi/core/runtime/casadi_project.hpp
+ /usr/local/include/casadi/core/runtime/casadi_qp.hpp
+ /usr/local/include/casadi/core/runtime/casadi_qr.hpp
+ /usr/local/include/casadi/core/runtime/casadi_qrqp.hpp
+ /usr/local/include/casadi/core/runtime/casadi_rank1.hpp
+ /usr/local/include/casadi/core/runtime/casadi_regularize.hpp
+ /usr/local/include/casadi/core/runtime/casadi_runtime.hpp
+ /usr/local/include/casadi/core/runtime/casadi_scal.hpp
+ /usr/local/include/casadi/core/runtime/casadi_scaled_copy.hpp
+ /usr/local/include/casadi/core/runtime/casadi_sparsify.hpp
+ /usr/local/include/casadi/core/runtime/casadi_sparsity.hpp
+ /usr/local/include/casadi/core/runtime/casadi_sqpmethod.hpp
+ /usr/local/include/casadi/core/runtime/casadi_sum.hpp
+ /usr/local/include/casadi/core/runtime/casadi_sum_viol.hpp
+ /usr/local/include/casadi/core/runtime/casadi_swap.hpp
+ /usr/local/include/casadi/core/runtime/casadi_trans.hpp
+ /usr/local/include/casadi/core/runtime/casadi_tri_project.hpp
+ /usr/local/include/casadi/core/runtime/casadi_trilsolve.hpp
+ /usr/local/include/casadi/core/runtime/casadi_triusolve.hpp
+ /usr/local/include/casadi/core/runtime/casadi_vector_fmax.hpp
+ /usr/local/include/casadi/core/runtime/casadi_vector_fmin.hpp
+ /usr/local/include/casadi/core/runtime/casadi_vfmax.hpp
+ /usr/local/include/casadi/core/runtime/casadi_vfmin.hpp
+ /usr/local/include/casadi/core/runtime/shared.hpp
+ /usr/local/include/casadi/core/serializer.hpp
+ /usr/local/include/casadi/core/serializing_stream.hpp
+ /usr/local/include/casadi/core/shared_object.hpp
+ /usr/local/include/casadi/core/slice.hpp
+ /usr/local/include/casadi/core/sparsity.hpp
+ /usr/local/include/casadi/core/sparsity_interface.hpp
+ /usr/local/include/casadi/core/submatrix.hpp
+ /usr/local/include/casadi/core/sx.hpp
+ /usr/local/include/casadi/core/sx_elem.hpp
+ /usr/local/include/casadi/core/sx_fwd.hpp
+ /usr/local/include/casadi/core/tools.hpp
+ /usr/local/include/casadi/core/xml_file.hpp
+ /usr/local/include/casadi/core/xml_node.hpp
  /usr/local/include/cppad/base_require.hpp
  /usr/local/include/cppad/configure.hpp
  /usr/local/include/cppad/core/abort_recording.hpp

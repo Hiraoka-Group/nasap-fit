@@ -36,8 +36,8 @@ private:
 		std::vector<double>state;
 	};
 	casadi::Function integrator_;  // build_integrator の結果
-    casadi::Function res_fun_;     // 残差評価用
-    casadi::Function jac_fun_;     // ヤコビアン評価用
+    casadi::Function res_fun_;     // 残差ベクトルを返す関数
+    casadi::Function jac_fun_;     // ヤコビアンを返す関数
 
 	std::vector<double> initialState; //初期状態（ランタイムサイズ）
 	std::vector<datum> QASAP;  //実験データ

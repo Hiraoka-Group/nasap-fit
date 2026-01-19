@@ -131,17 +131,17 @@ T differentialEvolution::calcError(const std::vector<T>& constant) {
 
 Function build_integrator(std::string name,const std::vector<double>& tout) {
     // 状態変数
-    MX sp = MX::sym("sp", config::species);
+    SX sp = SX::sym("sp", config::species);
     // パラメータ（反応速度定数）
-    MX k = MX::sym("k", config::constantSize);
+    SX k = SX::sym("k", config::constantSize);
 
     // 反応速度
-    MX xdot = MX::zeros(config::species);
+    SX xdot = SX::zeros(config::species);
     //ODE
     // Build xdot from rhsfBuilder::terms (mass-action style terms)
     for (const rhsfBuilder::term &t : rhsfBuilder::terms) {
         // start with the rate constant multiplier
-        MX term;
+        SX term;
         if(t.reactant2 != config::species)
             term = t.duplicacy * k(t.rateConstant) * sp(t.reactant1) * sp(t.reactant2);
         else{
@@ -151,7 +151,7 @@ Function build_integrator(std::string name,const std::vector<double>& tout) {
         xdot(t.add_to) = xdot(t.add_to) + term;
     }
     // DAE 定義
-    MXDict dae;
+    SXDict dae;
     dae["x"] = sp;
     dae["p"] = k;
     dae["ode"] = xdot;
@@ -166,7 +166,7 @@ Function build_integrator(std::string name,const std::vector<double>& tout) {
         "cvodes",
         dae,
         0.0,          // t0
-        tout,        // grid
+        tout,        
         opts
     );
 };
@@ -392,6 +392,69 @@ void differentialEvolution::Optimize(){
     MPI_Win_free(&winErr);
 }
 
+
+
+void differentialEvolution::runLM(int idx){
+    assert(0 <= idx && idx < config::popSize);
+    const int n = config::constantSize;
+    const int m = static_cast<int>(QASAP.size() * config::trackedSpecies);
+
+    std::vector<double> theta = populations[idx].constant;
+    double bestErr = populations[idx].error;
+    if (!std::isfinite(bestErr)) bestErr = calcError(theta);
+
+    double lambda = 1e-3;
+    const int maxIter = 200;
+
+    for (int iter = 0; iter < maxIter; ++iter) {
+        for(int i=0; i<config::constantSize; i++){
+            cout<<std::setprecision(4)<<theta[i]<<", ";
+        }
+        cout<<endl;
+        cout<<"Current error: "<<std::setprecision(6)<<bestErr<<endl;
+
+        std::vector<DM> arg(1);
+        arg[0] = DM(theta);
+
+        DM rdm = res_fun_(arg).at(0);
+        DM jdm = jac_fun_(arg).at(0);
+
+        std::vector<double> rvec = rdm.nonzeros();
+        std::vector<double> jvec = jdm.nonzeros();
+
+        Eigen::Map<Eigen::VectorXd> r(rvec.data(), m);
+        Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>> J(jvec.data(), m, n);
+
+        Eigen::MatrixXd A = J.transpose() * J;
+        A.diagonal().array() += lambda;
+        Eigen::VectorXd g = J.transpose() * r;
+
+        Eigen::VectorXd delta = -A.ldlt().solve(g);
+        if (!delta.allFinite()) break;
+
+        std::vector<double> trial = theta;
+        for (int i = 0; i < n; ++i) {
+            trial[i] = std::clamp(theta[i] + delta[i], config::lowerLim, config::upperLim);
+        }
+
+        double newErr = calcError(trial);
+        if (newErr < bestErr) {
+            theta = std::move(trial);
+            bestErr = newErr;
+            lambda *= 0.5;
+            if (delta.norm() < 1e-6) break;
+        } else {
+            lambda *= 2.0;
+        }
+    }
+
+    populations[idx].constant = theta;
+    populations[idx].error = bestErr;
+    for (int i = 0; i < n; ++i) {
+        populationsFlat[idx * n + i] = theta[i];
+    }
+    populationsErrorFlat[idx] = bestErr;
+}
 //最良個体の定数を返す
 void differentialEvolution::best(std::vector<double>& ret, double& minerror) {
     // find local best
