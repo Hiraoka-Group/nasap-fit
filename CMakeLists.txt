@@ -16,9 +16,24 @@ file(GLOB SOURCES "src/*.cpp")
 
 # MPIを探す
 find_package(MPI REQUIRED)
+
 # SUNDIALSを探す
 find_package(SUNDIALS REQUIRED)
-find_library(KLU_LIBRARY klu HINTS /usr/lib/x86_64-linux-gnu)
+
+# macOSかLinuxかで異なるパスを設定
+if(APPLE)
+    # macOS (Homebrew)
+    set(SUNDIALS_INCLUDE_DIR "/opt/homebrew/opt/sundials/include")
+    set(SUNDIALS_LIB_DIR "/opt/homebrew/opt/sundials/lib")
+    find_library(KLU_LIBRARY klu HINTS /opt/homebrew/lib)
+    set(SUITESPARSE_INCLUDE_DIR "/opt/homebrew/opt/suite-sparse/include/suitesparse")
+    # ライブラリディレクトリを追加（add_executableの前に必要）
+    link_directories(${SUNDIALS_LIB_DIR})
+else()
+    # Linux
+    find_library(KLU_LIBRARY klu HINTS /usr/lib/x86_64-linux-gnu)
+    set(SUITESPARSE_INCLUDE_DIR "/usr/include/suitesparse")
+endif()
 
 
 
@@ -33,7 +48,7 @@ target_include_directories(${PROJECT_NAME}
         ${PROJECT_SOURCE_DIR}/include
         ${MPI_INCLUDE_PATH}
         ${SUNDIALS_INCLUDE_DIR}
-        /usr/include/suitesparse
+        ${SUITESPARSE_INCLUDE_DIR}
 )
 
 
@@ -41,9 +56,17 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} PRIVATE MPI::MPI_CXX)
 
 # SUNDIALSライブラリをリンク
-target_link_libraries(${PROJECT_NAME} PRIVATE sundials_cvode)
-target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_core.so)
-target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_sunlinsolklu.so)
+if(APPLE)
+    # macOS (Homebrew)
+    target_link_libraries(${PROJECT_NAME} PRIVATE sundials_cvode)
+    target_link_libraries(${PROJECT_NAME} PRIVATE sundials_core)
+    target_link_libraries(${PROJECT_NAME} PRIVATE sundials_sunlinsolklu)
+else()
+    # Linux
+    target_link_libraries(${PROJECT_NAME} PRIVATE sundials_cvode)
+    target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_core.so)
+    target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_sunlinsolklu.so)
+endif()
 
 if (KLU_LIBRARY)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${KLU_LIBRARY})
