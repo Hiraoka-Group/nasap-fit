@@ -24,7 +24,7 @@
 #include "../include/Jacf.hpp" 
 #include "../include/Rhsf.hpp"
 
-xorshift myRand(1);
+xorshift myRand(2);
 int cnt=0;
 extern int num_procs, proc_rank;
     
@@ -32,14 +32,12 @@ using namespace casadi;
 using std::vector;
 using std::cout;
 using std::endl;
+using std::endl;
 using std::flush;
 using std::sqrt;
 
 //5分毎のステップ数カウント
 extern int stepCount[61];
-
-
-// Removed DP (explicit Runge-Kutta) integration routines: using CVODE instead.
 
 
 std::vector<double> differentialEvolution::crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2){
@@ -133,7 +131,7 @@ Function build_integrator(std::string name,const std::vector<double>& tout) {
     // 状態変数
     SX sp = SX::sym("sp", config::species);
     // パラメータ（反応速度定数）
-    SX k = SX::sym("k", config::constantSize);
+    SX logk = SX::sym("logk", config::constantSize);
 
     // 反応速度
     SX xdot = SX::zeros(config::species);
@@ -143,9 +141,9 @@ Function build_integrator(std::string name,const std::vector<double>& tout) {
         // start with the rate constant multiplier
         SX term;
         if(t.reactant2 != config::species)
-            term = t.duplicacy * k(t.rateConstant) * sp(t.reactant1) * sp(t.reactant2);
+            term = t.duplicacy * exp(logk(t.rateConstant)) * sp(t.reactant1) * sp(t.reactant2);
         else{
-            term = t.duplicacy * k(t.rateConstant) * sp(t.reactant1);
+            term = t.duplicacy * exp(logk(t.rateConstant)) * sp(t.reactant1);
         }
         // add contribution to the target species (signed by t.coeff)
         xdot(t.add_to) = xdot(t.add_to) + term;
@@ -153,7 +151,7 @@ Function build_integrator(std::string name,const std::vector<double>& tout) {
     // DAE 定義
     SXDict dae;
     dae["x"] = sp;
-    dae["p"] = k;
+    dae["p"] = logk;
     dae["ode"] = xdot;
 
     // integrator options
@@ -305,7 +303,8 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
             populationsFlat[i * config::constantSize + j] = v;
         }
         populationsErrorFlat[i] = DBL_MAX;
-        //populations[i].error = calcError(populations[i].constant);
+        populations[i].error = calcError(populations[i].constant);
+        populationsErrorFlat[i] = populations[i].error;
     }
 }
 
@@ -315,6 +314,7 @@ void differentialEvolution::Optimize(){
         if (temp <= 0) return false;
         return myRand.prob() < exp((oldE - newE) / temp);
     };
+    
     MPI_Win winConst, winErr;
     MPI_Win_create(populationsFlat.data(), sizeof(double)*config::popSize*config::constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
     MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*config::popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
@@ -322,7 +322,7 @@ void differentialEvolution::Optimize(){
         if(proc_rank==0)cout<<"current generation : "<<i<<" / "<<config::maxGen<<"\n";
         double temp=0;
         
-        vector<std::array<int, 3>> lockahead;
+        vector<std::array<int, 3>> lookahead;
         vector<int> indicesToVisit;
         vector<double>errors;
         auto pushIndex = [&](int idx){
@@ -336,7 +336,7 @@ void differentialEvolution::Optimize(){
             int xb = myRand(config::popSize), xr1=myRand(config::popSize), xr2=myRand(config::popSize);
             while (xb == xr1) {xr1 = myRand(config::popSize);}
             while (xb == xr2 || xr1 == xr2) {xr2 = myRand(config::popSize);}
-            lockahead.push_back({xb,xr1,xr2});
+            lookahead.push_back({xb,xr1,xr2});
             pushIndex(xb); pushIndex(xr1); pushIndex(xr2);
         }
         std::sort(
@@ -368,9 +368,9 @@ void differentialEvolution::Optimize(){
         for (int j = proc_rank; j < config::popSize; j+=num_procs) {
             //突然変異
             //ベースベクトルとその他二つのベクトルのindex
-            assert(!lockahead.empty());
-            auto [xb,xr1,xr2]=lockahead.back();
-            lockahead.pop_back();
+            assert(!lookahead.empty());
+            auto [xb,xr1,xr2]=lookahead.back();
+            lookahead.pop_back();
             //新しいベクトル、ベースベクトルとその他二つのベクトル
             std::vector<double> v,baseV,randV1,randV2;
             baseV=populations[xb].constant;
@@ -400,11 +400,24 @@ void differentialEvolution::runLM(int idx){
     const int m = static_cast<int>(QASAP.size() * config::trackedSpecies);
 
     std::vector<double> theta = populations[idx].constant;
+    std::vector<double> logTheta(n);
+    for (int i = 0; i < n; ++i) {
+        logTheta[i] = log(theta[i]);
+    }
     double bestErr = populations[idx].error;
     if (!std::isfinite(bestErr)) bestErr = calcError(theta);
 
-    double lambda = 1e-3;
+    double lambda = 10.0;
     const int maxIter = 200;
+
+    std::vector<DM> arg(1);
+    DM rdm, jdm;
+    std::vector<double> rvec, jvec;
+    Eigen::VectorXd r;
+    Eigen::MatrixXd J;
+    Eigen::MatrixXd A;
+    Eigen::VectorXd g;
+    bool isChanged = true;
 
     for (int iter = 0; iter < maxIter; ++iter) {
         for(int i=0; i<config::constantSize; i++){
@@ -412,38 +425,48 @@ void differentialEvolution::runLM(int idx){
         }
         cout<<endl;
         cout<<"Current error: "<<std::setprecision(6)<<bestErr<<endl;
+        cout<<"Iter : "<<iter<<", Lambda: "<<std::setprecision(6)<<lambda<<endl;
 
-        std::vector<DM> arg(1);
-        arg[0] = DM(theta);
-
-        DM rdm = res_fun_(arg).at(0);
-        DM jdm = jac_fun_(arg).at(0);
-
-        std::vector<double> rvec = rdm.nonzeros();
-        std::vector<double> jvec = jdm.nonzeros();
-
-        Eigen::Map<Eigen::VectorXd> r(rvec.data(), m);
-        Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>> J(jvec.data(), m, n);
-
-        Eigen::MatrixXd A = J.transpose() * J;
-        A.diagonal().array() += lambda;
-        Eigen::VectorXd g = J.transpose() * r;
-
-        Eigen::VectorXd delta = -A.ldlt().solve(g);
+        if (isChanged) {
+            arg[0] = DM(logTheta);
+            rdm = res_fun_(arg).at(0);
+            jdm = jac_fun_(arg).at(0);
+            rvec = rdm.nonzeros();
+            jvec = jdm.nonzeros();
+            r = Eigen::Map<Eigen::VectorXd>(rvec.data(), m);
+            J = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>>(jvec.data(), m, n);
+            A = J.transpose() * J; 
+            g = J.transpose() * r;
+        }
+        Eigen::MatrixXd A_try = A;
+        A_try.diagonal().array() += lambda;
+        Eigen::VectorXd delta = -A_try.ldlt().solve(g);
         if (!delta.allFinite()) break;
 
-        std::vector<double> trial = theta;
+        std::vector<double> trial(n),logTrial(n);
         for (int i = 0; i < n; ++i) {
-            trial[i] = std::clamp(theta[i] + delta[i], config::lowerLim, config::upperLim);
+            logTrial[i] = std::clamp(logTheta[i] + delta[i], log(config::lowerLim), log(config::upperLim));
+            trial[i] = exp(logTrial[i]);
         }
+
+        double predictedImprove = -(g.dot(delta) + 0.5 * delta.dot(A_try * delta));
+        double actualImprove = bestErr - calcError(trial);
+        double reliabilityIndex = actualImprove / predictedImprove;
 
         double newErr = calcError(trial);
         if (newErr < bestErr) {
+            isChanged = true;
             theta = std::move(trial);
+            logTheta = std::move(logTrial); 
             bestErr = newErr;
-            lambda *= 0.5;
+            if(reliabilityIndex > 0.75){
+                lambda /= 3.0;
+            } else if(reliabilityIndex < 0.25){
+                lambda *= 2.0;
+            }
             if (delta.norm() < 1e-6) break;
         } else {
+            isChanged = false;
             lambda *= 2.0;
         }
     }

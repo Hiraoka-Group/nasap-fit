@@ -28,7 +28,7 @@ const double fullConc[] = {0.0017099999999999999, 0.00085499999999999997, 0.0034
 //差分進化法のエージェント数
 const int popSize = 128;
 //差分進化法の最大世代数
-const int maxGen = 200;
+const int maxGen = 50;
 
 //シミュレーションの許容絶対誤差
 const double tolAbsError = 1.0000000000000001e-09;

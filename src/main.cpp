@@ -34,9 +34,9 @@ std::chrono::system_clock::time_point startTime,endTimeGlobal;
 //rshift myRand(1);
 
 signed main(int argc, char** argv) {
-	//MPI_Init(&argc, &argv);
-	//MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-    //MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
 	std::vector<std::vector<std::string>> QASAPdata = read_csv(std::string(config::QASAPFile));
 	std::vector<std::vector<double>> csv_data_double;
 	bool isHeader = true;
@@ -59,10 +59,8 @@ signed main(int argc, char** argv) {
 	jacBuilder::buildJacobian();
 
 	differentialEvolution diffEvo(csv_data_double); // Assuming setData is a method to set the data
-	diffEvo.runLM(0);
-	
+
 	startTime = std::chrono::system_clock::now();
-	return 0;
 	diffEvo.Optimize();
 	endTimeGlobal = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTimeGlobal - startTime).count();
@@ -87,13 +85,13 @@ signed main(int argc, char** argv) {
 		}
 		std::cout<<std::endl;
 		std::cout<<"error: "<<minerror<<std::endl;
-		//diffEvo.putJacobian(bestConstants);
+		diffEvo.runLM(0); //最良個体に対してLM法を実行
 	}
-	diffEvo.putCVODESim(bestConstants);
+	//diffEvo.putCVODESim(bestConstants);
 	
 	
 
-	//MPI_Finalize();
+	MPI_Finalize();
 	
 }//0.0349428 7370.47 966.895 138.205 0.359602 972.249 0.00584204 0.144209
 
