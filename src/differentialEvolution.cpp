@@ -10,6 +10,7 @@
 #include <set>
 #include <queue>
 #include <type_traits>
+#include <iterator>
 
 #include <Eigen/Dense>
 #include <mpi.h>
@@ -20,7 +21,7 @@
 #include "../include/differentialEvolution.hpp"
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
-#include "../include/Jacf.hpp" 
+#include "../include/Jacf.hpp"
 #include "../include/Rhsf.hpp"
 
 xorshift myRand(2);
@@ -40,13 +41,13 @@ extern int stepCount[61];
 
 
 std::vector<double> differentialEvolution::crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2){
-    std::vector<double> v(config::constantSize);
-    int jr = myRand(config::constantSize);
-    for (int k = 0; k < config::constantSize; k++) {
+    std::vector<double> v(cfg.constantSize);
+    int jr = myRand(cfg.constantSize);
+    for (int k = 0; k < cfg.constantSize; k++) {
         //交叉
-        if (jr == k || myRand.prob() < config::crossOver) {
-            v[k] = baseV[k] * pow(randV1[k] / randV2[k], config::scalar);
-            v[k]=std::clamp(v[k],config::lowerLim,config::upperLim);
+        if (jr == k || myRand.prob() < cfg.crossOver) {
+            v[k] = baseV[k] * pow(randV1[k] / randV2[k], cfg.scalar);
+            v[k]=std::clamp(v[k], cfg.lowerLim, cfg.upperLim);
         }
         else v[k] = baseV[k];
 
@@ -61,8 +62,8 @@ void differentialEvolution::addStepCountCV(const std::vector<double>& constant){
     int flag=CV_SUCCESS;
 
 
-    N_Vector y = N_VNew_Serial(config::species, sunctx);
-    for (int i = 0; i < config::species; ++i) {
+    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
+    for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
     
@@ -84,7 +85,7 @@ void differentialEvolution::addStepCountCV(const std::vector<double>& constant){
         assert(0 <= t && t <= endTime);
         if(t!=tret) flag=CVode(cvode_mem, t, y, &tret, CV_NORMAL);
         if(flag!=CV_SUCCESS){
-            for(int j=0;j<config::constantSize;j++){
+            for(int j=0;j<cfg.constantSize;j++){
                 cout<<constant[j]<<", ";
             }
             cout<<endl;
@@ -99,8 +100,8 @@ void differentialEvolution::addStepCountCV(const std::vector<double>& constant){
 double differentialEvolution::calcError(const std::vector<double>& constant) {
     int flag=CV_SUCCESS;
 
-    N_Vector y = N_VNew_Serial(config::species, sunctx);
-    for (int i = 0; i < config::species; ++i) {
+    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
+    for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
     
@@ -120,36 +121,39 @@ double differentialEvolution::calcError(const std::vector<double>& constant) {
         assert(0 <= t && t <= endTime);
         if(t!=tret) flag=CVode(cvode_mem, t, y, &tret, CV_NORMAL);
         if(flag!=CV_SUCCESS){
-            for(int j=0;j<config::constantSize;j++){
+            for(int j=0;j<cfg.constantSize;j++){
                 cout<<constant[j]<<", ";
             }
             cout<<endl;
             exit(1);
         }
         double* y_data = N_VGetArrayPointer(y);
-        for (int j = 0; j < config::trackedSpecies; j++) {
-            size_t idx= config::trackedIndex[j];
-            assert(0 <= idx && idx < config::species);
-            SSR += (y_data[idx] / config::fullConc[j] - QASAP[i].state[j]) * (y_data[idx] / config::fullConc[j] - QASAP[i].state[j]);
+        for (int j = 0; j < cfg.trackedSpecies; j++) {
+            size_t idx= (size_t)cfg.trackedIndex[j];
+            assert(0 <= idx && idx < (size_t)cfg.species);
+            SSR += (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]) * (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]);
         }
     }
     return SSR;
 }
 
-static Function build_integrator(std::string name, const std::vector<double>& tout, const ReactionNetwork& rxnNet) {
+static Function build_integrator(std::string name,
+						const std::vector<double>& tout,
+						const differentialEvolution::Constants& cfg,
+						const ReactionNetwork& rxnNet) {
     // 状態変数
-    SX sp = SX::sym("sp", config::species);
+    SX sp = SX::sym("sp", cfg.species);
     // パラメータ（反応速度定数）
-    SX logk = SX::sym("logk", config::constantSize);
+    SX logk = SX::sym("logk", cfg.constantSize);
 
     // 反応速度
-    SX xdot = SX::zeros(config::species);
+    SX xdot = SX::zeros(cfg.species);
     //ODE
     // Build xdot from ReactionNetwork::rhsTerms (mass-action style terms)
     for (const ReactionNetwork::RhsTerm &t : rxnNet.rhsTerms) {
         // start with the rate constant multiplier
         SX term;
-        if(t.reactant2 != config::species)
+        if(t.reactant2 != cfg.species)
             term = t.duplicacy * exp(logk(t.rateConstant)) * sp(t.reactant1) * sp(t.reactant2);
         else{
             term = t.duplicacy * exp(logk(t.rateConstant)) * sp(t.reactant1);
@@ -165,8 +169,8 @@ static Function build_integrator(std::string name, const std::vector<double>& to
 
     // integrator options
     Dict opts;
-    opts["abstol"] = config::tolAbsError;
-    opts["reltol"] = config::tolRelError;
+    opts["abstol"] = cfg.tolAbsError;
+    opts["reltol"] = cfg.tolRelError;
     opts["max_num_steps"] = INT_MAX;
 
     return integrator(
@@ -183,15 +187,15 @@ void differentialEvolution::setUpCasADiFunctions() {
     // Levenberg-Marquardt refinement of populations[idx]
     std::vector<double> t_obs;//観測時間点
 
-    MX x0 = MX::zeros(config::species);
-    for (int i = 0; i < config::species; i++) {
+    MX x0 = MX::zeros(cfg.species);
+    for (int i = 0; i < cfg.species; i++) {
         x0(i) = initialState[i];
     }
     for (const auto& datum : QASAP) {
         t_obs.push_back(datum.time);
     }
-    integrator_ = build_integrator("F", t_obs, rxnNet);
-    MX params = MX::sym("params", config::constantSize);
+    integrator_ = build_integrator("F", t_obs, cfg, rxnNet);
+    MX params = MX::sym("params", cfg.constantSize);
     MXDict arg;
     arg["p"]  = params;
     arg["x0"] = x0;
@@ -200,16 +204,16 @@ void differentialEvolution::setUpCasADiFunctions() {
     MX xf(res.at("xf"));
 
     // 残差ベクトル r(theta)
-    MX r = MX::zeros(QASAP.size() * config::trackedSpecies);
+    MX r = MX::zeros(QASAP.size() * cfg.trackedSpecies);
     // 平方残差和 SSR
     MX SSR = 0;
     for (int i = 0; i < QASAP.size(); i++) {
         MX x = xf(Slice(), i);
-        for (int j = 0; j < config::trackedSpecies; j++) {
-            MX sim_val = x(config::trackedIndex[j]) / config::fullConc[j];
+        for (int j = 0; j < cfg.trackedSpecies; j++) {
+            MX sim_val = x(cfg.trackedIndex[j]) / cfg.fullConc[j];
             MX exp_val = QASAP[i].state[j];
-            r(i * config::trackedSpecies + j) = sim_val - exp_val;
-            SSR += r(i * config::trackedSpecies + j) * r(i * config::trackedSpecies + j);
+            r(i * cfg.trackedSpecies + j) = sim_val - exp_val;
+            SSR += r(i * cfg.trackedSpecies + j) * r(i * cfg.trackedSpecies + j);
         }
     }
     MX SSR_jac = jacobian(SSR, params);
@@ -224,7 +228,7 @@ void differentialEvolution::setUpCasADiFunctions() {
 }
 //ヘッセ行列の計算
 std::vector<std::vector<double>> differentialEvolution::getHessian(const std::vector<double>& point){
-    assert(point.size()==config::constantSize);
+    assert((int)point.size()==cfg.constantSize);
     // numeric central differences for Hessian
     int n = (int)point.size();
     std::vector<std::vector<double>> H(n, std::vector<double>(n, 0.0));
@@ -250,7 +254,7 @@ std::vector<std::vector<double>> differentialEvolution::getHessian(const std::ve
 }
 
 std::vector<std::vector<double>> differentialEvolution::getHessian_parallel(const std::vector<double>& point){
-    assert(point.size()==config::constantSize);
+    assert((int)point.size()==cfg.constantSize);
     int n = (int)point.size();
     std::vector<std::vector<double>> H(n, std::vector<double>(n, 0.0));
     std::vector<double> logPoint(n);
@@ -308,8 +312,8 @@ std::vector<std::vector<double>> differentialEvolution::getHessian_parallel(cons
 }
 
 std::vector<std::vector<double>> differentialEvolution::pseudoHessian(const std::vector<double>& point){
-    const int n = config::constantSize;
-    const int m = QASAP.size() * config::trackedSpecies;
+    const int n = cfg.constantSize;
+    const int m = (int)QASAP.size() * cfg.trackedSpecies;
     std::vector<DM> arg(1);
     DM jdm;
     std::vector<double> jvec;
@@ -336,28 +340,28 @@ std::vector<std::vector<double>> differentialEvolution::pseudoHessian(const std:
 //実験データのセット
 void differentialEvolution::setQASAPData(std::vector<std::vector<double>>& arg) {
     for (const std::vector<double>& vec : arg) {
-        assert(vec.size() == config::trackedSpecies + 1);
-        QASAP.push_back({ vec[0],std::vector<double>({vec.begin()+1, vec.begin()+config::trackedSpecies+1}) });
+        assert((int)vec.size() == cfg.trackedSpecies + 1);
+        QASAP.push_back({ vec[0],std::vector<double>({vec.begin()+1, vec.begin()+cfg.trackedSpecies+1}) });
     }
 }
 
 //エージェントのセット
 void differentialEvolution::setPop(int idx, const std::vector<double>& theta){
-    assert(idx>=0 && idx<config::popSize);
-    assert(theta.size()==config::constantSize);
+    assert(idx>=0 && idx<cfg.popSize);
+    assert((int)theta.size()==cfg.constantSize);
     bool isSame=true;
-    for(int j=0;j<config::constantSize;j++){
+    for(int j=0;j<cfg.constantSize;j++){
         assert(std::isfinite(theta[j]));
         assert(0<theta[j]);
-        if(theta[j]<config::lowerLim||theta[j]>config::upperLim){
+        if(theta[j]<cfg.lowerLim||theta[j]>cfg.upperLim){
             std::cerr<<"Warning: Out of bounds parameter value "<<theta[j]<<" at index "<<j<<".\n";
         }
-        double clamped =std::clamp(theta[j], config::lowerLim, config::upperLim);
+        double clamped =std::clamp(theta[j], cfg.lowerLim, cfg.upperLim);
         if(populations[idx].constant[j]!=clamped){
             isSame=false;
         }
         populations[idx].constant[j]=clamped;
-        populationsFlat[idx * config::constantSize + j] = populations[idx].constant[j];
+        populationsFlat[idx * cfg.constantSize + j] = populations[idx].constant[j];
     }
     if(!isSame){
         populations[idx].error=DBL_MAX;
@@ -366,13 +370,13 @@ void differentialEvolution::setPop(int idx, const std::vector<double>& theta){
 }
 
 std::vector<double> differentialEvolution::getPop(int idx){
-    assert(idx>=0 && idx<config::popSize);
-    MPI_Bcast(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    assert(idx>=0 && idx<cfg.popSize);
+    MPI_Bcast(populations[idx].constant.data(), cfg.constantSize, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     return populations[idx].constant;
 }
 
 double differentialEvolution::getPopError(int idx){
-    assert(idx>=0 && idx<config::popSize);
+    assert(idx>=0 && idx<cfg.popSize);
     MPI_Bcast(&populations[idx].error, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     if(populations[idx].error==DBL_MAX){
         std::cerr<<"Warning: Error for population "<<idx<<" is not calculated yet.\n";
@@ -382,30 +386,30 @@ double differentialEvolution::getPopError(int idx){
 }
 
 void differentialEvolution::evaluate(){
-    vector<int> uncalculated(config::popSize, -1);
+    vector<int> uncalculated(cfg.popSize, -1);
     if(proc_rank==0){
         int count=0;
-        for (int i = 0; i < config::popSize; i++) {
+        for (int i = 0; i < cfg.popSize; i++) {
             if(populations[i].error==DBL_MAX){
                 uncalculated[count]=i;
                 count++;
             }
         }
-        MPI_Bcast(uncalculated.data(), config::popSize, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Bcast(uncalculated.data(), cfg.popSize, MPI_INT, 0, MPI_COMM_WORLD);
     }
     else{
-        MPI_Bcast(uncalculated.data(), config::popSize, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Bcast(uncalculated.data(), cfg.popSize, MPI_INT, 0, MPI_COMM_WORLD);
     }
     if(uncalculated[0]==-1) return;
     MPI_Win winConst, winErr;
-    MPI_Win_create(populationsFlat.data(), sizeof(double)*config::popSize*config::constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
-    MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*config::popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
+    MPI_Win_create(populationsFlat.data(), sizeof(double)*cfg.popSize*cfg.constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
+    MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*cfg.popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
     MPI_Win_fence(0, winConst);
     MPI_Win_fence(0, winErr);
-    for(int i=proc_rank;i<config::popSize;i+=num_procs){
+    for(int i=proc_rank;i<cfg.popSize;i+=num_procs){
         int idx =uncalculated[i];
         if(idx!=-1){
-            MPI_Get(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, 0, idx * config::constantSize, config::constantSize, MPI_DOUBLE, winConst);
+            MPI_Get(populations[idx].constant.data(), cfg.constantSize, MPI_DOUBLE, 0, idx * cfg.constantSize, cfg.constantSize, MPI_DOUBLE, winConst);
             populations[idx].error=calcError(populations[idx].constant);
             populationsErrorFlat[idx]=populations[idx].error;
             MPI_Put(&populationsErrorFlat[idx], 1, MPI_DOUBLE, 0, idx, 1, MPI_DOUBLE, winErr);
@@ -427,25 +431,45 @@ void differentialEvolution::evaluate(){
 
 differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     myRand=xorshift(1+proc_rank);
+
+    // copy config constants into instance-owned cfg
+    cfg.QASAPFile = config::QASAPFile;
+    cfg.reactNetworkFile = config::reactNetworkFile;
+    cfg.species = config::species;
+    cfg.constantSize = config::constantSize;
+    cfg.trackedSpecies = config::trackedSpecies;
+    cfg.trackedNames.assign(std::begin(config::trackedNames), std::end(config::trackedNames));
+    cfg.trackedIndex.assign(std::begin(config::trackedIndex), std::end(config::trackedIndex));
+    cfg.fullConc.assign(std::begin(config::fullConc), std::end(config::fullConc));
+    cfg.popSize = config::popSize;
+    cfg.maxGen = config::maxGen;
+    cfg.tolAbsError = config::tolAbsError;
+    cfg.tolRelError = config::tolRelError;
+    cfg.safetyConstant = config::safetyConstant;
+    cfg.scalar = config::scalar;
+    cfg.crossOver = config::crossOver;
+    cfg.upperLim = config::upperLim;
+    cfg.lowerLim = config::lowerLim;
+
     setQASAPData(arg);
     // allocate initialState according to runtime species
-    initialState.assign(config::species, 0.0);
+    initialState.assign(cfg.species, 0.0);
     // allocate flat population buffers
-    populationsFlat.assign(config::popSize * config::constantSize, 0.0);
-    populationsErrorFlat.assign(config::popSize, DBL_MAX);
-    for (int i = 0; i < config::trackedSpecies; i++) {
-        initialState[config::trackedIndex[i]] = config::fullConc[i]*QASAP[0].state[i];
+    populationsFlat.assign(cfg.popSize * cfg.constantSize, 0.0);
+    populationsErrorFlat.assign(cfg.popSize, DBL_MAX);
+    for (int i = 0; i < cfg.trackedSpecies; i++) {
+        initialState[cfg.trackedIndex[i]] = cfg.fullConc[i] * QASAP[0].state[i];
     }
     endTime = arg.back()[0];
 
-    rxnNet.build();
+    rxnNet.build(cfg.reactNetworkFile, cfg.species, cfg.constantSize);
 
     //setting up jac_fun_ and res_fun_
     setUpCasADiFunctions();
     
     //seting up CVODE
-    N_Vector y = N_VNew_Serial(config::species, sunctx);
-    for (int i = 0; i < config::species; ++i) {
+    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
+    for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
     
@@ -456,17 +480,17 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     #endif
     assert(flag == CV_SUCCESS);
 
-    flag = CVodeSStolerances(cvode_mem, config::tolRelError, config::tolAbsError);
+    flag = CVodeSStolerances(cvode_mem, cfg.tolRelError, cfg.tolAbsError);
     assert(flag == CV_SUCCESS);
 
     #if USE_PREGENERATED_JACOBIAN
-        SUNMatrix J = SUNSparseMatrix(config::species, config::species, nonZeroElems, CSC_MAT, sunctx);
+        SUNMatrix J = SUNSparseMatrix(cfg.species, cfg.species, nonZeroElems, CSC_MAT, sunctx);
         SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
         flag = CVodeSetLinearSolver(cvode_mem, LS, J);
         assert(flag == CV_SUCCESS);
         flag = CVodeSetJacFn(cvode_mem, JacFn);
     #else
-        SUNMatrix J = SUNSparseMatrix(config::species, config::species, rxnNet.jacNonZeros, CSC_MAT, sunctx);
+        SUNMatrix J = SUNSparseMatrix(cfg.species, cfg.species, rxnNet.jacNonZeros, CSC_MAT, sunctx);
         SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
         flag = CVodeSetLinearSolver(cvode_mem, LS, J);
         assert(flag == CV_SUCCESS);
@@ -478,12 +502,14 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     assert(flag == CV_SUCCESS);
     
 
-    populations = std::vector<individuals>(config::popSize);
-    for (int i = 0; i < config::popSize; i++) {
-        for (int j = 0; j < config::constantSize; j++) {
-            double v = randbetExp(config::lowerLim, config::upperLim);
+    populations.clear();
+    populations.reserve(cfg.popSize);
+    for (int i = 0; i < cfg.popSize; i++) {
+        populations.emplace_back(cfg.constantSize);
+        for (int j = 0; j < cfg.constantSize; j++) {
+            double v = randbetExp(cfg.lowerLim, cfg.upperLim);
             populations[i].constant[j] = v;
-            populationsFlat[i * config::constantSize + j] = v;
+            populationsFlat[i * cfg.constantSize + j] = v;
         }
     }
 }
@@ -496,10 +522,10 @@ void differentialEvolution::Optimize(){
     };
     evaluate(); //初期集団の評価
     MPI_Win winConst, winErr;
-    MPI_Win_create(populationsFlat.data(), sizeof(double)*config::popSize*config::constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
-    MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*config::popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
-    for (int i = 0; i < config::maxGen; i++) {
-        if(proc_rank==0)cout<<"current generation : "<<i<<" / "<<config::maxGen<<"\n";
+    MPI_Win_create(populationsFlat.data(), sizeof(double)*cfg.popSize*cfg.constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
+    MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*cfg.popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
+    for (int i = 0; i < cfg.maxGen; i++) {
+        if(proc_rank==0)cout<<"current generation : "<<i<<" / "<<cfg.maxGen<<"\n";
         double temp=0;
         
         vector<std::array<int, 3>> lookahead;
@@ -512,10 +538,10 @@ void differentialEvolution::Optimize(){
                 return true;
             }
         };
-        for (int j = proc_rank; j < config::popSize; j+=num_procs){
-            int xb = myRand(config::popSize), xr1=myRand(config::popSize), xr2=myRand(config::popSize);
-            while (xb == xr1) {xr1 = myRand(config::popSize);}
-            while (xb == xr2 || xr1 == xr2) {xr2 = myRand(config::popSize);}
+        for (int j = proc_rank; j < cfg.popSize; j+=num_procs){
+            int xb = myRand(cfg.popSize), xr1=myRand(cfg.popSize), xr2=myRand(cfg.popSize);
+            while (xb == xr1) {xr1 = myRand(cfg.popSize);} 
+            while (xb == xr2 || xr1 == xr2) {xr2 = myRand(cfg.popSize);} 
             lookahead.push_back({xb,xr1,xr2});
             pushIndex(xb); pushIndex(xr1); pushIndex(xr2);
         }
@@ -533,7 +559,7 @@ void differentialEvolution::Optimize(){
         for(int idx : indicesToVisit){
             if(idx%num_procs==proc_rank) continue;
             // fetch constants into local populations[idx].constant buffer
-            MPI_Get(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, idx%num_procs, idx * config::constantSize, config::constantSize, MPI_DOUBLE, winConst);
+            MPI_Get(populations[idx].constant.data(), cfg.constantSize, MPI_DOUBLE, idx%num_procs, idx * cfg.constantSize, cfg.constantSize, MPI_DOUBLE, winConst);
             // fetch error value
             MPI_Get(&populations[idx].error, 1, MPI_DOUBLE, idx%num_procs, idx, 1, MPI_DOUBLE, winErr);
             // note: data will be available after the following fences
@@ -545,7 +571,7 @@ void differentialEvolution::Optimize(){
             errors.push_back(populations[idx].error);
         }
 
-        for (int j = proc_rank; j < config::popSize; j+=num_procs) {
+        for (int j = proc_rank; j < cfg.popSize; j+=num_procs) {
             //突然変異
             //ベースベクトルとその他二つのベクトルのindex
             assert(!lookahead.empty());
@@ -563,7 +589,7 @@ void differentialEvolution::Optimize(){
                 populations[j].constant = v;
                 populations[j].error = newError;
                 // update flat buffers for MPI
-                for (int kk = 0; kk < config::constantSize; ++kk) populationsFlat[j * config::constantSize + kk] = populations[j].constant[kk];
+                for (int kk = 0; kk < cfg.constantSize; ++kk) populationsFlat[j * cfg.constantSize + kk] = populations[j].constant[kk];
                 populationsErrorFlat[j] = newError;
             }
         }
@@ -571,8 +597,8 @@ void differentialEvolution::Optimize(){
     // gather all final constants & errors to rank 0
     MPI_Win_fence(0, winConst);
     MPI_Win_fence(0, winErr);
-    for(int idx=proc_rank;idx<config::popSize;idx+=num_procs){
-        MPI_Put(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, 0, idx * config::constantSize, config::constantSize, MPI_DOUBLE, winConst);
+    for(int idx=proc_rank;idx<cfg.popSize;idx+=num_procs){
+        MPI_Put(populations[idx].constant.data(), cfg.constantSize, MPI_DOUBLE, 0, idx * cfg.constantSize, cfg.constantSize, MPI_DOUBLE, winConst);
         MPI_Put(&populations[idx].error, 1, MPI_DOUBLE, 0, idx, 1, MPI_DOUBLE, winErr);
     }
     MPI_Win_fence(0, winConst);
@@ -583,9 +609,9 @@ void differentialEvolution::Optimize(){
 }
 
 void differentialEvolution::runLM(int idx){
-    assert(0 <= idx && idx < config::popSize);
-    const int n = config::constantSize;
-    const int m = QASAP.size() * config::trackedSpecies;
+    assert(0 <= idx && idx < cfg.popSize);
+    const int n = cfg.constantSize;
+    const int m = (int)QASAP.size() * cfg.trackedSpecies;
 
     std::vector<double> theta = populations[idx].constant;
     std::vector<double> logTheta(n);
@@ -608,7 +634,7 @@ void differentialEvolution::runLM(int idx){
     bool isChanged = true;
 
     for (int iter = 0; iter < maxIter; ++iter) {
-        for(int i=0; i<config::constantSize; i++){
+        for(int i=0; i<cfg.constantSize; i++){
             cout<<std::setprecision(4)<<theta[i]<<", ";
         }
         cout<<endl;
@@ -633,7 +659,7 @@ void differentialEvolution::runLM(int idx){
 
         std::vector<double> trial(n),logTrial(n);
         for (int i = 0; i < n; ++i) {
-            logTrial[i] = std::clamp(logTheta[i] + delta[i], log(config::lowerLim), log(config::upperLim));
+            logTrial[i] = std::clamp(logTheta[i] + delta[i], log(cfg.lowerLim), log(cfg.upperLim));
             trial[i] = exp(logTrial[i]);
         }
 
@@ -668,16 +694,16 @@ void differentialEvolution::runLM(int idx){
 }
 void differentialEvolution::runLM(vector<int>& indices){
     MPI_Win winConst, winErr;
-    MPI_Win_create(populationsFlat.data(), sizeof(double)*config::popSize*config::constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
-    MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*config::popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
+    MPI_Win_create(populationsFlat.data(), sizeof(double)*cfg.popSize*cfg.constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
+    MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*cfg.popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
     MPI_Win_fence(0, winConst);
     MPI_Win_fence(0, winErr);
     for(int i=proc_rank;i<indices.size();i+=num_procs){
         int idx =indices[i];
-        MPI_Get(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, 0, idx * config::constantSize, config::constantSize, MPI_DOUBLE, winConst);
+        MPI_Get(populations[idx].constant.data(), cfg.constantSize, MPI_DOUBLE, 0, idx * cfg.constantSize, cfg.constantSize, MPI_DOUBLE, winConst);
         runLM(idx);
         populationsErrorFlat[idx]=populations[idx].error;
-        MPI_Put(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, 0, idx * config::constantSize, config::constantSize, MPI_DOUBLE, winConst);
+        MPI_Put(populations[idx].constant.data(), cfg.constantSize, MPI_DOUBLE, 0, idx * cfg.constantSize, cfg.constantSize, MPI_DOUBLE, winConst);
         MPI_Put(&populationsErrorFlat[idx], 1, MPI_DOUBLE, 0, idx, 1, MPI_DOUBLE, winErr);
     }
     MPI_Win_fence(0, winConst);
@@ -698,7 +724,7 @@ int differentialEvolution::best() {
     double minerror = DBL_MAX;
     int bestIdx = 0;
     if(proc_rank==0){
-         for (int i = 0; i < config::popSize; i++) {
+         for (int i = 0; i < cfg.popSize; i++) {
             if (minerror > populations[i].error) {
                 minerror = populations[i].error;
                 bestIdx = i;
@@ -721,8 +747,8 @@ void differentialEvolution::sortPopulationsByError(){
 
 void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
     if(proc_rank!=0)return;
-    N_Vector y = N_VNew_Serial(config::species, sunctx);
-    for (int i = 0; i < config::species; ++i) {
+    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
+    for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
     CVodeReInit(cvode_mem, 0.0, y);
@@ -744,10 +770,10 @@ void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
         assert(flag >= 0);
 
         double* y_data = N_VGetArrayPointer(y);
-        for (int j = 0; j < config::trackedSpecies; j++) {
-            size_t idx= config::trackedIndex[j];
-            assert(0 <= idx && idx < config::species);
-            cout<<y_data[idx]/config::fullConc[j] <<", ";
+        for (int j = 0; j < cfg.trackedSpecies; j++) {
+            size_t idx= (size_t)cfg.trackedIndex[j];
+            assert(0 <= idx && idx < (size_t)cfg.species);
+            cout<<y_data[idx]/cfg.fullConc[j] <<", ";
         }
         cout<<std::endl;
     }
@@ -756,9 +782,9 @@ void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
 
 void differentialEvolution::DEBUG() {
     std::cout<<"Population Error and Constants:\n";
-    for (int i = 0; i < config::popSize; i++) {
+    for (int i = 0; i < cfg.popSize; i++) {
         std::cout<< populations[i].error << std::endl;
-        for (int j = 0; j < config::constantSize; j++) {
+        for (int j = 0; j < cfg.constantSize; j++) {
             std::cout << populations[i].constant[j] << " ";
         }
         std::cout << std::endl;

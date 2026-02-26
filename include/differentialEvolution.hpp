@@ -25,13 +25,36 @@
 
 
 struct differentialEvolution {
+
+public:
+	struct Constants {
+		std::string QASAPFile;
+		std::string reactNetworkFile;
+		int species = 0;
+		int constantSize = 0;
+		int trackedSpecies = 0;
+		std::vector<std::string_view> trackedNames;
+		std::vector<int> trackedIndex;
+		std::vector<double> fullConc;
+		int popSize = 0;
+		int maxGen = 0;
+		double tolAbsError = 0.0;
+		double tolRelError = 0.0;
+		double safetyConstant = 0.0;
+		double scalar = 0.0;
+		double crossOver = 0.0;
+		double upperLim = 0.0;
+		double lowerLim = 0.0;
+	};
+
 private:
 	double endTime; //シミュレーション終了時間
+	Constants cfg;
 	ReactionNetwork rxnNet;
 	struct individuals {
 		std::vector<double> constant;
 		double error = DBL_MAX;//平方残差和
-		individuals() : constant(config::constantSize) {}
+		explicit individuals(int constantSize) : constant(constantSize) {}
 	};
 	struct datum {
 		double time;
@@ -60,6 +83,8 @@ private:
 	std::vector<double> crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2);
 
 public:
+	const Constants& constants() const { return cfg; }
+
 	// expose reaction-network metadata (e.g., kind->index map)
 	const ReactionNetwork& reactionNetwork() const { return rxnNet; }
 

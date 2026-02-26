@@ -10,7 +10,6 @@
 #include <nvector/nvector_serial.h>
 #include <sunmatrix/sunmatrix_sparse.h>
 
-#include "../include/constants.hpp"
 #include "../include/readcsv.hpp"
 #include "../include/reactionNetwork.hpp"
 
@@ -27,9 +26,17 @@ static bool is_stoiable(std::string s) {
 	return res.ec == std::errc() && res.ptr == s.data() + s.size();
 }
 
-ReactionNetwork::ReactionNetwork() {
-	speciesData_.assign(config::species + 1, 0.0);
-	speciesData_[config::species] = 1.0; // dummy
+void ReactionNetwork::ensureSizes() {
+	if (species <= 0) {
+		throw std::runtime_error("ReactionNetwork: species must be set (>0) before use");
+	}
+	if (constantSize <= 0) {
+		throw std::runtime_error("ReactionNetwork: constantSize must be set (>0) before use");
+	}
+	if ((int)speciesData_.size() != species + 1) {
+		speciesData_.assign(species + 1, 0.0);
+	}
+	speciesData_[species] = 1.0; // dummy
 }
 
 auto ReactionNetwork::RhsTerm::operator<=>(const RhsTerm& other) const {
@@ -49,7 +56,11 @@ auto ReactionNetwork::JacTerm::operator<=>(const JacTerm& other) const {
 	return reactant <=> other.reactant;
 }
 
-void ReactionNetwork::build() {
+void ReactionNetwork::build(const std::string& reactNetworkFile, int species_, int constantSize_) {
+	species = species_;
+	constantSize = constantSize_;
+	ensureSizes();
+
 	// reset
 	termIndex.clear();
 	rhsTerms.clear();
@@ -59,13 +70,7 @@ void ReactionNetwork::build() {
 	jacIdxPointer.clear();
 	jacIdxValue.clear();
 
-	// dummy species
-	if ((int)speciesData_.size() != config::species + 1) {
-		speciesData_.assign(config::species + 1, 0.0);
-	}
-	speciesData_[config::species] = 1.0;
-
-	auto csv_data = read_csv(std::string(config::reactNetworkFile));
+	auto csv_data = read_csv(reactNetworkFile);
 	std::vector<std::map<std::string, std::string>> dataDict;
 	dataDict.reserve(csv_data.size());
 	for (size_t i = 1; i < csv_data.size(); ++i) {
@@ -99,18 +104,18 @@ void ReactionNetwork::build() {
 
 		for (const auto& mp : dataDict) {
 			int init = std::stoi(mp.at("init_assem_id"));
-			int entering = is_stoiable(mp.at("entering_assem_id")) ? std::stoi(mp.at("entering_assem_id")) : config::species;
+			int entering = is_stoiable(mp.at("entering_assem_id")) ? std::stoi(mp.at("entering_assem_id")) : species;
 			int product = std::stoi(mp.at("product_assem_id"));
-			int leaving = is_stoiable(mp.at("leaving_assem_id")) ? std::stoi(mp.at("leaving_assem_id")) : config::species;
+			int leaving = is_stoiable(mp.at("leaving_assem_id")) ? std::stoi(mp.at("leaving_assem_id")) : species;
 			int kind = termIndex.at(mp.at("kind"));
 			int duplicacy = std::stoi(mp.at("duplicate_count"));
 
 			addTerm(init, init, entering, kind, -duplicacy);
-			if (entering != config::species) {
+			if (entering != species) {
 				addTerm(entering, init, entering, kind, -duplicacy);
 			}
 			addTerm(product, init, entering, kind, duplicacy);
-			if (leaving != config::species) {
+			if (leaving != species) {
 				addTerm(leaving, init, entering, kind, duplicacy);
 			}
 		}
@@ -140,27 +145,27 @@ void ReactionNetwork::build() {
 
 		for (const auto& mp : dataDict) {
 			int init = std::stoi(mp.at("init_assem_id"));
-			int entering = is_stoiable(mp.at("entering_assem_id")) ? std::stoi(mp.at("entering_assem_id")) : config::species;
+			int entering = is_stoiable(mp.at("entering_assem_id")) ? std::stoi(mp.at("entering_assem_id")) : species;
 			int product = std::stoi(mp.at("product_assem_id"));
-			int leaving = is_stoiable(mp.at("leaving_assem_id")) ? std::stoi(mp.at("leaving_assem_id")) : config::species;
+			int leaving = is_stoiable(mp.at("leaving_assem_id")) ? std::stoi(mp.at("leaving_assem_id")) : species;
 			int kind = termIndex.at(mp.at("kind"));
 			int duplicacy = std::stoi(mp.at("duplicate_count"));
 
 			addTerm(init, init, entering, kind, -duplicacy);
-			if (entering != config::species) {
+			if (entering != species) {
 				addTerm(init, entering, init, kind, -duplicacy);
 			}
-			if (entering != config::species) {
+			if (entering != species) {
 				addTerm(entering, init, entering, kind, -duplicacy);
 				addTerm(entering, entering, init, kind, -duplicacy);
 			}
 			addTerm(product, init, entering, kind, duplicacy);
-			if (entering != config::species) {
+			if (entering != species) {
 				addTerm(product, entering, init, kind, duplicacy);
 			}
-			if (leaving != config::species) {
+			if (leaving != species) {
 				addTerm(leaving, init, entering, kind, duplicacy);
-				if (entering != config::species) {
+				if (entering != species) {
 					addTerm(leaving, entering, init, kind, duplicacy);
 				}
 			}
@@ -168,11 +173,11 @@ void ReactionNetwork::build() {
 
 		int cnt = 0;
 		jacNonZeros = 0;
-		jacIdxPointer.resize(config::species + 1);
+		jacIdxPointer.resize(species + 1);
 		jacIdxValue.clear();
 		jacTerms.clear();
 
-		for (int col = 0; col < config::species; ++col) {
+		for (int col = 0; col < species; ++col) {
 			jacIdxPointer[col] = cnt;
 			for (const auto& [key1, mp] : jacMapping) {
 				int row = key1.first;
@@ -187,7 +192,7 @@ void ReactionNetwork::build() {
 					t.reactant = key2.first;
 					t.rateConstant = key2.second;
 					t.duplicacy = dup;
-					assert(0 <= t.reactant && t.reactant <= config::species);
+					assert(0 <= t.reactant && t.reactant <= species);
 					termList.push_back(t);
 				}
 				std::sort(termList.begin(), termList.end());
@@ -196,7 +201,7 @@ void ReactionNetwork::build() {
 				++jacNonZeros;
 			}
 		}
-		jacIdxPointer[config::species] = cnt;
+		jacIdxPointer[species] = cnt;
 	}
 }
 
@@ -220,19 +225,21 @@ int ReactionNetwork::JacFnCb(sunrealtype t,
 }
 
 int ReactionNetwork::rhsfImpl(sunrealtype /*t*/, N_Vector y, N_Vector ydot, const double* constants) {
+	ensureSizes();
+
 	auto* sp_ptr = N_VGetArrayPointer(y);
 	auto* ydotData = N_VGetArrayPointer(ydot);
 	assert(sp_ptr != nullptr);
 	assert(ydotData != nullptr);
 	assert(constants != nullptr);
 
-	std::memcpy(speciesData_.data(), sp_ptr, config::species * sizeof(double));
-	speciesData_[config::species] = 1.0;
-	std::fill(ydotData, ydotData + config::species, 0.0);
+	std::memcpy(speciesData_.data(), sp_ptr, species * sizeof(double));
+	speciesData_[species] = 1.0;
+	std::fill(ydotData, ydotData + species, 0.0);
 
-	std::span<double> ydotspan(ydotData, config::species);
-	std::span<const double> speciesSpan(speciesData_.data(), config::species + 1);
-	std::span<const double> kSpan(constants, config::constantSize);
+	std::span<double> ydotspan(ydotData, species);
+	std::span<const double> speciesSpan(speciesData_.data(), species + 1);
+	std::span<const double> kSpan(constants, constantSize);
 
 	for (const auto& term : rhsTerms) {
 		term.accumulate(ydotspan, speciesSpan, kSpan);
@@ -245,6 +252,8 @@ int ReactionNetwork::jacImpl(sunrealtype /*t*/,
 					N_Vector /*fy*/,
 					SUNMatrix Jac,
 					const double* constants) {
+	ensureSizes();
+
 	auto* sp_ptr = N_VGetArrayPointer(y);
 	assert(sp_ptr != nullptr);
 	assert(constants != nullptr);
@@ -254,18 +263,18 @@ int ReactionNetwork::jacImpl(sunrealtype /*t*/,
 	sunrealtype* Jx = SUNSparseMatrix_Data(Jac);
 	assert(Jp != nullptr && Ji != nullptr && Jx != nullptr);
 
-	for (int i = 0; i <= config::species; ++i) {
+	for (int i = 0; i <= species; ++i) {
 		Jp[i] = jacIdxPointer[i];
 	}
 	for (int i = 0; i < jacNonZeros; ++i) {
 		Ji[i] = jacIdxValue[i];
 	}
 
-	std::memcpy(speciesData_.data(), sp_ptr, config::species * sizeof(double));
-	speciesData_[config::species] = 1.0;
+	std::memcpy(speciesData_.data(), sp_ptr, species * sizeof(double));
+	speciesData_[species] = 1.0;
 
-	std::span<const double> speciesSpan(speciesData_.data(), config::species + 1);
-	std::span<const double> kSpan(constants, config::constantSize);
+	std::span<const double> speciesSpan(speciesData_.data(), species + 1);
+	std::span<const double> kSpan(constants, constantSize);
 
 	int idx = 0;
 	for (const auto& termList : jacTerms) {

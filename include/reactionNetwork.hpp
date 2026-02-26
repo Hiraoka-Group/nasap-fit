@@ -15,14 +15,15 @@
 #include <nvector/nvector_serial.h>
 #include <sunmatrix/sunmatrix_sparse.h>
 
-#include "constants.hpp"
-
 struct ReactionNetwork {
+	int species = 0;
+	int constantSize = 0;
+
 	struct RhsTerm {
 		int add_to{};
 		int duplicacy{};
 		int reactant1{};
-		int reactant2{}; // config::species means "no second reactant"
+		int reactant2{}; // dummy index means "no second reactant"
 		int rateConstant{};
 
 		inline void accumulate(std::span<double> ydot,
@@ -36,7 +37,7 @@ struct ReactionNetwork {
 
 	struct JacTerm {
 		int duplicacy{};
-		int reactant{}; // config::species means "no reactant" (dummy=1.0)
+		int reactant{}; // dummy index means "no reactant" (dummy=1.0)
 		int rateConstant{};
 
 		inline double value(std::span<const double> species, std::span<const double> k) const {
@@ -48,7 +49,7 @@ struct ReactionNetwork {
 
 	struct CvodeUserData {
 		ReactionNetwork* net{};
-		const double* constants{}; // length: config::constantSize
+		const double* constants{}; // length: constantSize
 	};
 
 	std::map<std::string, int> termIndex;      // kind -> index
@@ -59,10 +60,11 @@ struct ReactionNetwork {
 	std::vector<int> jacIdxPointer;           // CSC column pointer (size species+1)
 	std::vector<int> jacIdxValue;             // CSC row indices (size jacNonZeros)
 
-	ReactionNetwork();
+	ReactionNetwork() = default;
 
-	// Build RHS/Jacobian structures from config::reactNetworkFile.
-	void build();
+	// Build RHS/Jacobian structures from a reaction-network CSV file.
+	// species/constantSize are injected so this type doesn't depend on global config.
+	void build(const std::string& reactNetworkFile, int species, int constantSize);
 
 	// CVODE callback wrappers (used when USE_PREGENERATED_* == 0)
 	static int rhsfCb(sunrealtype t, N_Vector y, N_Vector ydot, void* user_data);
@@ -76,7 +78,9 @@ struct ReactionNetwork {
 					N_Vector tmp3);
 
 private:
-	std::vector<double> speciesData_; // size: config::species + 1 (last is dummy=1.0)
+	std::vector<double> speciesData_; // size: species + 1 (last is dummy=1.0)
+
+	void ensureSizes();
 
 	int rhsfImpl(sunrealtype t, N_Vector y, N_Vector ydot, const double* constants);
 	int jacImpl(sunrealtype t,
