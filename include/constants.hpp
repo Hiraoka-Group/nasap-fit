@@ -33,7 +33,7 @@ const int maxGen = 50;
 //シミュレーションの許容絶対誤差
 const double tolAbsError = 1.0000000000000001e-09;
 //シミュレーションの許容相対誤差
-const double tolRelError = 9.9999999999999995e-07;
+const double tolRelError = 3.2e-07;
 //適応型ルンゲクッタ法の安全係数
 const double safetyConstant=0.9;
 //差分進化法のパラメータ

@@ -4,12 +4,11 @@
 CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o
  /home/aspi/Project/nasap-fit-cpp/src/differentialEvolution.cpp
  /home/aspi/Project/nasap-fit-cpp/include/constants.hpp
+ /home/aspi/Project/nasap-fit-cpp/include/reactionNetwork.hpp
  /home/aspi/Project/nasap-fit-cpp/include/xorshift.hpp
  /home/aspi/Project/nasap-fit-cpp/include/Jacf.hpp
  /home/aspi/Project/nasap-fit-cpp/include/Rhsf.hpp
  /home/aspi/Project/nasap-fit-cpp/include/differentialEvolution.hpp
- /home/aspi/Project/nasap-fit-cpp/include/jacBuilder.hpp
- /home/aspi/Project/nasap-fit-cpp/include/rhsfBuilder.hpp
  /usr/include/alloca.h
  /usr/include/asm-generic/errno-base.h
  /usr/include/asm-generic/errno.h
@@ -1023,12 +1022,11 @@ CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o
 
 CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o
  /home/aspi/Project/nasap-fit-cpp/src/main.cpp
+ /home/aspi/Project/nasap-fit-cpp/include/reactionNetwork.hpp
  /home/aspi/Project/nasap-fit-cpp/include/xorshift.hpp
  /home/aspi/Project/nasap-fit-cpp/include/constants.hpp
  /home/aspi/Project/nasap-fit-cpp/include/differentialEvolution.hpp
- /home/aspi/Project/nasap-fit-cpp/include/jacBuilder.hpp
  /home/aspi/Project/nasap-fit-cpp/include/readcsv.hpp
- /home/aspi/Project/nasap-fit-cpp/include/rhsfBuilder.hpp
  /usr/include/alloca.h
  /usr/include/asm-generic/errno-base.h
  /usr/include/asm-generic/errno.h

@@ -9,6 +9,7 @@
 #include <fstream>
 #include <set>
 #include <queue>
+#include <type_traits>
 
 #include <Eigen/Dense>
 #include <mpi.h>
@@ -19,8 +20,6 @@
 #include "../include/differentialEvolution.hpp"
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
-#include "../include/rhsfBuilder.hpp"
-#include "../include/jacBuilder.hpp"
 #include "../include/Jacf.hpp" 
 #include "../include/Rhsf.hpp"
 
@@ -68,7 +67,12 @@ void differentialEvolution::addStepCountCV(const std::vector<double>& constant){
     }
     
     CVodeReInit(cvode_mem, 0.0, y);
-    CVodeSetUserData(cvode_mem, (void*)constant.data());
+    #if USE_PREGENERATED_RHSF || USE_PREGENERATED_JACOBIAN
+        CVodeSetUserData(cvode_mem, (void*)constant.data());
+    #else
+        ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data() };
+        CVodeSetUserData(cvode_mem, (void*)&ud);
+    #endif
     
     
     
@@ -92,8 +96,7 @@ void differentialEvolution::addStepCountCV(const std::vector<double>& constant){
     }
 }
 //平方残差和の計算
-template<class T>
-T differentialEvolution::calcError(const std::vector<T>& constant) {
+double differentialEvolution::calcError(const std::vector<double>& constant) {
     int flag=CV_SUCCESS;
 
     N_Vector y = N_VNew_Serial(config::species, sunctx);
@@ -102,9 +105,15 @@ T differentialEvolution::calcError(const std::vector<T>& constant) {
     }
     
     CVodeReInit(cvode_mem, 0.0, y);
-    CVodeSetUserData(cvode_mem, (void*)constant.data());
+    #if USE_PREGENERATED_RHSF || USE_PREGENERATED_JACOBIAN
+        CVodeSetUserData(cvode_mem, (void*)constant.data());
+    #else
+        static_assert(std::is_same_v<double, double>, "Non-pregenerated CVODE callbacks require double constants");
+        ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data() };
+        CVodeSetUserData(cvode_mem, (void*)&ud);
+    #endif
     
-    T SSR = 0;
+    double SSR = 0;
     double tret=0.0;
     for (int i = 0; i < QASAP.size(); i++) {
         double t = QASAP[i].time;
@@ -127,7 +136,7 @@ T differentialEvolution::calcError(const std::vector<T>& constant) {
     return SSR;
 }
 
-Function build_integrator(std::string name,const std::vector<double>& tout) {
+static Function build_integrator(std::string name, const std::vector<double>& tout, const ReactionNetwork& rxnNet) {
     // 状態変数
     SX sp = SX::sym("sp", config::species);
     // パラメータ（反応速度定数）
@@ -136,8 +145,8 @@ Function build_integrator(std::string name,const std::vector<double>& tout) {
     // 反応速度
     SX xdot = SX::zeros(config::species);
     //ODE
-    // Build xdot from rhsfBuilder::terms (mass-action style terms)
-    for (const rhsfBuilder::term &t : rhsfBuilder::terms) {
+    // Build xdot from ReactionNetwork::rhsTerms (mass-action style terms)
+    for (const ReactionNetwork::RhsTerm &t : rxnNet.rhsTerms) {
         // start with the rate constant multiplier
         SX term;
         if(t.reactant2 != config::species)
@@ -158,6 +167,7 @@ Function build_integrator(std::string name,const std::vector<double>& tout) {
     Dict opts;
     opts["abstol"] = config::tolAbsError;
     opts["reltol"] = config::tolRelError;
+    opts["max_num_steps"] = INT_MAX;
 
     return integrator(
         name,
@@ -169,7 +179,7 @@ Function build_integrator(std::string name,const std::vector<double>& tout) {
     );
 };
 
-void differentialEvolution::setUpJacobian() {
+void differentialEvolution::setUpCasADiFunctions() {
     // Levenberg-Marquardt refinement of populations[idx]
     std::vector<double> t_obs;//観測時間点
 
@@ -180,7 +190,7 @@ void differentialEvolution::setUpJacobian() {
     for (const auto& datum : QASAP) {
         t_obs.push_back(datum.time);
     }
-    integrator_ = build_integrator("F", t_obs);
+    integrator_ = build_integrator("F", t_obs, rxnNet);
     MX params = MX::sym("params", config::constantSize);
     MXDict arg;
     arg["p"]  = params;
@@ -191,62 +201,233 @@ void differentialEvolution::setUpJacobian() {
 
     // 残差ベクトル r(theta)
     MX r = MX::zeros(QASAP.size() * config::trackedSpecies);
+    // 平方残差和 SSR
+    MX SSR = 0;
     for (int i = 0; i < QASAP.size(); i++) {
         MX x = xf(Slice(), i);
         for (int j = 0; j < config::trackedSpecies; j++) {
             MX sim_val = x(config::trackedIndex[j]) / config::fullConc[j];
             MX exp_val = QASAP[i].state[j];
             r(i * config::trackedSpecies + j) = sim_val - exp_val;
+            SSR += r(i * config::trackedSpecies + j) * r(i * config::trackedSpecies + j);
         }
     }
+    MX SSR_jac = jacobian(SSR, params);
+    MX SSR_hes = hessian(SSR, params);
     MX J = jacobian(r, params);
 
     res_fun_ = Function("res_fun_", MXIList{params}, MXIList{r});
     jac_fun_ = Function("jac_fun_", MXIList{params}, MXIList{J});
+    SSR_jac_fun_ = Function("SSR_jac_fun_", MXIList{params}, MXIList{SSR_jac});
+    SSR_hes_fun_ = Function("SSR_hes_fun_", MXIList{params}, MXIList{SSR_hes});
     return;
 }
 //ヘッセ行列の計算
 std::vector<std::vector<double>> differentialEvolution::getHessian(const std::vector<double>& point){
+    assert(point.size()==config::constantSize);
     // numeric central differences for Hessian
     int n = (int)point.size();
     std::vector<std::vector<double>> H(n, std::vector<double>(n, 0.0));
-    //Hessianの実装は後回し
+    std::vector<double> logPoint(n);
+    for (int i = 0; i < n; ++i) {
+        logPoint[i] = log(point[i]);
+    }
+
+    std::vector<DM> arg(1);
+    arg[0] = DM(logPoint);
+    cout<<"Calculating Hessian..."<<endl;
+    DM hdm = SSR_hes_fun_(arg).at(0);
+    cout<<" done."<<endl;
+    std::vector<double> hvec = hdm.nonzeros();
+
+    Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>> Hmat(hvec.data(), n, n);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            H[i][j] = Hmat(i, j);
+        }
+    }
+    return H;
+}
+
+std::vector<std::vector<double>> differentialEvolution::getHessian_parallel(const std::vector<double>& point){
+    assert(point.size()==config::constantSize);
+    int n = (int)point.size();
+    std::vector<std::vector<double>> H(n, std::vector<double>(n, 0.0));
+    std::vector<double> logPoint(n);
+    for (int i = 0; i < n; ++i) {
+        logPoint[i] = log(point[i]);
+    }
+    double eps = 1e-5;
+    std::vector<DM> arg(1);
+    DM dm;
+    std::vector<double> vec;
+    std::vector<double> buffer(2*n*n, 0.0);
+    MPI_Win win;
+    MPI_Win_create(buffer.data(), sizeof(double)*2*n*n, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
+    MPI_Win_fence(0, win);
+    for(int i=proc_rank; i<2*n; i+=num_procs){
+        int idx = i/2;
+        bool isUpper = (i % 2 == 0);
+        DM pert = DM::zeros(n);
+        pert(idx) = eps;
+        if(isUpper)arg[0] = DM(logPoint) + pert;
+        else arg[0] = DM(logPoint) - pert;
+        dm = SSR_jac_fun_(arg).at(0);
+        vec = dm.nonzeros();
+        MPI_Put(vec.data(), n, MPI_DOUBLE, 0, i*n, n, MPI_DOUBLE, win);
+    }
+    MPI_Win_fence(0, win);
+    if(proc_rank==0){
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                double f_plus = buffer[(2*i)*n + j];
+                double f_minus = buffer[(2*i+1)*n + j];
+                H[i][j] = (f_plus - f_minus) / (2 * eps);
+            }
+        }
+    }
+    std::vector<double> hflat(n * n, 0.0);
+    if (proc_rank == 0) {
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                hflat[i * n + j] = H[i][j];
+            }
+        }
+    }
+    MPI_Bcast(hflat.data(), n * n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    if (proc_rank != 0) {
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                H[i][j] = hflat[i * n + j];
+            }
+        }
+    }
+    MPI_Win_free(&win);
+    return H;
+
+}
+
+std::vector<std::vector<double>> differentialEvolution::pseudoHessian(const std::vector<double>& point){
+    const int n = config::constantSize;
+    const int m = QASAP.size() * config::trackedSpecies;
+    std::vector<DM> arg(1);
+    DM jdm;
+    std::vector<double> jvec;
+    Eigen::MatrixXd J;
+    Eigen::MatrixXd A;
+    std::vector<double> logTheta(n);
+    for (int i = 0; i < n; ++i) {
+        logTheta[i] = std::log(point[i]);
+    }
+    arg[0] = DM(logTheta);
+    jdm = jac_fun_(arg).at(0);
+    jvec = jdm.nonzeros();
+    J = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>>(jvec.data(), m, n);
+    A = J.transpose() * J; 
+    std::vector<std::vector<double>> H(n, std::vector<double>(n, 0.0));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            H[i][j] = A(i, j);
+        }
+    }
     return H;
 }
 
 //実験データのセット
-void differentialEvolution::setData(std::vector<std::vector<double>>& arg) {
+void differentialEvolution::setQASAPData(std::vector<std::vector<double>>& arg) {
     for (const std::vector<double>& vec : arg) {
         assert(vec.size() == config::trackedSpecies + 1);
         QASAP.push_back({ vec[0],std::vector<double>({vec.begin()+1, vec.begin()+config::trackedSpecies+1}) });
     }
 }
 
-//途中まで最適化されたエージェントのセット
-void differentialEvolution::setPop(){
-    std::string filename = "../optimizingData.txt";
-    std::ifstream ifs(filename);
-    if (!ifs) {
-        std::cerr << "Error: Could not open file " << filename << std::endl;
-        return;
+//エージェントのセット
+void differentialEvolution::setPop(int idx, const std::vector<double>& theta){
+    assert(idx>=0 && idx<config::popSize);
+    assert(theta.size()==config::constantSize);
+    bool isSame=true;
+    for(int j=0;j<config::constantSize;j++){
+        assert(std::isfinite(theta[j]));
+        assert(0<theta[j]);
+        if(theta[j]<config::lowerLim||theta[j]>config::upperLim){
+            std::cerr<<"Warning: Out of bounds parameter value "<<theta[j]<<" at index "<<j<<".\n";
+        }
+        double clamped =std::clamp(theta[j], config::lowerLim, config::upperLim);
+        if(populations[idx].constant[j]!=clamped){
+            isSame=false;
+        }
+        populations[idx].constant[j]=clamped;
+        populationsFlat[idx * config::constantSize + j] = populations[idx].constant[j];
     }
-    populations = vector<individuals>(config::popSize);
-    // ensure flat buffers exist
-    populationsFlat.assign(config::popSize * config::constantSize, 0.0);
-    populationsErrorFlat.assign(config::popSize, DBL_MAX);
-    for(int i=0; i<config::popSize; i++){
-        ifs >> populations[i].error;
-        populationsErrorFlat[i] = populations[i].error;
-        for(int j=0; j<config::constantSize; j++){
-            ifs >> populations[i].constant[j];
-            populationsFlat[i * config::constantSize + j] = populations[i].constant[j];
+    if(!isSame){
+        populations[idx].error=DBL_MAX;
+        populationsErrorFlat[idx]=populations[idx].error;
+    }
+}
+
+std::vector<double> differentialEvolution::getPop(int idx){
+    assert(idx>=0 && idx<config::popSize);
+    MPI_Bcast(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    return populations[idx].constant;
+}
+
+double differentialEvolution::getPopError(int idx){
+    assert(idx>=0 && idx<config::popSize);
+    MPI_Bcast(&populations[idx].error, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    if(populations[idx].error==DBL_MAX){
+        std::cerr<<"Warning: Error for population "<<idx<<" is not calculated yet.\n";
+        evaluate();
+    }
+    return populations[idx].error;
+}
+
+void differentialEvolution::evaluate(){
+    vector<int> uncalculated(config::popSize, -1);
+    if(proc_rank==0){
+        int count=0;
+        for (int i = 0; i < config::popSize; i++) {
+            if(populations[i].error==DBL_MAX){
+                uncalculated[count]=i;
+                count++;
+            }
+        }
+        MPI_Bcast(uncalculated.data(), config::popSize, MPI_INT, 0, MPI_COMM_WORLD);
+    }
+    else{
+        MPI_Bcast(uncalculated.data(), config::popSize, MPI_INT, 0, MPI_COMM_WORLD);
+    }
+    if(uncalculated[0]==-1) return;
+    MPI_Win winConst, winErr;
+    MPI_Win_create(populationsFlat.data(), sizeof(double)*config::popSize*config::constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
+    MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*config::popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
+    MPI_Win_fence(0, winConst);
+    MPI_Win_fence(0, winErr);
+    for(int i=proc_rank;i<config::popSize;i+=num_procs){
+        int idx =uncalculated[i];
+        if(idx!=-1){
+            MPI_Get(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, 0, idx * config::constantSize, config::constantSize, MPI_DOUBLE, winConst);
+            populations[idx].error=calcError(populations[idx].constant);
+            populationsErrorFlat[idx]=populations[idx].error;
+            MPI_Put(&populationsErrorFlat[idx], 1, MPI_DOUBLE, 0, idx, 1, MPI_DOUBLE, winErr);
+        }
+    }
+    MPI_Win_fence(0, winConst);
+    MPI_Win_fence(0, winErr);
+    MPI_Win_free(&winConst);
+    MPI_Win_free(&winErr);
+    if(proc_rank==0){
+        for(int i : uncalculated){
+            if(i!=-1){
+                populations[i].error=populationsErrorFlat[i];
+            }
+            else break;
         }
     }
 }
 
 differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     myRand=xorshift(1+proc_rank);
-    setData(arg);
+    setQASAPData(arg);
     // allocate initialState according to runtime species
     initialState.assign(config::species, 0.0);
     // allocate flat population buffers
@@ -257,8 +438,10 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     }
     endTime = arg.back()[0];
 
+    rxnNet.build();
+
     //setting up jac_fun_ and res_fun_
-    setUpJacobian();
+    setUpCasADiFunctions();
     
     //seting up CVODE
     N_Vector y = N_VNew_Serial(config::species, sunctx);
@@ -269,7 +452,7 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     #if USE_PREGENERATED_RHSF
         int flag = CVodeInit(cvode_mem, rhsf, 0.0, y);
     #else
-        int flag = CVodeInit(cvode_mem, rhsfBuilder::rhsf, 0.0, y);
+        int flag = CVodeInit(cvode_mem, ReactionNetwork::rhsfCb, 0.0, y);
     #endif
     assert(flag == CV_SUCCESS);
 
@@ -283,11 +466,11 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
         assert(flag == CV_SUCCESS);
         flag = CVodeSetJacFn(cvode_mem, JacFn);
     #else
-        SUNMatrix J = SUNSparseMatrix(config::species, config::species, jacBuilder::nonZeros, CSC_MAT, sunctx);
+        SUNMatrix J = SUNSparseMatrix(config::species, config::species, rxnNet.jacNonZeros, CSC_MAT, sunctx);
         SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
         flag = CVodeSetLinearSolver(cvode_mem, LS, J);
         assert(flag == CV_SUCCESS);
-        flag = CVodeSetJacFn(cvode_mem, jacBuilder::JacFn);
+        flag = CVodeSetJacFn(cvode_mem, ReactionNetwork::JacFnCb);
     #endif
     assert(flag == CV_SUCCESS);
 
@@ -296,15 +479,12 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     
 
     populations = std::vector<individuals>(config::popSize);
-    for (int i = proc_rank; i < config::popSize; i+=num_procs) {
+    for (int i = 0; i < config::popSize; i++) {
         for (int j = 0; j < config::constantSize; j++) {
             double v = randbetExp(config::lowerLim, config::upperLim);
             populations[i].constant[j] = v;
             populationsFlat[i * config::constantSize + j] = v;
         }
-        populationsErrorFlat[i] = DBL_MAX;
-        populations[i].error = calcError(populations[i].constant);
-        populationsErrorFlat[i] = populations[i].error;
     }
 }
 
@@ -314,7 +494,7 @@ void differentialEvolution::Optimize(){
         if (temp <= 0) return false;
         return myRand.prob() < exp((oldE - newE) / temp);
     };
-    
+    evaluate(); //初期集団の評価
     MPI_Win winConst, winErr;
     MPI_Win_create(populationsFlat.data(), sizeof(double)*config::popSize*config::constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
     MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*config::popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
@@ -388,16 +568,24 @@ void differentialEvolution::Optimize(){
             }
         }
     }
+    // gather all final constants & errors to rank 0
+    MPI_Win_fence(0, winConst);
+    MPI_Win_fence(0, winErr);
+    for(int idx=proc_rank;idx<config::popSize;idx+=num_procs){
+        MPI_Put(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, 0, idx * config::constantSize, config::constantSize, MPI_DOUBLE, winConst);
+        MPI_Put(&populations[idx].error, 1, MPI_DOUBLE, 0, idx, 1, MPI_DOUBLE, winErr);
+    }
+    MPI_Win_fence(0, winConst);
+    MPI_Win_fence(0, winErr);
+    
     MPI_Win_free(&winConst);
     MPI_Win_free(&winErr);
 }
 
-
-
 void differentialEvolution::runLM(int idx){
     assert(0 <= idx && idx < config::popSize);
     const int n = config::constantSize;
-    const int m = static_cast<int>(QASAP.size() * config::trackedSpecies);
+    const int m = QASAP.size() * config::trackedSpecies;
 
     std::vector<double> theta = populations[idx].constant;
     std::vector<double> logTheta(n);
@@ -478,35 +666,58 @@ void differentialEvolution::runLM(int idx){
     }
     populationsErrorFlat[idx] = bestErr;
 }
-//最良個体の定数を返す
-void differentialEvolution::best(std::vector<double>& ret, double& minerror) {
-    // find local best
-    minerror = DBL_MAX;
-    std::vector<double> localBest(config::constantSize);
-    for (auto& t : populations) {
-        if (minerror > t.error) {
-            minerror = t.error;
-            localBest = t.constant;
+void differentialEvolution::runLM(vector<int>& indices){
+    MPI_Win winConst, winErr;
+    MPI_Win_create(populationsFlat.data(), sizeof(double)*config::popSize*config::constantSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winConst);
+    MPI_Win_create(populationsErrorFlat.data(), sizeof(double)*config::popSize, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &winErr);
+    MPI_Win_fence(0, winConst);
+    MPI_Win_fence(0, winErr);
+    for(int i=proc_rank;i<indices.size();i+=num_procs){
+        int idx =indices[i];
+        MPI_Get(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, 0, idx * config::constantSize, config::constantSize, MPI_DOUBLE, winConst);
+        runLM(idx);
+        populationsErrorFlat[idx]=populations[idx].error;
+        MPI_Put(populations[idx].constant.data(), config::constantSize, MPI_DOUBLE, 0, idx * config::constantSize, config::constantSize, MPI_DOUBLE, winConst);
+        MPI_Put(&populationsErrorFlat[idx], 1, MPI_DOUBLE, 0, idx, 1, MPI_DOUBLE, winErr);
+    }
+    MPI_Win_fence(0, winConst);
+    MPI_Win_fence(0, winErr);
+    MPI_Win_free(&winConst);
+    MPI_Win_free(&winErr);
+    if(proc_rank==0){
+        for(int i : indices){
+            if(i!=-1){
+                populations[i].error=populationsErrorFlat[i];
+            }
+            else break;
         }
     }
-    // gather all minerrors
-    std::vector<double> all_minerrors(num_procs);
-    MPI_Allgather(&minerror, 1, MPI_DOUBLE, all_minerrors.data(), 1, MPI_DOUBLE, MPI_COMM_WORLD);
-    // find global minimum and its owner
-    double globalMin = all_minerrors[0];
-    int owner = 0;
-    for (int i = 1; i < num_procs; ++i) {
-        if (all_minerrors[i] < globalMin) { globalMin = all_minerrors[i]; owner = i; }
+}
+//最良個体のインデックスを返す
+int differentialEvolution::best() {
+    double minerror = DBL_MAX;
+    int bestIdx = 0;
+    if(proc_rank==0){
+         for (int i = 0; i < config::popSize; i++) {
+            if (minerror > populations[i].error) {
+                minerror = populations[i].error;
+                bestIdx = i;
+            }
+        }
     }
-    minerror = globalMin;
-    // owner broadcasts the best constants
-    ret.assign(config::constantSize, 0.0);
-    if ((int)localBest.size() != config::constantSize) localBest.resize(config::constantSize);
-    if (proc_rank == owner) ret = localBest;
-    MPI_Bcast(ret.data(), config::constantSize, MPI_DOUBLE, owner, MPI_COMM_WORLD);
+    MPI_Bcast(&bestIdx, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    return bestIdx;
 }
 
-
+void differentialEvolution::sortPopulationsByError(){
+    sort(
+        populations.begin(),
+        populations.end(),
+        [](const individuals& a, const individuals& b){
+            return a.error < b.error;
+        }
+    );
+}
 
 void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
     if(proc_rank!=0)return;
@@ -515,7 +726,12 @@ void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
         NV_Ith_S(y, i) = initialState[i];
     }
     CVodeReInit(cvode_mem, 0.0, y);
-    CVodeSetUserData(cvode_mem, (void*)constant.data());
+    #if USE_PREGENERATED_RHSF || USE_PREGENERATED_JACOBIAN
+        CVodeSetUserData(cvode_mem, (void*)constant.data());
+    #else
+        ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data() };
+        CVodeSetUserData(cvode_mem, (void*)&ud);
+    #endif
     
     cout <<"Time (min),1 (%),[PdPy*4]2+ (%),Py* (%),Pd214 cage (%),"<<std::endl;
     bool flag=CV_SUCCESS;
@@ -537,8 +753,6 @@ void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
     }
 
 }
-
-
 
 void differentialEvolution::DEBUG() {
     std::cout<<"Population Error and Constants:\n";

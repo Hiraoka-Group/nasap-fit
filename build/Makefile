@@ -201,6 +201,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/reactionNetwork.o: src/reactionNetwork.cpp.o
+.PHONY : src/reactionNetwork.o
+
+# target to build an object file
+src/reactionNetwork.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.o
+.PHONY : src/reactionNetwork.cpp.o
+
+src/reactionNetwork.i: src/reactionNetwork.cpp.i
+.PHONY : src/reactionNetwork.i
+
+# target to preprocess a source file
+src/reactionNetwork.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.i
+.PHONY : src/reactionNetwork.cpp.i
+
+src/reactionNetwork.s: src/reactionNetwork.cpp.s
+.PHONY : src/reactionNetwork.s
+
+# target to generate assembly for a file
+src/reactionNetwork.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.s
+.PHONY : src/reactionNetwork.cpp.s
+
 src/readcsv.o: src/readcsv.cpp.o
 .PHONY : src/readcsv.o
 
@@ -267,6 +291,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/reactionNetwork.o"
+	@echo "... src/reactionNetwork.i"
+	@echo "... src/reactionNetwork.s"
 	@echo "... src/readcsv.o"
 	@echo "... src/readcsv.i"
 	@echo "... src/readcsv.s"

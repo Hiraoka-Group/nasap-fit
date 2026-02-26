@@ -20,11 +20,9 @@
 #include "../include/constants.hpp"
 #include "../include/differentialEvolution.hpp"
 #include "../include/readcsv.hpp"
-#include "../include/rhsfBuilder.hpp"
-#include "../include/jacBuilder.hpp"
 
 int num_procs=1;//総プロセス数
-int proc_rank;//自分のプロセス番号
+int proc_rank=0;//自分のプロセス番号
 
 int stepCount[61];
 
@@ -55,10 +53,8 @@ signed main(int argc, char** argv) {
 	if(proc_rank==0)std::cout<<"Loaded "<<csv_data_double.size()<<" rows of data."<<std::endl;
 
 	
-	rhsfBuilder::buildRhsf();
-	jacBuilder::buildJacobian();
-
-	differentialEvolution diffEvo(csv_data_double); // Assuming setData is a method to set the data
+	differentialEvolution diffEvo(csv_data_double); // Assuming setQASAPData is a method to set the data
+	
 
 	startTime = std::chrono::system_clock::now();
 	diffEvo.Optimize();
@@ -72,21 +68,47 @@ signed main(int argc, char** argv) {
 	
 	std::vector<double> bestConstants(config::constantSize);
 	double minerror;
-	diffEvo.best(bestConstants, minerror);
-	
+	diffEvo.sortPopulationsByError();
+	diffEvo.runLM(0); //最良個体に対してLM法を実行
+
+	bestConstants=diffEvo.getPop(0);
+	minerror=diffEvo.getPopError(0);
+	std::vector<std::string>kinds(config::constantSize);
+	for(const auto& [key, val] : diffEvo.reactionNetwork().termIndex){
+		kinds[val]=key;
+	}
 	if(proc_rank==0){
 		std::cout<<"Optimized Constants:"<<std::endl;
-		std::vector<std::string>kinds(config::constantSize);
-		for(const auto& [key, val] : rhsfBuilder::termIndex){
-			kinds[val]=key;
-		}
 		for(int i=0;i<config::constantSize;i++){
 			std::cout<<kinds[i]<<": "<<bestConstants[i]<<std::endl;
 		}
 		std::cout<<std::endl;
 		std::cout<<"error: "<<minerror<<std::endl;
-		diffEvo.runLM(0); //最良個体に対してLM法を実行
 	}
+
+	MPI_Finalize();
+	return 0;
+
+	std::vector<std::vector<double>> hessianMat, hessianMatParallel;
+	if(proc_rank==0)std::cout<<"Calculating Hessian Matrix at optimum..."<<std::endl;
+	hessianMat =diffEvo.getHessian(bestConstants);
+	hessianMatParallel = diffEvo.getHessian_parallel(bestConstants);
+	if(proc_rank==0){
+		for (int i = 0; i < config::constantSize; i++) {
+			for (int j = 0; j < config::constantSize; j++) {
+				std::cout << std::setw(15) << hessianMat[i][j] << " ";
+			}
+			std::cout << std::endl;	
+		}
+		std::cout<<"Parallel Hessian Matrix:\n";
+		for (int i = 0; i < config::constantSize; i++) {
+			for (int j = 0; j < config::constantSize; j++) {
+				std::cout << std::setw(15) << hessianMatParallel[i][j] << " ";
+			}
+			std::cout << std::endl;
+		}
+	}
+
 	//diffEvo.putCVODESim(bestConstants);
 	
 	

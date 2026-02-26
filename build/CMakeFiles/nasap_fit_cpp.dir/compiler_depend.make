@@ -3,12 +3,11 @@
 
 CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/differentialEvolution.cpp \
   /home/aspi/Project/nasap-fit-cpp/include/constants.hpp \
+  /home/aspi/Project/nasap-fit-cpp/include/reactionNetwork.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/xorshift.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/Jacf.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/Rhsf.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/differentialEvolution.hpp \
-  /home/aspi/Project/nasap-fit-cpp/include/jacBuilder.hpp \
-  /home/aspi/Project/nasap-fit-cpp/include/rhsfBuilder.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
@@ -1020,12 +1019,11 @@ CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o: /home/aspi/Project/nasap-fit-
   /usr/local/include/sunmatrix/sunmatrix_sparse.h
 
 CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o: /home/aspi/Project/nasap-fit-cpp/src/main.cpp \
+  /home/aspi/Project/nasap-fit-cpp/include/reactionNetwork.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/xorshift.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/constants.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/differentialEvolution.hpp \
-  /home/aspi/Project/nasap-fit-cpp/include/jacBuilder.hpp \
   /home/aspi/Project/nasap-fit-cpp/include/readcsv.hpp \
-  /home/aspi/Project/nasap-fit-cpp/include/rhsfBuilder.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
@@ -2469,6 +2467,8 @@ CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o:
 
 /lib/x86_64-linux-gnu/libc.so.6:
 
+/home/aspi/Project/nasap-fit-cpp/include/rhsfBuilder.hpp:
+
 /home/aspi/Project/nasap-fit-cpp/src/rhsfBuilder.cpp:
 
 /usr/local/include/cppad/utility/vector_bool.hpp:
@@ -3379,6 +3379,26 @@ CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o:
 
 /usr/include/c++/12/streambuf:
 
+/usr/include/eigen3/Eigen/src/Core/MatrixBase.h:
+
+/usr/include/c++/12/backward/auto_ptr.h:
+
+/usr/include/c++/12/bits/charconv.h:
+
+/usr/include/c++/12/bits/allocated_ptr.h:
+
+/usr/local/include/cppad/core/ad_to_string.hpp:
+
+/usr/include/c++/12/bits/concept_check.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/12/include/stdarg.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
+
+/usr/local/include/cppad/utility/speed_test.hpp:
+
+/usr/include/x86_64-linux-gnu/c++/12/bits/ctype_base.h:
+
 /usr/include/eigen3/Eigen/src/Core/Reverse.h:
 
 /usr/include/eigen3/Eigen/src/Core/NoAlias.h:
@@ -3388,6 +3408,20 @@ CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o:
 /usr/include/c++/12/bits/nested_exception.h:
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/functions_inln.h:
+
+/home/aspi/Project/nasap-fit-cpp/include/readcsv.hpp:
+
+/usr/include/eigen3/Eigen/src/Core/util/ForwardDeclarations.h:
+
+/usr/include/eigen3/Eigen/src/Core/SolverBase.h:
+
+/usr/include/c++/12/bits/alloc_traits.h:
+
+/usr/include/locale.h:
+
+/usr/include/eigen3/Eigen/src/Core/SelfAdjointView.h:
+
+/usr/include/eigen3/Eigen/src/LU/arch/InverseSize4.h:
 
 /usr/include/c++/12/ext/type_traits.h:
 
@@ -3503,35 +3537,9 @@ CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
 
-/usr/include/c++/12/ext/atomicity.h:
+/home/aspi/Project/nasap-fit-cpp/include/reactionNetwork.hpp:
 
-/usr/include/eigen3/Eigen/src/Eigenvalues/Tridiagonalization.h:
-
-/usr/include/eigen3/Eigen/src/Householder/HouseholderSequence.h:
-
-/usr/lib/x86_64-linux-gnu/libamd.so.3:
-
-/usr/include/inttypes.h:
-
-/usr/include/eigen3/Eigen/src/Core/MatrixBase.h:
-
-/usr/include/c++/12/backward/auto_ptr.h:
-
-/usr/include/c++/12/bits/charconv.h:
-
-/usr/include/c++/12/bits/allocated_ptr.h:
-
-/usr/local/include/cppad/core/ad_to_string.hpp:
-
-/usr/include/c++/12/bits/concept_check.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/12/include/stdarg.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
-
-/usr/local/include/cppad/utility/speed_test.hpp:
-
-/usr/include/x86_64-linux-gnu/c++/12/bits/ctype_base.h:
+/usr/include/c++/12/debug/assertions.h:
 
 /home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp:
 
@@ -3575,6 +3583,10 @@ CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o:
 
 /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
 
+/usr/local/include/cppad/local/var_op/add_op.hpp:
+
+/usr/include/eigen3/Eigen/src/Core/util/IndexedViewHelper.h:
+
 /usr/include/c++/12/bits/localefwd.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o:
@@ -3603,45 +3615,49 @@ CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o:
 
 /usr/include/c++/12/bits/cxxabi_forced.h:
 
-/home/aspi/Project/nasap-fit-cpp/include/readcsv.hpp:
+/usr/local/include/cppad/local/record/put_dyn_atomic.hpp:
 
-/usr/include/eigen3/Eigen/src/Core/util/ForwardDeclarations.h:
+/usr/include/eigen3/Eigen/src/Core/MapBase.h:
 
-/usr/include/eigen3/Eigen/src/Core/SolverBase.h:
+/usr/include/time.h:
 
-/usr/include/c++/12/bits/alloc_traits.h:
+/usr/local/include/cppad/local/play/sequential_iterator.hpp:
 
-/usr/include/locale.h:
+/usr/include/x86_64-linux-gnu/bits/syscall.h:
 
-/usr/include/eigen3/Eigen/src/Core/SelfAdjointView.h:
+/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/datatype.h:
 
-/usr/include/eigen3/Eigen/src/LU/arch/InverseSize4.h:
+/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/status_inln.h:
+
+/usr/include/c++/12/ext/atomicity.h:
+
+/usr/include/eigen3/Eigen/src/Eigenvalues/Tridiagonalization.h:
+
+/usr/include/eigen3/Eigen/src/Householder/HouseholderSequence.h:
+
+/usr/lib/x86_64-linux-gnu/libamd.so.3:
+
+/usr/include/inttypes.h:
+
+/usr/include/c++/12/cassert:
+
+/home/aspi/Project/nasap-fit-cpp/include/differentialEvolution.hpp:
+
+/usr/local/include/cppad/core/discrete/discrete.hpp:
+
+/usr/local/include/sundials/sundials_linearsolver.hpp:
+
+/usr/include/eigen3/Eigen/src/Core/Replicate.h:
+
+/usr/include/c++/12/bits/exception.h:
+
+/usr/include/eigen3/Eigen/src/Core/PartialReduxEvaluator.h:
 
 /home/aspi/Project/nasap-fit-cpp/src/differentialEvolution.cpp:
-
-/usr/include/c++/12/bits/ranges_algo.h:
-
-/usr/local/include/cppad/core/integer.hpp:
-
-/usr/include/eigen3/Eigen/src/Core/util/ConfigureVectorization.h:
-
-/usr/include/c++/12/tr1/riemann_zeta.tcc:
-
-/usr/include/eigen3/Eigen/src/Core/Select.h:
-
-/usr/include/eigen3/Eigen/src/plugins/CommonCwiseBinaryOps.h:
-
-/usr/local/include/casadi/core/runtime/casadi_kron.hpp:
 
 /usr/include/c++/12/bits/erase_if.h:
 
 /usr/include/c++/12/math.h:
-
-/usr/local/include/cppad/core/near_equal_ext.hpp:
-
-/usr/include/c++/12/bits/shared_ptr_atomic.h:
-
-/usr/include/c++/12/bits/locale_classes.tcc:
 
 /usr/local/include/cppad/core/chkpoint_one/set_jac_sparse_set.hpp:
 
@@ -3685,63 +3701,31 @@ CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o:
 
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
 
-/usr/include/c++/12/debug/assertions.h:
-
 /usr/include/c++/12/bits/basic_ios.tcc:
 
 /usr/include/eigen3/Eigen/src/Core/TriangularMatrix.h:
 
+/usr/local/include/cppad/core/near_equal_ext.hpp:
+
+/usr/include/c++/12/bits/locale_classes.tcc:
+
+/usr/include/c++/12/bits/shared_ptr_atomic.h:
+
+/usr/local/include/cppad/core/integer.hpp:
+
+/usr/include/eigen3/Eigen/src/Core/util/ConfigureVectorization.h:
+
+/usr/include/c++/12/tr1/riemann_zeta.tcc:
+
+/usr/include/eigen3/Eigen/src/Core/Select.h:
+
+/usr/include/eigen3/Eigen/src/plugins/CommonCwiseBinaryOps.h:
+
+/usr/local/include/casadi/core/runtime/casadi_kron.hpp:
+
 /usr/local/include/casadi/core/runtime/casadi_flip.hpp:
 
-/usr/include/eigen3/Eigen/src/Core/products/SelfadjointRank2Update.h:
-
-/usr/include/c++/12/ext/concurrence.h:
-
-/usr/include/c++/12/bits/max_size_type.h:
-
-/usr/include/c++/12/bits/vector.tcc:
-
-/home/aspi/Project/nasap-fit-cpp/include/Rhsf.hpp:
-
-/usr/local/include/cppad/local/record/put_dyn_atomic.hpp:
-
-/usr/include/eigen3/Eigen/src/Core/MapBase.h:
-
-/usr/include/time.h:
-
-/usr/local/include/cppad/local/play/sequential_iterator.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/syscall.h:
-
-/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/datatype.h:
-
-/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/status_inln.h:
-
-/usr/include/c++/12/cassert:
-
-/home/aspi/Project/nasap-fit-cpp/include/differentialEvolution.hpp:
-
-/usr/local/include/cppad/core/discrete/discrete.hpp:
-
-/usr/local/include/sundials/sundials_linearsolver.hpp:
-
-/usr/include/eigen3/Eigen/src/Core/Replicate.h:
-
-/usr/include/c++/12/bits/exception.h:
-
-/usr/include/eigen3/Eigen/src/Core/PartialReduxEvaluator.h:
-
-/usr/include/eigen3/Eigen/src/Core/Solve.h:
-
-/usr/local/include/casadi/core/runtime/casadi_trans.hpp:
-
-/usr/include/eigen3/Eigen/src/Core/products/GeneralMatrixVector.h:
-
-/usr/include/c++/12/bits/hashtable.h:
-
-/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/intracomm.h:
-
-/usr/include/c++/12/bits/std_mutex.h:
+/usr/include/c++/12/bits/ranges_algo.h:
 
 /usr/include/c++/12/initializer_list:
 
@@ -3768,6 +3752,12 @@ CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o:
 /usr/local/include/casadi/core/printable.hpp:
 
 /usr/include/c++/12/bits/ranges_util.h:
+
+/usr/include/eigen3/Eigen/src/Core/products/SelfadjointRank2Update.h:
+
+/usr/include/c++/12/ext/concurrence.h:
+
+/home/aspi/Project/nasap-fit-cpp/include/Rhsf.hpp:
 
 /usr/local/lib/libcppad_lib.so:
 
@@ -3812,8 +3802,6 @@ CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o:
 CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o:
 
 /usr/include/c++/12/cstdint:
-
-/home/aspi/Project/nasap-fit-cpp/include/rhsfBuilder.hpp:
 
 /usr/local/include/cppad/local/val_graph/record_new.hpp:
 
@@ -4027,13 +4015,11 @@ CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o:
 
 /usr/local/include/casadi/core/runtime/casadi_densify.hpp:
 
-/usr/include/eigen3/Eigen/LU:
-
-/usr/local/include/casadi/core/casadi_export.h:
-
-/usr/local/include/casadi/core/runtime/casadi_sum_viol.hpp:
-
 /usr/include/c++/12/bits/utility.h:
+
+/usr/include/c++/12/bits/max_size_type.h:
+
+/usr/include/c++/12/bits/vector.tcc:
 
 /usr/local/include/cppad/local/record/dyn_recorder.hpp:
 
@@ -4081,9 +4067,17 @@ CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o:
 
 /usr/include/c++/12/functional:
 
-/usr/local/include/cppad/local/var_op/add_op.hpp:
+/usr/include/eigen3/Eigen/src/Core/Solve.h:
 
-/usr/include/eigen3/Eigen/src/Core/util/IndexedViewHelper.h:
+/usr/local/include/casadi/core/runtime/casadi_trans.hpp:
+
+/usr/include/eigen3/Eigen/src/Core/products/GeneralMatrixVector.h:
+
+/usr/include/c++/12/bits/hashtable.h:
+
+/usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/intracomm.h:
+
+/usr/include/c++/12/bits/std_mutex.h:
 
 /usr/include/eigen3/Eigen/src/Core/util/Meta.h:
 
@@ -4363,10 +4357,6 @@ CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o:
 
 /usr/local/include/casadi/core/filesystem.hpp:
 
-/usr/local/include/casadi/core/runtime/casadi_vector_fmin.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
-
 /usr/local/include/cppad/local/var_op/log_op.hpp:
 
 /usr/local/include/cppad/local/var_op/cskip_op.hpp:
@@ -4629,6 +4619,12 @@ CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o:
 
 /usr/local/include/casadi/core/callback.hpp:
 
+/usr/include/eigen3/Eigen/LU:
+
+/usr/local/include/casadi/core/casadi_export.h:
+
+/usr/local/include/casadi/core/runtime/casadi_sum_viol.hpp:
+
 /usr/local/include/casadi/core/casadi_interrupt.hpp:
 
 /usr/include/x86_64-linux-gnu/c++/12/bits/os_defines.h:
@@ -4761,9 +4757,9 @@ CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o:
 
 /usr/local/include/casadi/core/runtime/casadi_oracle_callback.hpp:
 
-/usr/include/c++/12/bits/functional_hash.h:
-
 /home/aspi/Project/nasap-fit-cpp/include/jacBuilder.hpp:
+
+/usr/include/c++/12/bits/functional_hash.h:
 
 /usr/include/x86_64-linux-gnu/sys/select.h:
 
@@ -4780,3 +4776,7 @@ CMakeFiles/nasap_fit_cpp.dir/src/jacBuilder.cpp.o:
 /usr/local/include/casadi/core/runtime/casadi_tri_project.hpp:
 
 /usr/local/include/casadi/core/runtime/casadi_vector_fmax.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
+
+/usr/local/include/casadi/core/runtime/casadi_vector_fmin.hpp:
