@@ -17,75 +17,113 @@
 #include <sunlinsol/sunlinsol_pcg.h>
 #include <sunlinsol/sunlinsol_spgmr.h>
 #include <sundials/sundials_context.hpp>
+#include <casadi/casadi.hpp>
 
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
-#include "../include/ODE.hpp"
+#include "../include/reactionNetwork.hpp"
 
 
 struct differentialEvolution {
+
+public:
+	struct Constants {
+		std::string QASAPFile;
+		std::string reactNetworkFile;
+		int species = 0;
+		int constantSize = 0;
+		int trackedSpecies = 0;
+		std::vector<std::string_view> trackedNames;
+		std::vector<int> trackedIndex;
+		std::vector<double> fullConc;
+		int popSize = 0;
+		int maxGen = 0;
+		double tolAbsError = 0.0;
+		double tolRelError = 0.0;
+		double safetyConstant = 0.0;
+		double scalar = 0.0;
+		double crossOver = 0.0;
+		double upperLim = 0.0;
+		double lowerLim = 0.0;
+	};
+
 private:
 	double endTime; //シミュレーション終了時間
+	Constants cfg;
+	ReactionNetwork rxnNet;
 	struct individuals {
-		std::array<double, config::constantSize>constant;
+		std::vector<double> constant;
 		double error = DBL_MAX;//平方残差和
+		explicit individuals(int constantSize) : constant(constantSize) {}
 	};
-	static_assert(sizeof(individuals) == sizeof(double) * (config::constantSize + 1), "構造体のサイズが不正です");
 	struct datum {
 		double time;
 		std::vector<double>state;
 	};
-	template<class T>
-	struct stepResult {
-		speciesAmount<T> newState;
-		double usedStepSize;
-		double newStepSize;
-	};
-	speciesAmount<double>initialState; //初期状態
+	casadi::Function integrator_;  // build_integrator の結果
+    casadi::Function res_fun_;     // 残差ベクトルを返す関数
+    casadi::Function jac_fun_;     // ヤコビアンを返す関数
+	casadi::Function SSR_jac_fun_; // 平方残差和とヤコビアンを返す関数
+	casadi::Function SSR_hes_fun_; // 平方残差和とヘッセ行列を返す関数
+
+	std::vector<double> initialState; //初期状態（ランタイムサイズ）
 	std::vector<datum> QASAP;  //実験データ
 	std::vector<individuals>populations; //エージェントの集団
-	std::vector<speciesAmount<double>>simulation; //シミュレーション結果
-	std::vector<double>simTime; //シミュレーション時間
+	// flat buffers for MPI-safe sharing
+	std::vector<double> populationsFlat; // size: popSize * constantSize
+	std::vector<double> populationsErrorFlat; // size: popSize
+	
 
 	sundials::Context sunctx;
 	void* cvode_mem = CVodeCreate(CV_BDF, sunctx);
 
-	//シミュレーションにおける、次のステップの計算
-	template<class T>
-    stepResult<T> calcNextStep(const std::array<T, config::constantSize>& reactConst, const speciesAmount<T>& data, double stepSize);
+	// jac_fun_と res_fun_のセットアップ
+	void setUpCasADiFunctions();
 
-	std::array<double, config::constantSize> crossingOver(const std::array<double, config::constantSize>& baseV, const std::array<double, config::constantSize>& randV1, const std::array<double, config::constantSize>& randV2);
+	std::vector<double> crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2);
 
-	template<class T>
-	std::vector<speciesAmount<T>> simulate(const std::array<T, config::constantSize>& constant);
+public:
+	const Constants& constants() const { return cfg; }
 
-	public:
-	//平方残差和の計算
-	template<class T>
-	T calcErrorDP(const std::array<T, config::constantSize>& constant);
+	// expose reaction-network metadata (e.g., kind->index map)
+	const ReactionNetwork& reactionNetwork() const { return rxnNet; }
 
-	template<class T>
-	T calcError(const std::array<T, config::constantSize>& constant);
-	
-	void addStepCountCV(const std::array<double, config::constantSize>& constant);
-	void addStepCountDP(const std::array<double, config::constantSize>& constant);
+	//平方残差和の計算（CVODEを用いる）
+	double calcError(const std::vector<double>& constant);
 
-	std::vector<double> getJacobian(const std::array<double, config::constantSize>& point);
-	//ヘッセ行列の計算
-	std::vector<std::vector<double>> getHessian(const std::array<double, config::constantSize>& point);
+	void addStepCountCV(const std::vector<double>& constant);
 
-    //実験データのセット
-    void setData(std::vector<std::vector<double>>& arg);
+	// ヘッセ行列の計算
+	std::vector<std::vector<double>> getHessian(const std::vector<double>& point);
 
-	void setPop();
-	//Constructor
+	std::vector<std::vector<double>> getHessian_parallel(const std::vector<double>& point);
+
+	std::vector<std::vector<double>> pseudoHessian(const std::vector<double>& point);
+
+	// 実験データのセット
+	void setQASAPData(std::vector<std::vector<double>>& arg);
+
+	void setPop(int idx, const std::vector<double>& theta);
+
+	std::vector<double> getPop(int idx);
+
+	double getPopError(int idx);
+
+	void evaluate();
+	// Constructor
 	differentialEvolution(std::vector<std::vector<double>>& arg);
+
+	// Levenberg-Marquardt法による最適化の実行
+	void runLM(int idx);
+	void runLM(std::vector<int>& indices);
+
+	// 差分進化法の実行
 	void Optimize();
-    //最良個体の定数を返す
-	void best(std::array<double, config::constantSize>& ret, double& minerror);
+	// 最良個体のインデックスを返す
+	int best();
 
-	void putSim(const std::array<double, config::constantSize>& constant);
+	void sortPopulationsByError();
 
-	void putCVODESim(const std::array<double, config::constantSize>& constant);
+	void putCVODESim(const std::vector<double>& constant);
 	void DEBUG();
 };

@@ -20,8 +20,8 @@ namespace jacBuilder{
 
     std::vector<std::vector<term>> terms; //反応項リスト
     std::map<std::string, int> termIndex; //反応速度定数名からindexへのマップ
-    std::array<double, config::constantSize> rateConstants; //反応速度定数配列
-    std::array<double, config::species+1> speciesData; //初期種量配列
+    std::vector<double> rateConstants(config::constantSize); //反応速度定数配列
+    std::vector<double> speciesData(config::species+1); //初期種量配列
 
     std::vector<int>idxPointer;
     std::vector<int>idxValue;

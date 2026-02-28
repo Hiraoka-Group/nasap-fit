@@ -1242,6 +1242,18 @@
 			"value" : "FALSE"
 		},
 		{
+			"name" : "Eigen3_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "The directory containing a CMake configuration file for Eigen3."
+				}
+			],
+			"type" : "PATH",
+			"value" : "/usr/share/eigen3/cmake"
+		},
+		{
 			"name" : "FIND_PACKAGE_MESSAGE_DETAILS_MPI",
 			"properties" : 
 			[
@@ -1752,6 +1764,18 @@
 			],
 			"type" : "PATH",
 			"value" : "/usr/local/lib/cmake/sundials"
+		},
+		{
+			"name" : "casadi_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "The directory containing a CMake configuration file for casadi."
+				}
+			],
+			"type" : "PATH",
+			"value" : "/usr/local/lib/cmake/casadi"
 		},
 		{
 			"name" : "nasap_fit_cpp_BINARY_DIR",

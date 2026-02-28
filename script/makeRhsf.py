@@ -61,7 +61,7 @@ def make_rhsf(input_path: Path | None = None) -> None:
             "int rhsf(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) {\n"
             "\tauto sp = N_VGetArrayPointer(y);\n"
             "\tauto ydotData = N_VGetArrayPointer(ydot);\n"
-            "\tstd::array<double, config::constantSize> &k = *static_cast<std::array<double, config::constantSize>*>(user_data);\n\t"
+            "\tstd::vector<double> &k = *static_cast<std::vector<double>*>(user_data);\n\t"
         )
         for idx, t in enumerate(ODE):
             f.write(f"ydotData[{idx}] = ")

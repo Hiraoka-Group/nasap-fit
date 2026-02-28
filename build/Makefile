@@ -153,30 +153,6 @@ src/differentialEvolution.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.s
 .PHONY : src/differentialEvolution.cpp.s
 
-src/dualNumber.o: src/dualNumber.cpp.o
-.PHONY : src/dualNumber.o
-
-# target to build an object file
-src/dualNumber.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.o
-.PHONY : src/dualNumber.cpp.o
-
-src/dualNumber.i: src/dualNumber.cpp.i
-.PHONY : src/dualNumber.i
-
-# target to preprocess a source file
-src/dualNumber.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.i
-.PHONY : src/dualNumber.cpp.i
-
-src/dualNumber.s: src/dualNumber.cpp.s
-.PHONY : src/dualNumber.s
-
-# target to generate assembly for a file
-src/dualNumber.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/dualNumber.cpp.s
-.PHONY : src/dualNumber.cpp.s
-
 src/jacBuilder.o: src/jacBuilder.cpp.o
 .PHONY : src/jacBuilder.o
 
@@ -224,6 +200,30 @@ src/main.s: src/main.cpp.s
 src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
+
+src/reactionNetwork.o: src/reactionNetwork.cpp.o
+.PHONY : src/reactionNetwork.o
+
+# target to build an object file
+src/reactionNetwork.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.o
+.PHONY : src/reactionNetwork.cpp.o
+
+src/reactionNetwork.i: src/reactionNetwork.cpp.i
+.PHONY : src/reactionNetwork.i
+
+# target to preprocess a source file
+src/reactionNetwork.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.i
+.PHONY : src/reactionNetwork.cpp.i
+
+src/reactionNetwork.s: src/reactionNetwork.cpp.s
+.PHONY : src/reactionNetwork.s
+
+# target to generate assembly for a file
+src/reactionNetwork.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.s
+.PHONY : src/reactionNetwork.cpp.s
 
 src/readcsv.o: src/readcsv.cpp.o
 .PHONY : src/readcsv.o
@@ -273,30 +273,6 @@ src/rhsfBuilder.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/rhsfBuilder.cpp.s
 .PHONY : src/rhsfBuilder.cpp.s
 
-src/speciesAmount.o: src/speciesAmount.cpp.o
-.PHONY : src/speciesAmount.o
-
-# target to build an object file
-src/speciesAmount.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.o
-.PHONY : src/speciesAmount.cpp.o
-
-src/speciesAmount.i: src/speciesAmount.cpp.i
-.PHONY : src/speciesAmount.i
-
-# target to preprocess a source file
-src/speciesAmount.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.i
-.PHONY : src/speciesAmount.cpp.i
-
-src/speciesAmount.s: src/speciesAmount.cpp.s
-.PHONY : src/speciesAmount.s
-
-# target to generate assembly for a file
-src/speciesAmount.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/speciesAmount.cpp.s
-.PHONY : src/speciesAmount.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -309,24 +285,21 @@ help:
 	@echo "... src/differentialEvolution.o"
 	@echo "... src/differentialEvolution.i"
 	@echo "... src/differentialEvolution.s"
-	@echo "... src/dualNumber.o"
-	@echo "... src/dualNumber.i"
-	@echo "... src/dualNumber.s"
 	@echo "... src/jacBuilder.o"
 	@echo "... src/jacBuilder.i"
 	@echo "... src/jacBuilder.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/reactionNetwork.o"
+	@echo "... src/reactionNetwork.i"
+	@echo "... src/reactionNetwork.s"
 	@echo "... src/readcsv.o"
 	@echo "... src/readcsv.i"
 	@echo "... src/readcsv.s"
 	@echo "... src/rhsfBuilder.o"
 	@echo "... src/rhsfBuilder.i"
 	@echo "... src/rhsfBuilder.s"
-	@echo "... src/speciesAmount.o"
-	@echo "... src/speciesAmount.i"
-	@echo "... src/speciesAmount.s"
 .PHONY : help
 
 

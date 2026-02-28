@@ -13,8 +13,8 @@
 
 namespace rhsfBuilder {
 	extern std::map<std::string, int> termIndex; //反応速度定数名からindexへのマップ
-	extern std::array<double, config::constantSize> rateConstants; //反応速度定数配列
-    extern std::array<double, config::species+1> speciesData; //初期種量配列
+	extern std::vector<double> rateConstants; //反応速度定数配列
+    extern std::vector<double> speciesData; //初期種量配列
 
 	struct term {
 		int add_to;       // 生成物のインデックス
@@ -29,6 +29,7 @@ namespace rhsfBuilder {
 
 		auto operator<=>(const term&) const;
 	};
+	extern std::vector<term> terms; //反応項リスト
 
 
 	// call this function to setup Rhsf::terms from CSV data
