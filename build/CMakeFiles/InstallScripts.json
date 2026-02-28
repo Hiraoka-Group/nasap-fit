@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/aspi/Project/nasap-fit-cpp/build/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
