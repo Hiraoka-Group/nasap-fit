@@ -57,22 +57,18 @@ signed main(int argc, char** argv) {
 	
 
 	startTime = std::chrono::system_clock::now();
-	diffEvo.Optimize();
+	auto opt = diffEvo.Optimize(50, 128);
 	endTimeGlobal = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTimeGlobal - startTime).count();
 
 	if(proc_rank==0)std::cout << "Optimization took " << duration << " milliseconds." << std::endl;
 	
-
-	
-	
 	std::vector<double> bestConstants(config::constantSize);
 	double minerror;
-	diffEvo.sortPopulationsByError();
-	diffEvo.runLM(0); //最良個体に対してLM法を実行
-
-	bestConstants=diffEvo.getPop(0);
-	minerror=diffEvo.getPopError(0);
+	// LM refinement on the best solution returned by DE
+	auto refined = diffEvo.runLM(opt[4].constants);
+	bestConstants = refined.constants;
+	minerror = refined.error;
 	std::vector<std::string>kinds(config::constantSize);
 	for(const auto& [key, val] : diffEvo.reactionNetwork().termIndex){
 		kinds[val]=key;

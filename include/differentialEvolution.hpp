@@ -23,39 +23,34 @@
 #include "../include/xorshift.hpp"
 #include "../include/reactionNetwork.hpp"
 
+using std::vector;
 
 struct differentialEvolution {
-
-public:
 	struct Constants {
 		std::string QASAPFile;
 		std::string reactNetworkFile;
-		int species = 0;
-		int constantSize = 0;
-		int trackedSpecies = 0;
-		std::vector<std::string_view> trackedNames;
-		std::vector<int> trackedIndex;
-		std::vector<double> fullConc;
-		int popSize = 0;
-		int maxGen = 0;
-		double tolAbsError = 0.0;
-		double tolRelError = 0.0;
-		double safetyConstant = 0.0;
-		double scalar = 0.0;
-		double crossOver = 0.0;
-		double upperLim = 0.0;
-		double lowerLim = 0.0;
+		int species = 0;//シミュレーション時 config.yamlから
+		int constantSize = 0;//初期化時 config.yamlから
+		int trackedSpecies = 0;//シミュレーション時 config.yamlから
+		vector<std::string_view> trackedNames;//QASAPのcsv読み取り時 config.yamlから
+		vector<int> trackedIndex;//QASAPのcsv読み取り時 config.yamlから
+		vector<double> fullConc;//シミュレーション時 config.yamlから
+		double tolAbsError = 1e-09;//シミュレーション時
+		double tolRelError = 3.2e-07;
+		double scalar = 0.7;//optimize時
+		double crossOver = 0.4;//optimize時
+		double upperLim = 1e4;//popset時
+		double lowerLim = 1e-3;//popset時
 	};
-
+	struct OptimizeResult {
+		std::vector<double> constants;
+		double error = DBL_MAX;
+		explicit OptimizeResult(int constantSize) : constants((size_t)constantSize, 0.0) {}
+	};
 private:
 	double endTime; //シミュレーション終了時間
 	Constants cfg;
 	ReactionNetwork rxnNet;
-	struct individuals {
-		std::vector<double> constant;
-		double error = DBL_MAX;//平方残差和
-		explicit individuals(int constantSize) : constant(constantSize) {}
-	};
 	struct datum {
 		double time;
 		std::vector<double>state;
@@ -68,11 +63,6 @@ private:
 
 	std::vector<double> initialState; //初期状態（ランタイムサイズ）
 	std::vector<datum> QASAP;  //実験データ
-	std::vector<individuals>populations; //エージェントの集団
-	// flat buffers for MPI-safe sharing
-	std::vector<double> populationsFlat; // size: popSize * constantSize
-	std::vector<double> populationsErrorFlat; // size: popSize
-	
 
 	sundials::Context sunctx;
 	void* cvode_mem = CVodeCreate(CV_BDF, sunctx);
@@ -80,50 +70,43 @@ private:
 	// jac_fun_と res_fun_のセットアップ
 	void setUpCasADiFunctions();
 
-	std::vector<double> crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2);
+	vector<double> crossingOver(const vector<double>& baseV, const vector<double>& randV1, const vector<double>& randV2);
 
+	void validateConstants(const vector<double>& constants);
+
+	void sortByError(vector<OptimizeResult>& populations);
 public:
+
 	const Constants& constants() const { return cfg; }
 
 	// expose reaction-network metadata (e.g., kind->index map)
 	const ReactionNetwork& reactionNetwork() const { return rxnNet; }
 
 	//平方残差和の計算（CVODEを用いる）
-	double calcError(const std::vector<double>& constant);
+	double calcError(const vector<double>& constant);
 
-	void addStepCountCV(const std::vector<double>& constant);
 
 	// ヘッセ行列の計算
-	std::vector<std::vector<double>> getHessian(const std::vector<double>& point);
+	vector<vector<double>> getHessian(const vector<double>& point);
 
-	std::vector<std::vector<double>> getHessian_parallel(const std::vector<double>& point);
+	vector<vector<double>> getHessian_parallel(const vector<double>& point);
 
-	std::vector<std::vector<double>> pseudoHessian(const std::vector<double>& point);
+	vector<vector<double>> pseudoHessian(const vector<double>& point);
 
 	// 実験データのセット
-	void setQASAPData(std::vector<std::vector<double>>& arg);
+	void setQASAPData(vector<vector<double>>& arg);
 
-	void setPop(int idx, const std::vector<double>& theta);
-
-	std::vector<double> getPop(int idx);
-
-	double getPopError(int idx);
-
-	void evaluate();
 	// Constructor
-	differentialEvolution(std::vector<std::vector<double>>& arg);
+	differentialEvolution(vector<vector<double>>& arg);
 
 	// Levenberg-Marquardt法による最適化の実行
-	void runLM(int idx);
-	void runLM(std::vector<int>& indices);
+	OptimizeResult runLM(const vector<double>& theta0);
+	vector<OptimizeResult> runLM(const vector<vector<double>>& thetaList);
 
 	// 差分進化法の実行
-	void Optimize();
-	// 最良個体のインデックスを返す
-	int best();
+	vector<OptimizeResult> Optimize(int maxGen, int popSize, double lowerLim = 1e-3, double upperLim = 1e4);
 
-	void sortPopulationsByError();
+	vector<OptimizeResult> Optimize(vector<vector<double>> arg);
 
-	void putCVODESim(const std::vector<double>& constant);
-	void DEBUG();
+	void putCVODESim(const vector<double>& constant);
 };
