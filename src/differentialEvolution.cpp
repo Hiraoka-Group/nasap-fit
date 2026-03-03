@@ -104,7 +104,7 @@ double differentialEvolution::calcError(const std::vector<double>& constant) {
         for (int j = 0; j < cfg.trackedSpecies; j++) {
             size_t idx= (size_t)cfg.trackedIndex[j];
             assert(0 <= idx && idx < (size_t)cfg.species);
-            SSR += (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]) * (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]);
+            SSR += (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]/100) * (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]/100);
         }
     }
     return SSR;
@@ -112,7 +112,7 @@ double differentialEvolution::calcError(const std::vector<double>& constant) {
 
 static Function build_integrator(std::string name,
 						const std::vector<double>& tout,
-						const differentialEvolution::Constants& cfg,
+						const differentialEvolution::Config& cfg,
 						const ReactionNetwork& rxnNet) {
     // 状態変数
     SX sp = SX::sym("sp", cfg.species);
@@ -184,7 +184,7 @@ void differentialEvolution::setUpCasADiFunctions() {
         MX x = xf(Slice(), i);
         for (int j = 0; j < cfg.trackedSpecies; j++) {
             MX sim_val = x(cfg.trackedIndex[j]) / cfg.fullConc[j];
-            MX exp_val = QASAP[i].state[j];
+            MX exp_val = QASAP[i].state[j]/100;
             r(i * cfg.trackedSpecies + j) = sim_val - exp_val;
             SSR += r(i * cfg.trackedSpecies + j) * r(i * cfg.trackedSpecies + j);
         }
@@ -312,44 +312,46 @@ std::vector<std::vector<double>> differentialEvolution::pseudoHessian(const std:
 }
 
 //実験データのセット
-void differentialEvolution::setQASAPData(std::vector<std::vector<double>>& arg) {
-    for (const std::vector<double>& vec : arg) {
-        assert((int)vec.size() == cfg.trackedSpecies + 1);
-        QASAP.push_back({ vec[0],std::vector<double>({vec.begin()+1, vec.begin()+cfg.trackedSpecies+1}) });
-    }
+void differentialEvolution::setQASAPData(vector<vector<std::string>>& arg) {
+    QASAP.clear();
+    indexOrder.clear();
+	bool isHeader = true;
+	for (const auto& row : arg) {
+        assert((size_t)cfg.trackedSpecies + 1 <= row.size());
+		std::vector<double> row_double;
+		if(isHeader){
+            isHeader = false;
+            for(int i=1;i<=cfg.trackedSpecies;i++){
+                auto it = std::find(cfg.trackedNames.begin(), cfg.trackedNames.end(), row[i]);
+                assert(it != cfg.trackedNames.end());
+                int idx = std::distance(cfg.trackedNames.begin(), it);
+                indexOrder.push_back(cfg.trackedIndex[idx]);
+            }
+        }
+        else{
+            for(int i=0;i<=cfg.trackedSpecies;i++){
+                row_double.push_back(std::stod(row[i]));
+                assert(std::stod(row[i]) >= 0);
+            }
+            QASAP.push_back({ row_double[0],std::vector<double>({row_double.begin()+1, row_double.begin()+cfg.trackedSpecies+1}) });
+        }
+	}
+    endTime = QASAP.back().time;
+
 }
 
-differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
+differentialEvolution::differentialEvolution(const Config& arg): cfg(arg) {
     myRand=xorshift(1+proc_rank);
 
-    // copy config constants into instance-owned cfg
-    cfg.QASAPFile = config::QASAPFile;
-    cfg.reactNetworkFile = config::reactNetworkFile;
-    cfg.species = config::species;
-    cfg.constantSize = config::constantSize;
-    cfg.trackedSpecies = config::trackedSpecies;
-    cfg.trackedNames.assign(std::begin(config::trackedNames), std::end(config::trackedNames));
-    cfg.trackedIndex.assign(std::begin(config::trackedIndex), std::end(config::trackedIndex));
-    cfg.fullConc.assign(std::begin(config::fullConc), std::end(config::fullConc));
-    cfg.tolAbsError = config::tolAbsError;
-    cfg.tolRelError = config::tolRelError;
-    cfg.scalar = config::scalar;
-    cfg.crossOver = config::crossOver;
-    cfg.upperLim = config::upperLim;
-    cfg.lowerLim = config::lowerLim;
-
-    setQASAPData(arg);
     // allocate initialState according to runtime species
     initialState.assign(cfg.species, 0.0);
-    for (int i = 0; i < cfg.trackedSpecies; i++) {
-        initialState[cfg.trackedIndex[i]] = cfg.fullConc[i] * QASAP[0].state[i];
+    for (auto p: cfg.initConc) {
+        assert(0 <= p.first && p.first < cfg.species);
+        assert(p.second >= 0);
+        initialState[p.first] = p.second;
     }
-    endTime = arg.back()[0];
 
     rxnNet.build(cfg.reactNetworkFile, cfg.species, cfg.constantSize);
-
-    //setting up jac_fun_ and res_fun_
-    setUpCasADiFunctions();
     
     //seting up CVODE
     N_Vector y = N_VNew_Serial(cfg.species, sunctx);
@@ -781,7 +783,7 @@ void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
         for (int j = 0; j < cfg.trackedSpecies; j++) {
             size_t idx= (size_t)cfg.trackedIndex[j];
             assert(0 <= idx && idx < (size_t)cfg.species);
-            cout<<y_data[idx]/cfg.fullConc[j] <<", ";
+            cout<<100*y_data[idx]/cfg.fullConc[j] <<", ";
         }
         cout<<std::endl;
     }

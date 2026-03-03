@@ -22,6 +22,13 @@ trackedSpecies:
   'Pd214 cage (%)':
     100%concentration: 4.275e-4
     index: 25
+
+#初期状態の化学種の濃度 index:conc (必須)
+initConc:
+  27: 1.71e-3
+  26: 8.55e-4
+
+
 #差分進化法のエージェント数(必須)
 popSize: 128
 #最大世代数(必須)

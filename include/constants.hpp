@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <string_view>
+#include <map>
 
 #define USE_PREGENERATED_RHSF (1)
 #define USE_PREGENERATED_JACOBIAN (1)
@@ -24,6 +25,10 @@ const int trackedIndex[] = { 27, 26, 28, 25 };
 //Table_S1.csvにおいて、化学種の100%にあたる濃度
 const double fullConc[] = {0.0017099999999999999, 0.00085499999999999997, 0.0034199999999999999, 0.00042749999999999998};
 
+const std::map<int,double> initConc = {
+    {27, 1.71e-3},
+    {26, 8.55e-4}
+};
 
 //差分進化法のエージェント数
 const int popSize = 128;

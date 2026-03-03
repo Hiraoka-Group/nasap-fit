@@ -26,7 +26,7 @@
 using std::vector;
 
 struct differentialEvolution {
-	struct Constants {
+	struct Config {
 		std::string QASAPFile;
 		std::string reactNetworkFile;
 		int species = 0;//シミュレーション時 config.yamlから
@@ -35,6 +35,7 @@ struct differentialEvolution {
 		vector<std::string_view> trackedNames;//QASAPのcsv読み取り時 config.yamlから
 		vector<int> trackedIndex;//QASAPのcsv読み取り時 config.yamlから
 		vector<double> fullConc;//シミュレーション時 config.yamlから
+		std::map<int,double> initConc;//シミュレーション時 config.yamlから
 		double tolAbsError = 1e-09;//シミュレーション時
 		double tolRelError = 3.2e-07;
 		double scalar = 0.7;//optimize時
@@ -49,7 +50,7 @@ struct differentialEvolution {
 	};
 private:
 	double endTime; //シミュレーション終了時間
-	Constants cfg;
+	Config cfg;
 	ReactionNetwork rxnNet;
 	struct datum {
 		double time;
@@ -63,12 +64,10 @@ private:
 
 	std::vector<double> initialState; //初期状態（ランタイムサイズ）
 	std::vector<datum> QASAP;  //実験データ
+	vector<int>indexOrder;
 
 	sundials::Context sunctx;
 	void* cvode_mem = CVodeCreate(CV_BDF, sunctx);
-
-	// jac_fun_と res_fun_のセットアップ
-	void setUpCasADiFunctions();
 
 	vector<double> crossingOver(const vector<double>& baseV, const vector<double>& randV1, const vector<double>& randV2);
 
@@ -76,8 +75,10 @@ private:
 
 	void sortByError(vector<OptimizeResult>& populations);
 public:
+// jac_fun_と res_fun_のセットアップ
+	void setUpCasADiFunctions();
 
-	const Constants& constants() const { return cfg; }
+	const Config& constants() const { return cfg; }
 
 	// expose reaction-network metadata (e.g., kind->index map)
 	const ReactionNetwork& reactionNetwork() const { return rxnNet; }
@@ -94,10 +95,10 @@ public:
 	vector<vector<double>> pseudoHessian(const vector<double>& point);
 
 	// 実験データのセット
-	void setQASAPData(vector<vector<double>>& arg);
+	void setQASAPData(vector<vector<std::string>>& arg);
 
 	// Constructor
-	differentialEvolution(vector<vector<double>>& arg);
+	differentialEvolution(const Config& arg);
 
 	// Levenberg-Marquardt法による最適化の実行
 	OptimizeResult runLM(const vector<double>& theta0);
