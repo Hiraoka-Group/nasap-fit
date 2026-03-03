@@ -32,9 +32,9 @@ std::chrono::system_clock::time_point startTime,endTimeGlobal;
 //rshift myRand(1);
 
 signed main(int argc, char** argv) {
-	//MPI_Init(&argc, &argv);
-	//MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-    //MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
 
 	differentialEvolution::Config cfg;
 	cfg.QASAPFile = config::QASAPFile;
@@ -59,9 +59,6 @@ signed main(int argc, char** argv) {
 
 	
 	differentialEvolution diffEvo(cfg); // Assuming setQASAPData is a method to set the data
-	diffEvo.setQASAPData(QASAPdata);
-	diffEvo.setUpCasADiFunctions();
-	diffEvo.runLM({3.002, 1e+04, 60.37, 2978, 4.915, 0.7673, 0.5706, 0.2084});
 
 	startTime = std::chrono::system_clock::now();
 	auto opt = diffEvo.Optimize(50, 128);
@@ -88,6 +85,7 @@ signed main(int argc, char** argv) {
 		std::cout<<std::endl;
 		std::cout<<"error: "<<minerror<<std::endl;
 	}
+	diffEvo.putCVODESim(bestConstants);
 
 	MPI_Finalize();
 	return 0;

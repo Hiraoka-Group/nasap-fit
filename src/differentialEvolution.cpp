@@ -23,6 +23,7 @@
 #include "../include/xorshift.hpp"
 #include "../include/Jacf.hpp"
 #include "../include/Rhsf.hpp"
+#include "../include/readcsv.hpp"
 
 xorshift myRand(2);
 int cnt=0;
@@ -102,7 +103,7 @@ double differentialEvolution::calcError(const std::vector<double>& constant) {
         }
         double* y_data = N_VGetArrayPointer(y);
         for (int j = 0; j < cfg.trackedSpecies; j++) {
-            size_t idx= (size_t)cfg.trackedIndex[j];
+            size_t idx= (size_t)indexOrder[j];
             assert(0 <= idx && idx < (size_t)cfg.species);
             SSR += (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]/100) * (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]/100);
         }
@@ -312,7 +313,7 @@ std::vector<std::vector<double>> differentialEvolution::pseudoHessian(const std:
 }
 
 //実験データのセット
-void differentialEvolution::setQASAPData(vector<vector<std::string>>& arg) {
+void differentialEvolution::setQASAPData(const vector<vector<std::string>>& arg) {
     QASAP.clear();
     indexOrder.clear();
 	bool isHeader = true;
@@ -352,6 +353,8 @@ differentialEvolution::differentialEvolution(const Config& arg): cfg(arg) {
     }
 
     rxnNet.build(cfg.reactNetworkFile, cfg.species, cfg.constantSize);
+    setQASAPData(read_csv(cfg.QASAPFile));
+    setUpCasADiFunctions();
     
     //seting up CVODE
     N_Vector y = N_VNew_Serial(cfg.species, sunctx);
@@ -781,7 +784,7 @@ void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
 
         double* y_data = N_VGetArrayPointer(y);
         for (int j = 0; j < cfg.trackedSpecies; j++) {
-            size_t idx= (size_t)cfg.trackedIndex[j];
+            size_t idx= (size_t)indexOrder[j];
             assert(0 <= idx && idx < (size_t)cfg.species);
             cout<<100*y_data[idx]/cfg.fullConc[j] <<", ";
         }

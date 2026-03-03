@@ -95,7 +95,7 @@ public:
 	vector<vector<double>> pseudoHessian(const vector<double>& point);
 
 	// 実験データのセット
-	void setQASAPData(vector<vector<std::string>>& arg);
+	void setQASAPData(const vector<vector<std::string>>& arg);
 
 	// Constructor
 	differentialEvolution(const Config& arg);

@@ -3,8 +3,8 @@
 #include <string_view>
 #include <map>
 
-#define USE_PREGENERATED_RHSF (1)
-#define USE_PREGENERATED_JACOBIAN (1)
+#define USE_PREGENERATED_RHSF (0)
+#define USE_PREGENERATED_JACOBIAN (0)
 
 namespace config {
 const std::string QASAPFile = "../data/Table_S1.csv";
@@ -36,7 +36,7 @@ const int popSize = 128;
 const int maxGen = 50;
 
 //シミュレーションの許容絶対誤差
-const double tolAbsError = 1.0000000000000001e-09;
+const double tolAbsError = 1.0000000000000001e-10;
 //シミュレーションの許容相対誤差
 const double tolRelError = 3.2e-07;
 //適応型ルンゲクッタ法の安全係数
