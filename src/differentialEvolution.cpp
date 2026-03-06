@@ -16,6 +16,7 @@
 #include <mpi.h>
 #include <sunmatrix/sunmatrix_sparse.h>
 #include <sunlinsol/sunlinsol_klu.h>
+#include <cvodes/cvodes.h>
 #include <casadi/casadi.hpp>
 
 #include "../include/differentialEvolution.hpp"
@@ -23,6 +24,7 @@
 #include "../include/xorshift.hpp"
 #include "../include/Jacf.hpp"
 #include "../include/Rhsf.hpp"
+#include "../include/readcsv.hpp"
 
 xorshift myRand(2);
 int cnt=0;
@@ -77,8 +79,9 @@ double differentialEvolution::calcError(const std::vector<double>& constant) {
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
-    
+    N_Vector yQ0 = N_VNew_Serial(0, sunctx);
     CVodeReInit(cvode_mem, 0.0, y);
+    CVodeQuadReInit(cvode_mem, yQ0);
     #if USE_PREGENERATED_RHSF || USE_PREGENERATED_JACOBIAN
         CVodeSetUserData(cvode_mem, (void*)constant.data());
     #else
@@ -102,9 +105,9 @@ double differentialEvolution::calcError(const std::vector<double>& constant) {
         }
         double* y_data = N_VGetArrayPointer(y);
         for (int j = 0; j < cfg.trackedSpecies; j++) {
-            size_t idx= (size_t)cfg.trackedIndex[j];
+            size_t idx= (size_t)indexOrder[j];
             assert(0 <= idx && idx < (size_t)cfg.species);
-            SSR += (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]) * (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]);
+            SSR += (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]/100) * (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]/100);
         }
     }
     return SSR;
@@ -112,7 +115,7 @@ double differentialEvolution::calcError(const std::vector<double>& constant) {
 
 static Function build_integrator(std::string name,
 						const std::vector<double>& tout,
-						const differentialEvolution::Constants& cfg,
+						const differentialEvolution::Config& cfg,
 						const ReactionNetwork& rxnNet) {
     // 状態変数
     SX sp = SX::sym("sp", cfg.species);
@@ -184,7 +187,7 @@ void differentialEvolution::setUpCasADiFunctions() {
         MX x = xf(Slice(), i);
         for (int j = 0; j < cfg.trackedSpecies; j++) {
             MX sim_val = x(cfg.trackedIndex[j]) / cfg.fullConc[j];
-            MX exp_val = QASAP[i].state[j];
+            MX exp_val = QASAP[i].state[j]/100;
             r(i * cfg.trackedSpecies + j) = sim_val - exp_val;
             SSR += r(i * cfg.trackedSpecies + j) * r(i * cfg.trackedSpecies + j);
         }
@@ -312,47 +315,56 @@ std::vector<std::vector<double>> differentialEvolution::pseudoHessian(const std:
 }
 
 //実験データのセット
-void differentialEvolution::setQASAPData(std::vector<std::vector<double>>& arg) {
-    for (const std::vector<double>& vec : arg) {
-        assert((int)vec.size() == cfg.trackedSpecies + 1);
-        QASAP.push_back({ vec[0],std::vector<double>({vec.begin()+1, vec.begin()+cfg.trackedSpecies+1}) });
-    }
+void differentialEvolution::setQASAPData(const vector<vector<std::string>>& arg) {
+    QASAP.clear();
+    indexOrder.clear();
+	bool isHeader = true;
+	for (const auto& row : arg) {
+        assert((size_t)cfg.trackedSpecies + 1 <= row.size());
+		std::vector<double> row_double;
+		if(isHeader){
+            isHeader = false;
+            for(int i=1;i<=cfg.trackedSpecies;i++){
+                auto it = std::find(cfg.trackedNames.begin(), cfg.trackedNames.end(), row[i]);
+                assert(it != cfg.trackedNames.end());
+                int idx = std::distance(cfg.trackedNames.begin(), it);
+                indexOrder.push_back(cfg.trackedIndex[idx]);
+            }
+        }
+        else{
+            for(int i=0;i<=cfg.trackedSpecies;i++){
+                row_double.push_back(std::stod(row[i]));
+                assert(std::stod(row[i]) >= 0);
+            }
+            QASAP.push_back({ row_double[0],std::vector<double>({row_double.begin()+1, row_double.begin()+cfg.trackedSpecies+1}) });
+        }
+	}
+    endTime = QASAP.back().time;
+
 }
 
-differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
+differentialEvolution::differentialEvolution(const Config& arg): cfg(arg) {
     myRand=xorshift(1+proc_rank);
 
-    // copy config constants into instance-owned cfg
-    cfg.QASAPFile = config::QASAPFile;
-    cfg.reactNetworkFile = config::reactNetworkFile;
-    cfg.species = config::species;
-    cfg.constantSize = config::constantSize;
-    cfg.trackedSpecies = config::trackedSpecies;
-    cfg.trackedNames.assign(std::begin(config::trackedNames), std::end(config::trackedNames));
-    cfg.trackedIndex.assign(std::begin(config::trackedIndex), std::end(config::trackedIndex));
-    cfg.fullConc.assign(std::begin(config::fullConc), std::end(config::fullConc));
-    cfg.tolAbsError = config::tolAbsError;
-    cfg.tolRelError = config::tolRelError;
-    cfg.scalar = config::scalar;
-    cfg.crossOver = config::crossOver;
-    cfg.upperLim = config::upperLim;
-    cfg.lowerLim = config::lowerLim;
-
-    setQASAPData(arg);
     // allocate initialState according to runtime species
     initialState.assign(cfg.species, 0.0);
-    for (int i = 0; i < cfg.trackedSpecies; i++) {
-        initialState[cfg.trackedIndex[i]] = cfg.fullConc[i] * QASAP[0].state[i];
+    for (auto p: cfg.initConc) {
+        assert(0 <= p.first && p.first < cfg.species);
+        assert(p.second >= 0);
+        initialState[p.first] = p.second;
     }
-    endTime = arg.back()[0];
 
     rxnNet.build(cfg.reactNetworkFile, cfg.species, cfg.constantSize);
-
-    //setting up jac_fun_ and res_fun_
+    setQASAPData(read_csv(cfg.QASAPFile));
     setUpCasADiFunctions();
     
     //seting up CVODE
     N_Vector y = N_VNew_Serial(cfg.species, sunctx);
+
+    //あとで修正する
+    N_Vector yQ0 = N_VNew_Serial(136, sunctx);
+    //あとで修正する
+
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
@@ -367,6 +379,7 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
     flag = CVodeSStolerances(cvode_mem, cfg.tolRelError, cfg.tolAbsError);
     assert(flag == CV_SUCCESS);
 
+
     #if USE_PREGENERATED_JACOBIAN
         SUNMatrix J = SUNSparseMatrix(cfg.species, cfg.species, nonZeroElems, CSC_MAT, sunctx);
         SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
@@ -380,6 +393,9 @@ differentialEvolution::differentialEvolution(vector<vector<double>>& arg) {
         assert(flag == CV_SUCCESS);
         flag = CVodeSetJacFn(cvode_mem, ReactionNetwork::JacFnCb);
     #endif
+    assert(flag == CV_SUCCESS);
+
+    flag = CVodeQuadInit(cvode_mem, ReactionNetwork::quadRhsCb, yQ0);
     assert(flag == CV_SUCCESS);
 
     flag = CVodeSetMaxNumSteps(cvode_mem, 10000);
@@ -760,12 +776,8 @@ void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
         NV_Ith_S(y, i) = initialState[i];
     }
     CVodeReInit(cvode_mem, 0.0, y);
-    #if USE_PREGENERATED_RHSF || USE_PREGENERATED_JACOBIAN
-        CVodeSetUserData(cvode_mem, (void*)constant.data());
-    #else
-        ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data() };
-        CVodeSetUserData(cvode_mem, (void*)&ud);
-    #endif
+    ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), nullptr };
+    CVodeSetUserData(cvode_mem, (void*)&ud);
     
     cout <<"Time (min),1 (%),[PdPy*4]2+ (%),Py* (%),Pd214 cage (%),"<<std::endl;
     bool flag=CV_SUCCESS;
@@ -779,12 +791,89 @@ void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
 
         double* y_data = N_VGetArrayPointer(y);
         for (int j = 0; j < cfg.trackedSpecies; j++) {
-            size_t idx= (size_t)cfg.trackedIndex[j];
+            size_t idx= (size_t)indexOrder[j];
             assert(0 <= idx && idx < (size_t)cfg.species);
-            cout<<y_data[idx]/cfg.fullConc[j] <<", ";
+            cout<<100*y_data[idx]/cfg.fullConc[j] <<", ";
         }
         cout<<std::endl;
     }
-
 }
 
+
+
+differentialEvolution::SimulationResult differentialEvolution::simulate(const vector<double>& t, const vector<double>& constant, const vector<int>& reaction_ids) {
+    if(proc_rank!=0)return {};
+    validateConstants(constant);
+
+    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
+    for (int i = 0; i < cfg.species; ++i) {
+        NV_Ith_S(y, i) = initialState[i];
+    }
+    N_Vector yQ0 = N_VNew_Serial(reaction_ids.size(), sunctx);
+    for(int i=0; i<reaction_ids.size(); i++){
+        int rid = reaction_ids[i];
+        assert(0 <= rid && rid < rxnNet.data.size());
+        NV_Ith_S(yQ0, i) = 0.0;
+    }
+
+    CVodeReInit(cvode_mem, 0.0, y);
+    CVodeQuadReInit(cvode_mem, yQ0);
+    #if USE_PREGENERATED_RHSF || USE_PREGENERATED_JACOBIAN
+        CVodeSetUserData(cvode_mem, (void*)constant.data());
+    #else
+        ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), &reaction_ids };
+        CVodeSetUserData(cvode_mem, (void*)&ud);
+    #endif
+    
+    SimulationResult result;
+    result.t = t;
+    result.timePoints = t.size();
+    result.y.resize(t.size(), vector<double>(cfg.species, 0.0));
+    result.reactionProgress.J.resize(t.size(), vector<double>(reaction_ids.size(), 0.0));
+    result.reactionProgress.reaction_ids = reaction_ids;
+    result.reactionProgress.reaction_labels.resize(reaction_ids.size(),"");
+    for(size_t i=0; i<reaction_ids.size(); i++){
+        int rid = reaction_ids[i];
+        std::string& label = result.reactionProgress.reaction_labels[i];
+        assert(0 <= rid && rid < rxnNet.data.size());
+        int init = rxnNet.data[rid][0];
+        int entering = rxnNet.data[rid][1];
+        int product = rxnNet.data[rid][2];
+        int leaving = rxnNet.data[rid][3];
+        int kind = rxnNet.data[rid][4];
+        int duplicacy = rxnNet.data[rid][5];
+        if (entering != -1) {
+           label += std::to_string(init) + " + " + std::to_string(entering) + " -> ";
+        } else {
+           label += std::to_string(init) + " -> ";
+        }
+        if (leaving != -1) {
+           label += std::to_string(product) + " + " + std::to_string(leaving);
+        } else {
+           label += std::to_string(product);
+        }
+    }
+    
+    bool flag=CV_SUCCESS;
+    double tret=0.0;
+    for (size_t i = 0; i < t.size(); i++) {
+        double time_point = t[i];
+        assert(0 <= time_point && time_point <= endTime);
+        if(!(tret-0.1<time_point&&time_point<tret+0.1)) flag=CVode(cvode_mem, time_point, y, &tret, CV_NORMAL);
+        assert(flag >= 0);
+        flag = CVodeGetQuad(cvode_mem, &tret, yQ0);
+        assert(flag >= 0);
+
+        double* y_data = N_VGetArrayPointer(y);
+        double* q_data = N_VGetArrayPointer(yQ0);
+        for (int j = 0; j < cfg.species; j++) {
+            result.y[i][j] = y_data[j];
+        }
+        for (size_t j = 0; j < reaction_ids.size(); j++) {
+            int rid = reaction_ids[j];
+            assert(0 <= rid && rid < rxnNet.data.size());
+            result.reactionProgress.J[i][j] = q_data[j];
+        }
+    }
+    return result;
+}

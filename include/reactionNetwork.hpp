@@ -19,6 +19,8 @@ struct ReactionNetwork {
 	int species = 0;
 	int constantSize = 0;
 
+	std::vector<std::array<int, 6>>data;
+
 	struct RhsTerm {
 		int add_to{};
 		int duplicacy{};
@@ -50,6 +52,7 @@ struct ReactionNetwork {
 	struct CvodeUserData {
 		ReactionNetwork* net{};
 		const double* constants{}; // length: constantSize
+		const std::vector<int>* reactionIds;
 	};
 
 	std::map<std::string, int> termIndex;      // kind -> index
@@ -77,6 +80,8 @@ struct ReactionNetwork {
 					N_Vector tmp2,
 					N_Vector tmp3);
 
+	static int quadRhsCb(sunrealtype t, N_Vector y, N_Vector yQdot, void *user_data);
+
 private:
 	std::vector<double> speciesData_; // size: species + 1 (last is dummy=1.0)
 
@@ -88,4 +93,6 @@ private:
 			N_Vector fy,
 			SUNMatrix Jac,
 			const double* constants);
+	
+	int quadRhsImpl(sunrealtype t, N_Vector y, N_Vector yQdot, const double* constants, const std::vector<int>* reactionIds);
 };

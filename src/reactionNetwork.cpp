@@ -6,6 +6,7 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include <nvector/nvector_serial.h>
 #include <sunmatrix/sunmatrix_sparse.h>
@@ -72,6 +73,8 @@ void ReactionNetwork::build(const std::string& reactNetworkFile, int species_, i
 
 	auto csv_data = read_csv(reactNetworkFile);
 	std::vector<std::map<std::string, std::string>> dataDict;
+	data.clear();
+	data.reserve(csv_data.size() - 1);
 	dataDict.reserve(csv_data.size());
 	for (size_t i = 1; i < csv_data.size(); ++i) {
 		std::map<std::string, std::string> row;
@@ -92,6 +95,7 @@ void ReactionNetwork::build(const std::string& reactNetworkFile, int species_, i
 		++idx;
 	}
 
+
 	// RHS terms
 	{
 		std::map<std::tuple<int, int, int, int>, int> ode; // (add_to, init, entering, kind) -> duplicacy
@@ -109,6 +113,8 @@ void ReactionNetwork::build(const std::string& reactNetworkFile, int species_, i
 			int leaving = is_stoiable(mp.at("leaving_assem_id")) ? std::stoi(mp.at("leaving_assem_id")) : species;
 			int kind = termIndex.at(mp.at("kind"));
 			int duplicacy = std::stoi(mp.at("duplicate_count"));
+
+			data.push_back({init, entering, product, leaving, kind, duplicacy});
 
 			addTerm(init, init, entering, kind, -duplicacy);
 			if (entering != species) {
@@ -224,6 +230,13 @@ int ReactionNetwork::JacFnCb(sunrealtype t,
 	return ud->net->jacImpl(t, y, fy, Jac, ud->constants);
 }
 
+int ReactionNetwork::quadRhsCb(sunrealtype t, N_Vector y, N_Vector yQdot, void *user_data){
+	auto* ud = static_cast<CvodeUserData*>(user_data);
+	if (ud == nullptr || ud->net == nullptr || ud->constants == nullptr) return -1;
+	if (ud->reactionIds==nullptr)return 0;
+	return ud->net->quadRhsImpl(t, y, yQdot, ud->constants, ud->reactionIds);
+}
+
 int ReactionNetwork::rhsfImpl(sunrealtype /*t*/, N_Vector y, N_Vector ydot, const double* constants) {
 	ensureSizes();
 
@@ -286,4 +299,24 @@ int ReactionNetwork::jacImpl(sunrealtype /*t*/,
 		++idx;
 	}
 	return 0;
+}
+
+int ReactionNetwork::quadRhsImpl(sunrealtype t, N_Vector y, N_Vector yQdot, const double* constants, const std::vector<int>* reactionIds) {
+	double* y_data = N_VGetArrayPointer(y);
+    double* yQdot_data = N_VGetArrayPointer(yQdot);
+    int M = reactionIds->size();
+    for(int i=0; i<M; i++){
+		int idx = reactionIds->at(i);
+        int init = data[idx][0];
+        int entering = data[idx][1];
+        int kind = data[idx][4];
+        int duplicacy = data[idx][5];
+        if(entering==species) {
+            yQdot_data[i] = duplicacy * constants[kind] * y_data[init];
+        }
+        else{
+            yQdot_data[i] = duplicacy * constants[kind] * y_data[init] * y_data[entering];
+        }
+    }
+    return 0;
 }

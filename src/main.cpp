@@ -35,25 +35,30 @@ signed main(int argc, char** argv) {
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+
+	differentialEvolution::Config cfg;
+	cfg.QASAPFile = config::QASAPFile;
+    cfg.reactNetworkFile = config::reactNetworkFile;
+    cfg.species = config::species;
+    cfg.constantSize = config::constantSize;
+    cfg.trackedSpecies = config::trackedSpecies;
+    cfg.trackedNames=vector<std::string_view>(std::begin(config::trackedNames), std::end(config::trackedNames));
+    cfg.trackedIndex=vector<int>(std::begin(config::trackedIndex), std::end(config::trackedIndex));
+    cfg.fullConc=vector<double>(std::begin(config::fullConc), std::end(config::fullConc));
+    cfg.initConc = config::initConc;
+    cfg.tolAbsError = config::tolAbsError;
+    cfg.tolRelError = config::tolRelError;
+    cfg.scalar = config::scalar;
+    cfg.crossOver = config::crossOver;
+    cfg.upperLim = config::upperLim;
+    cfg.lowerLim = config::lowerLim;
+
 	std::vector<std::vector<std::string>> QASAPdata = read_csv(std::string(config::QASAPFile));
-	std::vector<std::vector<double>> csv_data_double;
-	bool isHeader = true;
-	for (const auto& row : QASAPdata) {
-		std::vector<double> row_double;
-		for (int i=0; i<config::trackedSpecies+1; i++) {
-			if(isHeader){
-				isHeader=false;
-				goto dontPush; //ヘッダー行をスキップ
-			} 
-			row_double.push_back(std::stod(row[i]));
-		}
-		csv_data_double.push_back(row_double);
-		dontPush:;
-	}
-	if(proc_rank==0)std::cout<<"Loaded "<<csv_data_double.size()<<" rows of data."<<std::endl;
+
+	if(proc_rank==0)std::cout<<"Loaded "<<QASAPdata.size()<<" rows of data."<<std::endl;
 
 	
-	differentialEvolution diffEvo(csv_data_double); // Assuming setQASAPData is a method to set the data
+	differentialEvolution diffEvo(cfg);
 	
 
 	startTime = std::chrono::system_clock::now();
@@ -81,6 +86,7 @@ signed main(int argc, char** argv) {
 		std::cout<<std::endl;
 		std::cout<<"error: "<<minerror<<std::endl;
 	}
+	diffEvo.putCVODESim(bestConstants);
 
 	MPI_Finalize();
 	return 0;
