@@ -22,8 +22,6 @@
 #include "../include/differentialEvolution.hpp"
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
-#include "../include/Jacf.hpp"
-#include "../include/Rhsf.hpp"
 #include "../include/readcsv.hpp"
 
 xorshift myRand(2);
