@@ -19,6 +19,8 @@ struct ReactionNetwork {
 	int species = 0;
 	int constantSize = 0;
 
+	std::vector<std::array<int, 6>>data;
+
 	struct RhsTerm {
 		int add_to{};
 		int duplicacy{};

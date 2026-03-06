@@ -72,6 +72,7 @@ void ReactionNetwork::build(const std::string& reactNetworkFile, int species_, i
 
 	auto csv_data = read_csv(reactNetworkFile);
 	std::vector<std::map<std::string, std::string>> dataDict;
+	data.resize(csv_data.size() - 1);
 	dataDict.reserve(csv_data.size());
 	for (size_t i = 1; i < csv_data.size(); ++i) {
 		std::map<std::string, std::string> row;
@@ -92,6 +93,7 @@ void ReactionNetwork::build(const std::string& reactNetworkFile, int species_, i
 		++idx;
 	}
 
+
 	// RHS terms
 	{
 		std::map<std::tuple<int, int, int, int>, int> ode; // (add_to, init, entering, kind) -> duplicacy
@@ -109,6 +111,8 @@ void ReactionNetwork::build(const std::string& reactNetworkFile, int species_, i
 			int leaving = is_stoiable(mp.at("leaving_assem_id")) ? std::stoi(mp.at("leaving_assem_id")) : species;
 			int kind = termIndex.at(mp.at("kind"));
 			int duplicacy = std::stoi(mp.at("duplicate_count"));
+
+			data.push_back({init, entering, product, leaving, kind, duplicacy});
 
 			addTerm(init, init, entering, kind, -duplicacy);
 			if (entering != species) {
