@@ -55,7 +55,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE MPI::MPI_CXX)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
 
 # SUNDIALSライブラリをリンク
-target_link_libraries(${PROJECT_NAME} PRIVATE sundials_cvode)
+target_link_libraries(${PROJECT_NAME} PRIVATE sundials_cvodes)
 target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_core.so)
 target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_sunlinsolklu.so)
 

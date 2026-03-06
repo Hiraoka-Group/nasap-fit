@@ -110,4 +110,20 @@ public:
 	vector<OptimizeResult> Optimize(vector<vector<double>> arg);
 
 	void putCVODESim(const vector<double>& constant);
+
+	struct SimulationResult {
+		struct ReactionProgressResult{
+			vector<int> reaction_ids;
+			//累積反応進行度
+			vector<vector<double>> J; // size: [reaction_id][time_index]
+			vector<std::string> reaction_labels;
+		};
+		std::string status; // "success"|"failed"
+		int timePoints;
+		vector<double> t;
+		vector<vector<double>>y; // size: [species][time_index]
+		ReactionProgressResult reactionProgress;
+	};
+
+	SimulationResult simulate(const vector<double>& t, const vector<double>& constant, const vector<int>& reaction_ids);
 };

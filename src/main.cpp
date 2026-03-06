@@ -58,7 +58,8 @@ signed main(int argc, char** argv) {
 	if(proc_rank==0)std::cout<<"Loaded "<<QASAPdata.size()<<" rows of data."<<std::endl;
 
 	
-	differentialEvolution diffEvo(cfg); // Assuming setQASAPData is a method to set the data
+	differentialEvolution diffEvo(cfg);
+	
 
 	startTime = std::chrono::system_clock::now();
 	auto opt = diffEvo.Optimize(50, 128);
