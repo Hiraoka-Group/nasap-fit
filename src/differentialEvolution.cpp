@@ -22,8 +22,6 @@
 #include "../include/differentialEvolution.hpp"
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
-#include "../include/Jacf.hpp"
-#include "../include/Rhsf.hpp"
 #include "../include/readcsv.hpp"
 
 xorshift myRand(2);
@@ -82,13 +80,8 @@ double differentialEvolution::calcError(const std::vector<double>& constant) {
     N_Vector yQ0 = N_VNew_Serial(0, sunctx);
     CVodeReInit(cvode_mem, 0.0, y);
     CVodeQuadReInit(cvode_mem, yQ0);
-    #if USE_PREGENERATED_RHSF || USE_PREGENERATED_JACOBIAN
-        CVodeSetUserData(cvode_mem, (void*)constant.data());
-    #else
-        static_assert(std::is_same_v<double, double>, "Non-pregenerated CVODE callbacks require double constants");
-        ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data() };
-        CVodeSetUserData(cvode_mem, (void*)&ud);
-    #endif
+    ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), nullptr };
+    CVodeSetUserData(cvode_mem, (void*)&ud);
     
     double SSR = 0;
     double tret=0.0;
@@ -369,30 +362,17 @@ differentialEvolution::differentialEvolution(const Config& arg): cfg(arg) {
         NV_Ith_S(y, i) = initialState[i];
     }
     
-    #if USE_PREGENERATED_RHSF
-        int flag = CVodeInit(cvode_mem, rhsf, 0.0, y);
-    #else
-        int flag = CVodeInit(cvode_mem, ReactionNetwork::rhsfCb, 0.0, y);
-    #endif
+    int flag = CVodeInit(cvode_mem, ReactionNetwork::rhsfCb, 0.0, y);
     assert(flag == CV_SUCCESS);
 
     flag = CVodeSStolerances(cvode_mem, cfg.tolRelError, cfg.tolAbsError);
     assert(flag == CV_SUCCESS);
 
-
-    #if USE_PREGENERATED_JACOBIAN
-        SUNMatrix J = SUNSparseMatrix(cfg.species, cfg.species, nonZeroElems, CSC_MAT, sunctx);
-        SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
-        flag = CVodeSetLinearSolver(cvode_mem, LS, J);
-        assert(flag == CV_SUCCESS);
-        flag = CVodeSetJacFn(cvode_mem, JacFn);
-    #else
-        SUNMatrix J = SUNSparseMatrix(cfg.species, cfg.species, rxnNet.jacNonZeros, CSC_MAT, sunctx);
-        SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
-        flag = CVodeSetLinearSolver(cvode_mem, LS, J);
-        assert(flag == CV_SUCCESS);
-        flag = CVodeSetJacFn(cvode_mem, ReactionNetwork::JacFnCb);
-    #endif
+    SUNMatrix J = SUNSparseMatrix(cfg.species, cfg.species, rxnNet.jacNonZeros, CSC_MAT, sunctx);
+    SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
+    flag = CVodeSetLinearSolver(cvode_mem, LS, J);
+    assert(flag == CV_SUCCESS);
+    flag = CVodeSetJacFn(cvode_mem, ReactionNetwork::JacFnCb);
     assert(flag == CV_SUCCESS);
 
     flag = CVodeQuadInit(cvode_mem, ReactionNetwork::quadRhsCb, yQ0);
@@ -818,12 +798,8 @@ differentialEvolution::SimulationResult differentialEvolution::simulate(const ve
 
     CVodeReInit(cvode_mem, 0.0, y);
     CVodeQuadReInit(cvode_mem, yQ0);
-    #if USE_PREGENERATED_RHSF || USE_PREGENERATED_JACOBIAN
-        CVodeSetUserData(cvode_mem, (void*)constant.data());
-    #else
-        ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), &reaction_ids };
-        CVodeSetUserData(cvode_mem, (void*)&ud);
-    #endif
+    ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), &reaction_ids };
+    CVodeSetUserData(cvode_mem, (void*)&ud);
     
     SimulationResult result;
     result.t = t;
