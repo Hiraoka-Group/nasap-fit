@@ -18,7 +18,7 @@
 */
 
 #include "../include/constants.hpp"
-#include "../include/differentialEvolution.hpp"
+#include "../include/NASAP_fit.hpp"
 #include "../include/readcsv.hpp"
 
 int num_procs=1;//総プロセス数
@@ -36,7 +36,7 @@ signed main(int argc, char** argv) {
 	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
 
-	differentialEvolution::Config cfg;
+	NASAP_fit::Config cfg;
 	cfg.QASAPFile = config::QASAPFile;
     cfg.reactNetworkFile = config::reactNetworkFile;
     cfg.species = config::species;
@@ -58,11 +58,11 @@ signed main(int argc, char** argv) {
 	if(proc_rank==0)std::cout<<"Loaded "<<QASAPdata.size()<<" rows of data."<<std::endl;
 
 	
-	differentialEvolution diffEvo(cfg);
+	NASAP_fit diffEvo(cfg);
 	
 
 	startTime = std::chrono::system_clock::now();
-	auto opt = diffEvo.Optimize(50, 128);
+	auto opt = diffEvo.runDE(50, 128);
 	endTimeGlobal = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTimeGlobal - startTime).count();
 

@@ -19,7 +19,7 @@
 #include <cvodes/cvodes.h>
 #include <casadi/casadi.hpp>
 
-#include "../include/differentialEvolution.hpp"
+#include "../include/NASAP_fit.hpp"
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
 #include "../include/readcsv.hpp"
@@ -38,7 +38,7 @@ using std::sqrt;
 
 
 
-std::vector<double> differentialEvolution::crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2){
+std::vector<double> NASAP_fit::crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2){
     std::vector<double> v(cfg.constantSize);
     int jr = myRand(cfg.constantSize);
     for (int k = 0; k < cfg.constantSize; k++) {
@@ -54,23 +54,23 @@ std::vector<double> differentialEvolution::crossingOver(const std::vector<double
     return v;
 }
 
-void differentialEvolution::sortByError(vector<differentialEvolution::OptimizeResult>& populations){
+void NASAP_fit::sortByError(vector<NASAP_fit::OptimizeResult>& populations){
     sort(
         populations.begin(),
         populations.end(),
-        [](const differentialEvolution::OptimizeResult& a, const differentialEvolution::OptimizeResult& b){
+        [](const NASAP_fit::OptimizeResult& a, const NASAP_fit::OptimizeResult& b){
             return a.error < b.error;
         }
     );
 }
 
-void differentialEvolution::validateConstants(const vector<double>& constants){
+void NASAP_fit::validateConstants(const vector<double>& constants){
     assert(constants.size() == (size_t)cfg.constantSize);
     for(double c : constants) assert(std::isfinite(c) && c > 0);
 }
 
 //平方残差和の計算
-double differentialEvolution::calcError(const std::vector<double>& constant) {
+double NASAP_fit::calcError(const std::vector<double>& constant) {
     int flag=CV_SUCCESS;
 
     N_Vector y = N_VNew_Serial(cfg.species, sunctx);
@@ -108,7 +108,7 @@ double differentialEvolution::calcError(const std::vector<double>& constant) {
 
 static Function build_integrator(std::string name,
 						const std::vector<double>& tout,
-						const differentialEvolution::Config& cfg,
+						const NASAP_fit::Config& cfg,
 						const ReactionNetwork& rxnNet) {
     // 状態変数
     SX sp = SX::sym("sp", cfg.species);
@@ -152,7 +152,7 @@ static Function build_integrator(std::string name,
     );
 };
 
-void differentialEvolution::setUpCasADiFunctions() {
+void NASAP_fit::setUpCasADiFunctions() {
     // Levenberg-Marquardt refinement of populations[idx]
     std::vector<double> t_obs;//観測時間点
 
@@ -196,7 +196,7 @@ void differentialEvolution::setUpCasADiFunctions() {
     return;
 }
 //ヘッセ行列の計算
-std::vector<std::vector<double>> differentialEvolution::getHessian(const std::vector<double>& point){
+std::vector<std::vector<double>> NASAP_fit::getHessian(const std::vector<double>& point){
     validateConstants(point);
     // numeric central differences for Hessian
     int n = (int)point.size();
@@ -222,7 +222,7 @@ std::vector<std::vector<double>> differentialEvolution::getHessian(const std::ve
     return H;
 }
 
-std::vector<std::vector<double>> differentialEvolution::getHessian_parallel(const std::vector<double>& point){
+std::vector<std::vector<double>> NASAP_fit::getHessian_parallel(const std::vector<double>& point){
     validateConstants(point);
     int n = (int)point.size();
     std::vector<std::vector<double>> H(n, std::vector<double>(n, 0.0));
@@ -280,7 +280,7 @@ std::vector<std::vector<double>> differentialEvolution::getHessian_parallel(cons
 
 }
 
-std::vector<std::vector<double>> differentialEvolution::pseudoHessian(const std::vector<double>& point){
+std::vector<std::vector<double>> NASAP_fit::pseudoHessian(const std::vector<double>& point){
     validateConstants(point);
     const int n = cfg.constantSize;
     const int m = (int)QASAP.size() * cfg.trackedSpecies;
@@ -308,7 +308,7 @@ std::vector<std::vector<double>> differentialEvolution::pseudoHessian(const std:
 }
 
 //実験データのセット
-void differentialEvolution::setQASAPData(const vector<vector<std::string>>& arg) {
+void NASAP_fit::setQASAPData(const vector<vector<std::string>>& arg) {
     QASAP.clear();
     indexOrder.clear();
 	bool isHeader = true;
@@ -336,7 +336,7 @@ void differentialEvolution::setQASAPData(const vector<vector<std::string>>& arg)
 
 }
 
-differentialEvolution::differentialEvolution(const Config& arg): cfg(arg) {
+NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     myRand=xorshift(1+proc_rank);
 
     // allocate initialState according to runtime species
@@ -382,7 +382,7 @@ differentialEvolution::differentialEvolution(const Config& arg): cfg(arg) {
     assert(flag == CV_SUCCESS);
 }
 
-std::vector<differentialEvolution::OptimizeResult> differentialEvolution::Optimize(int maxGen, int popSize, double lowerLim, double upperLim) {
+std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int maxGen, int popSize, double lowerLim, double upperLim) {
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
         if (temp <= 0) return false;
@@ -505,7 +505,7 @@ std::vector<differentialEvolution::OptimizeResult> differentialEvolution::Optimi
     return populations;
 }
 
-std::vector<differentialEvolution::OptimizeResult> differentialEvolution::Optimize(std::vector<std::vector<double>> arg){
+std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<double>> arg){
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
         if (temp <= 0) return false;
@@ -634,7 +634,7 @@ std::vector<differentialEvolution::OptimizeResult> differentialEvolution::Optimi
 }
 
 
-differentialEvolution::OptimizeResult differentialEvolution::runLM(const std::vector<double>& theta0){
+NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0){
     const int n = cfg.constantSize;
     const int m = (int)QASAP.size() * cfg.trackedSpecies;
     validateConstants(theta0);
@@ -718,7 +718,7 @@ differentialEvolution::OptimizeResult differentialEvolution::runLM(const std::ve
     return result;
 }
 
-vector<differentialEvolution::OptimizeResult> differentialEvolution::runLM(const vector<vector<double>>& thetaList){
+vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>& thetaList){
     const size_t n = thetaList.size();
     vector<OptimizeResult> results(n, OptimizeResult(cfg.constantSize));
     std::vector<double> populationsFlat(n * (size_t)cfg.constantSize, 0.0);
@@ -749,7 +749,7 @@ vector<differentialEvolution::OptimizeResult> differentialEvolution::runLM(const
 
 
 
-void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
+void NASAP_fit::putCVODESim(const std::vector<double>& constant) {
     if(proc_rank!=0)return;
     N_Vector y = N_VNew_Serial(cfg.species, sunctx);
     for (int i = 0; i < cfg.species; ++i) {
@@ -781,7 +781,7 @@ void differentialEvolution::putCVODESim(const std::vector<double>& constant) {
 
 
 
-differentialEvolution::SimulationResult differentialEvolution::simulate(const vector<double>& t, const vector<double>& constant, const vector<int>& reaction_ids) {
+NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const vector<double>& constant, const vector<int>& reaction_ids) {
     if(proc_rank!=0)return {};
     validateConstants(constant);
 

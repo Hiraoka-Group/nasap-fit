@@ -129,29 +129,29 @@ nasap_fit_cpp/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/build
 .PHONY : nasap_fit_cpp/fast
 
-src/differentialEvolution.o: src/differentialEvolution.cpp.o
-.PHONY : src/differentialEvolution.o
+src/NASAP_fit.o: src/NASAP_fit.cpp.o
+.PHONY : src/NASAP_fit.o
 
 # target to build an object file
-src/differentialEvolution.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.o
-.PHONY : src/differentialEvolution.cpp.o
+src/NASAP_fit.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.o
+.PHONY : src/NASAP_fit.cpp.o
 
-src/differentialEvolution.i: src/differentialEvolution.cpp.i
-.PHONY : src/differentialEvolution.i
+src/NASAP_fit.i: src/NASAP_fit.cpp.i
+.PHONY : src/NASAP_fit.i
 
 # target to preprocess a source file
-src/differentialEvolution.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.i
-.PHONY : src/differentialEvolution.cpp.i
+src/NASAP_fit.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.i
+.PHONY : src/NASAP_fit.cpp.i
 
-src/differentialEvolution.s: src/differentialEvolution.cpp.s
-.PHONY : src/differentialEvolution.s
+src/NASAP_fit.s: src/NASAP_fit.cpp.s
+.PHONY : src/NASAP_fit.s
 
 # target to generate assembly for a file
-src/differentialEvolution.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/differentialEvolution.cpp.s
-.PHONY : src/differentialEvolution.cpp.s
+src/NASAP_fit.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.s
+.PHONY : src/NASAP_fit.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -234,9 +234,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... nasap_fit_cpp"
-	@echo "... src/differentialEvolution.o"
-	@echo "... src/differentialEvolution.i"
-	@echo "... src/differentialEvolution.s"
+	@echo "... src/NASAP_fit.o"
+	@echo "... src/NASAP_fit.i"
+	@echo "... src/NASAP_fit.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

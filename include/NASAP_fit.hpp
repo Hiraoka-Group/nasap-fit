@@ -25,7 +25,7 @@
 
 using std::vector;
 
-struct differentialEvolution {
+struct NASAP_fit {
 	struct Config {
 		std::string QASAPFile;
 		std::string reactNetworkFile;
@@ -98,16 +98,16 @@ public:
 	void setQASAPData(const vector<vector<std::string>>& arg);
 
 	// Constructor
-	differentialEvolution(const Config& arg);
+	NASAP_fit(const Config& arg);
 
 	// Levenberg-Marquardt法による最適化の実行
 	OptimizeResult runLM(const vector<double>& theta0);
 	vector<OptimizeResult> runLM(const vector<vector<double>>& thetaList);
 
 	// 差分進化法の実行
-	vector<OptimizeResult> Optimize(int maxGen, int popSize, double lowerLim = 1e-3, double upperLim = 1e4);
+	vector<OptimizeResult> runDE(int maxGen, int popSize, double lowerLim = 1e-3, double upperLim = 1e4);
 
-	vector<OptimizeResult> Optimize(vector<vector<double>> arg);
+	vector<OptimizeResult> runDE(vector<vector<double>> arg);
 
 	void putCVODESim(const vector<double>& constant);
 
