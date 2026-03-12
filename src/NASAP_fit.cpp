@@ -26,7 +26,6 @@
 
 xorshift myRand(2);
 int cnt=0;
-extern int num_procs, proc_rank;
     
 using namespace casadi;
 using std::vector;
@@ -238,7 +237,7 @@ std::vector<std::vector<double>> NASAP_fit::getHessian_parallel(const std::vecto
     MPI_Win win;
     MPI_Win_create(buffer.data(), sizeof(double)*2*n*n, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
     MPI_Win_fence(0, win);
-    for(int i=proc_rank; i<2*n; i+=num_procs){
+    for(int i=mpi_env.rank(); i<2*n; i+=mpi_env.size()){
         int idx = i/2;
         bool isUpper = (i % 2 == 0);
         DM pert = DM::zeros(n);
@@ -250,7 +249,7 @@ std::vector<std::vector<double>> NASAP_fit::getHessian_parallel(const std::vecto
         MPI_Put(vec.data(), n, MPI_DOUBLE, 0, i*n, n, MPI_DOUBLE, win);
     }
     MPI_Win_fence(0, win);
-    if(proc_rank==0){
+    if(mpi_env.rank()==0){
         for(int i=0;i<n;i++){
             for(int j=0;j<n;j++){
                 double f_plus = buffer[(2*i)*n + j];
@@ -260,7 +259,7 @@ std::vector<std::vector<double>> NASAP_fit::getHessian_parallel(const std::vecto
         }
     }
     std::vector<double> hflat(n * n, 0.0);
-    if (proc_rank == 0) {
+    if (mpi_env.rank() == 0) {
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
                 hflat[i * n + j] = H[i][j];
@@ -268,7 +267,7 @@ std::vector<std::vector<double>> NASAP_fit::getHessian_parallel(const std::vecto
         }
     }
     MPI_Bcast(hflat.data(), n * n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    if (proc_rank != 0) {
+    if (mpi_env.rank() != 0) {
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
                 H[i][j] = hflat[i * n + j];
@@ -337,7 +336,7 @@ void NASAP_fit::setQASAPData(const vector<vector<std::string>>& arg) {
 }
 
 NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
-    myRand=xorshift(1+proc_rank);
+    myRand=xorshift(1 + mpi_env.rank());
 
     // allocate initialState according to runtime species
     initialState.assign(cfg.species, 0.0);
@@ -383,6 +382,8 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
 }
 
 std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int maxGen, int popSize, double lowerLim, double upperLim) {
+    const int world_size = mpi_env.size();
+    const int world_rank = mpi_env.rank();
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
         if (temp <= 0) return false;
@@ -399,7 +400,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int maxGen, int popSize,
     std::vector<double> populationsErrorFlat((size_t)popSize, DBL_MAX);
 
     // initialize owned individuals only
-    for (int idx = proc_rank; idx < popSize; idx += num_procs) {
+    for (int idx = world_rank; idx < popSize; idx += world_size) {
         for (int j = 0; j < cfg.constantSize; ++j) {
             double v = randbetExp(lowerLim, upperLim);
             populations[idx].constants[j] = v;
@@ -428,19 +429,19 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int maxGen, int popSize,
     struct Triple { int j, xb, xr1, xr2; };
 
     for (int gen = 0; gen < maxGen; ++gen) {
-        if (proc_rank == 0) cout << "current generation : " << gen << " / " << maxGen << "\n";
+        if (world_rank == 0) cout << "current generation : " << gen << " / " << maxGen << "\n";
         double temp = 0;
 
         std::vector<Triple> triples;
-        triples.reserve((size_t)((popSize + num_procs - 1) / num_procs));
+        triples.reserve((size_t)((popSize + world_size - 1) / world_size));
 
         std::vector<int> remoteIndices;
         remoteIndices.reserve((size_t)popSize);
         auto needRemote = [&](int idx) {
-            if (idx % num_procs != proc_rank) remoteIndices.push_back(idx);
+            if (idx % world_size != world_rank) remoteIndices.push_back(idx);
         };
 
-        for (int j = proc_rank; j < popSize; j += num_procs) {
+        for (int j = world_rank; j < popSize; j += world_size) {
             int xb = myRand(popSize), xr1 = myRand(popSize), xr2 = myRand(popSize);
             while (xb == xr1) { xr1 = myRand(popSize); }
             while (xb == xr2 || xr1 == xr2) { xr2 = myRand(popSize); }
@@ -452,15 +453,15 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int maxGen, int popSize,
 
         std::sort(remoteIndices.begin(), 
             remoteIndices.end(),
-            [](int left, int right){
-                if (left % num_procs != right % num_procs) return (left % num_procs) < (right % num_procs);
+            [world_size](int left, int right){
+                if (left % world_size != right % world_size) return (left % world_size) < (right % world_size);
                 return left < right;
             });
         remoteIndices.erase(std::unique(remoteIndices.begin(), remoteIndices.end()), remoteIndices.end());
 
         MPI_Win_fence(0, winConst);
         for (int idx : remoteIndices) {
-            int owner = idx % num_procs;
+            int owner = idx % world_size;
             MPI_Get(
                 populations[idx].constants.data(),
                 cfg.constantSize,
@@ -489,12 +490,12 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int maxGen, int popSize,
         }
     }
 
-    for (int j = proc_rank; j < popSize; j += num_procs){
+    for (int j = world_rank; j < popSize; j += world_size){
         populationsErrorFlat[(size_t)j] = populations[j].error;
     }
     // broadcast all constants & errors
     for (int i=0; i<popSize; ++i) {
-        int owner = i % num_procs;
+        int owner = i % world_size;
         MPI_Bcast(populationsFlat.data() + (size_t)i * (size_t)cfg.constantSize, cfg.constantSize, MPI_DOUBLE, owner, MPI_COMM_WORLD);
         MPI_Bcast(&populationsErrorFlat[(size_t)i], 1, MPI_DOUBLE, owner, MPI_COMM_WORLD);
         populations[i].constants.assign(populationsFlat.begin() + (size_t)i * (size_t)cfg.constantSize, populationsFlat.begin() + ((size_t)i + 1) * (size_t)cfg.constantSize);
@@ -506,6 +507,8 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int maxGen, int popSize,
 }
 
 std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<double>> arg){
+    const int world_size = mpi_env.size();
+    const int world_rank = mpi_env.rank();
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
         if (temp <= 0) return false;
@@ -524,7 +527,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     std::vector<double> populationsErrorFlat((size_t)n, DBL_MAX);
 
     // initialize with provided arg
-    for (int idx = proc_rank; idx < n; idx += num_procs) {
+    for (int idx = world_rank; idx < n; idx += world_size) {
         for (int j = 0; j < cfg.constantSize; ++j) {
             populations[idx].constants[j] = arg[idx][j];
             populationsFlat[(size_t)idx * (size_t)cfg.constantSize + (size_t)j] = arg[idx][j];
@@ -553,19 +556,19 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     int maxGen = 100;
 
     for (int gen = 0; gen < maxGen; ++gen) {
-        if (proc_rank == 0) cout << "current generation : " << gen << " / " << maxGen << "\n";
+        if (world_rank == 0) cout << "current generation : " << gen << " / " << maxGen << "\n";
         double temp = 0;
 
         std::vector<Triple> triples;
-        triples.reserve((size_t)((n + num_procs - 1) / num_procs));
+        triples.reserve((size_t)((n + world_size - 1) / world_size));
 
         std::vector<int> remoteIndices;
         remoteIndices.reserve((size_t)n);
         auto needRemote = [&](int idx) {
-            if (idx % num_procs != proc_rank) remoteIndices.push_back(idx);
+            if (idx % world_size != world_rank) remoteIndices.push_back(idx);
         };
 
-        for (int j = proc_rank; j < n; j += num_procs) {
+        for (int j = world_rank; j < n; j += world_size) {
             int xb = myRand(n), xr1 = myRand(n), xr2 = myRand(n);
             while (xb == xr1) { xr1 = myRand(n); }
             while (xb == xr2 || xr1 == xr2) { xr2 = myRand(n); }
@@ -577,15 +580,15 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
 
         std::sort(remoteIndices.begin(), 
             remoteIndices.end(),
-            [](int left, int right){
-                if (left % num_procs != right % num_procs) return (left % num_procs) < (right % num_procs);
+            [world_size](int left, int right){
+                if (left % world_size != right % world_size) return (left % world_size) < (right % world_size);
                 return left < right;
             });
         remoteIndices.erase(std::unique(remoteIndices.begin(), remoteIndices.end()), remoteIndices.end());
 
         MPI_Win_fence(0, winConst);
         for (int idx : remoteIndices) {
-            int owner = idx % num_procs;
+            int owner = idx % world_size;
             MPI_Get(
                 populations[idx].constants.data(),
                 cfg.constantSize,
@@ -614,12 +617,12 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
         }
     }
 
-    for (int j = proc_rank; j < n; j += num_procs){
+    for (int j = world_rank; j < n; j += world_size){
         populationsErrorFlat[(size_t)j] = populations[j].error;
     }
     // broadcast all constants & errors
     for (int i=0; i<n; ++i) {
-        int owner = i % num_procs;
+        int owner = i % world_size;
         MPI_Bcast(populationsFlat.data() + (size_t)i * (size_t)cfg.constantSize, cfg.constantSize, MPI_DOUBLE, owner, MPI_COMM_WORLD);
         MPI_Bcast(&populationsErrorFlat[(size_t)i], 1, MPI_DOUBLE, owner, MPI_COMM_WORLD);
         populations[i].constants.assign(populationsFlat.begin() + (size_t)i * (size_t)cfg.constantSize, populationsFlat.begin() + ((size_t)i + 1) * (size_t)cfg.constantSize);
@@ -635,6 +638,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
 
 
 NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0){
+    const int world_rank = mpi_env.rank();
     const int n = cfg.constantSize;
     const int m = (int)QASAP.size() * cfg.trackedSpecies;
     validateConstants(theta0);
@@ -659,7 +663,7 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0){
     bool isChanged = true;
 
     for (int iter = 0; iter < maxIter; ++iter) {
-        if (proc_rank == 0) {
+        if (world_rank == 0) {
             for (int i = 0; i < cfg.constantSize; i++) {
                 cout << std::setprecision(4) << theta[i] << ", ";
             }
@@ -719,6 +723,7 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0){
 }
 
 vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>& thetaList){
+    const int world_size = mpi_env.size();
     const size_t n = thetaList.size();
     vector<OptimizeResult> results(n, OptimizeResult(cfg.constantSize));
     std::vector<double> populationsFlat(n * (size_t)cfg.constantSize, 0.0);
@@ -731,7 +736,7 @@ vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>&
         }
     }
 
-    for(int i=proc_rank;i<n;i+=num_procs){
+    for(int i = mpi_env.rank(); i < (int)n; i += world_size){
         results[i] = runLM(results[i].constants);
         for(int j=0;j<cfg.constantSize;j++){
             populationsFlat[(size_t)i * (size_t)cfg.constantSize + (size_t)j] = results[i].constants[j];
@@ -739,8 +744,8 @@ vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>&
         populationsErrorFlat[i] = results[i].error;
     }
     for(int i=0; i<n; i++){
-        MPI_Bcast(populationsFlat.data() + (size_t)i * (size_t)cfg.constantSize, cfg.constantSize, MPI_DOUBLE, i % num_procs, MPI_COMM_WORLD);
-        MPI_Bcast(&populationsErrorFlat[(size_t)i], 1, MPI_DOUBLE, i % num_procs, MPI_COMM_WORLD);
+        MPI_Bcast(populationsFlat.data() + (size_t)i * (size_t)cfg.constantSize, cfg.constantSize, MPI_DOUBLE, i % world_size, MPI_COMM_WORLD);
+        MPI_Bcast(&populationsErrorFlat[(size_t)i], 1, MPI_DOUBLE, i % world_size, MPI_COMM_WORLD);
         results[i].constants.assign(populationsFlat.begin() + (size_t)i * (size_t)cfg.constantSize, populationsFlat.begin() + ((size_t)i + 1) * (size_t)cfg.constantSize);
         results[i].error = populationsErrorFlat[(size_t)i];
     }
@@ -750,7 +755,7 @@ vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>&
 
 
 void NASAP_fit::putCVODESim(const std::vector<double>& constant) {
-    if(proc_rank!=0)return;
+    if (mpi_env.rank() != 0) return;
     N_Vector y = N_VNew_Serial(cfg.species, sunctx);
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
@@ -782,7 +787,7 @@ void NASAP_fit::putCVODESim(const std::vector<double>& constant) {
 
 
 NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const vector<double>& constant, const vector<int>& reaction_ids) {
-    if(proc_rank!=0)return {};
+    if (mpi_env.rank() != 0) return {};
     validateConstants(constant);
 
     N_Vector y = N_VNew_Serial(cfg.species, sunctx);

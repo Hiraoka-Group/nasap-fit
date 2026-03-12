@@ -22,6 +22,7 @@
 #include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
 #include "../include/reactionNetwork.hpp"
+#include "../include/MPIEnvironment.hpp"
 
 using std::vector;
 
@@ -52,6 +53,7 @@ private:
 	double endTime; //シミュレーション終了時間
 	Config cfg;
 	ReactionNetwork rxnNet;
+	MpiEnvironment mpi_env;
 	struct datum {
 		double time;
 		std::vector<double>state;

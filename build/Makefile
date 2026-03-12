@@ -153,6 +153,30 @@ src/NASAP_fit.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.s
 .PHONY : src/NASAP_fit.cpp.s
 
+src/bindings.o: src/bindings.cpp.o
+.PHONY : src/bindings.o
+
+# target to build an object file
+src/bindings.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/bindings.cpp.o
+.PHONY : src/bindings.cpp.o
+
+src/bindings.i: src/bindings.cpp.i
+.PHONY : src/bindings.i
+
+# target to preprocess a source file
+src/bindings.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/bindings.cpp.i
+.PHONY : src/bindings.cpp.i
+
+src/bindings.s: src/bindings.cpp.s
+.PHONY : src/bindings.s
+
+# target to generate assembly for a file
+src/bindings.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/bindings.cpp.s
+.PHONY : src/bindings.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -237,6 +261,9 @@ help:
 	@echo "... src/NASAP_fit.o"
 	@echo "... src/NASAP_fit.i"
 	@echo "... src/NASAP_fit.s"
+	@echo "... src/bindings.o"
+	@echo "... src/bindings.i"
+	@echo "... src/bindings.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
