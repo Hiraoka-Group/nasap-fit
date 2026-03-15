@@ -27,12 +27,12 @@ public:
 	inline int operator()(int mi, int ma) { return mi + operator()(ma - mi); }
 	// [0,1)
 	inline double prob() { return double(operator()()) / 0xffffffff; }
+
+	inline double randbetExp(double lower, double upper) { 
+	return lower * exp(log(upper / lower) * prob());
+}
 };
 extern xorshift myRand;
 inline double randbet(double lower, double upper) {
 	return lower + (upper - lower) * myRand.prob();
-}
-//指数分布に基づいて[lower, upper]のランダムな値を得る
-inline double randbetExp(double lower, double upper) { 
-	return lower * exp(log(upper / lower) * myRand.prob());
 }

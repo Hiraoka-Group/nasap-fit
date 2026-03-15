@@ -1,8 +1,6 @@
 #pragma once
 #include <pybind11/pybind11.h>
-#include <pybind11/embed.h>
 
-void init_structure(pybind11::module_ &);
-
-void init_differentialEvolution(pybind11::module_ &);
+// Initializes Python bindings for the nasap_fit_cpp core types.
+void init_core(pybind11::module_ &m);
 

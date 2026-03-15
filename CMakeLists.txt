@@ -16,6 +16,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ソースコードを収集
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
+list(REMOVE_ITEM SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/bindings.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/bindings/module.cpp"
+)
+
+
+# src/bindings.cpp is a pybind11 demo/stub and should not be part of the main C++ executable.
+list(FILTER SOURCES EXCLUDE REGEX "/src/bindings\\.cpp$")
+
 # MPIを探す
 find_package(MPI REQUIRED)
 

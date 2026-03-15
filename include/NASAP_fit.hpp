@@ -33,7 +33,7 @@ struct NASAP_fit {
 		int species = 0;//シミュレーション時 config.yamlから
 		int constantSize = 0;//初期化時 config.yamlから
 		int trackedSpecies = 0;//シミュレーション時 config.yamlから
-		vector<std::string_view> trackedNames;//QASAPのcsv読み取り時 config.yamlから
+		vector<std::string> trackedNames;//QASAPのcsv読み取り時 config.yamlから
 		vector<int> trackedIndex;//QASAPのcsv読み取り時 config.yamlから
 		vector<double> fullConc;//シミュレーション時 config.yamlから
 		std::map<int,double> initConc;//シミュレーション時 config.yamlから
@@ -48,6 +48,23 @@ struct NASAP_fit {
 		std::vector<double> constants;
 		double error = DBL_MAX;
 		explicit OptimizeResult(int constantSize) : constants((size_t)constantSize, 0.0) {}
+	};
+	//最適化の終了条件を記述する構造体
+	struct TerminationCondition {
+		//最大世代数
+		int maxIter=-1;
+		//実行時間の上限（秒）
+		double timeLimit=-1;
+		//パラメータ空間における最適解の近傍の大きさの基準値(DEでは無効)
+		double xtol=-1;
+		//目的関数の改善率の基準値
+		double ftolAbs=-1;
+		//目的関数の改善率の基準値
+		double ftolRel=-1;
+		//目的関数が目標値を下回ったときに終了
+		double targetError=0;
+		//停滞期間（世代数）
+		int stall=-1;
 	};
 private:
 	double endTime; //シミュレーション終了時間
@@ -76,7 +93,12 @@ private:
 	void validateConstants(const vector<double>& constants);
 
 	void sortByError(vector<OptimizeResult>& populations);
+
+	vector<OptimizeResult> runDE_single(int maxGen, int popSize, double lowerLim, double upperLim);
+	vector<OptimizeResult> runDE_single(const vector<vector<double>>& arg);
 public:
+	vector<vector<double>> makeRandomPopulation(int popSize, double lower, double upper, int seed);
+
 // jac_fun_と res_fun_のセットアップ
 	void setUpCasADiFunctions();
 
@@ -103,13 +125,13 @@ public:
 	NASAP_fit(const Config& arg);
 
 	// Levenberg-Marquardt法による最適化の実行
-	OptimizeResult runLM(const vector<double>& theta0);
-	vector<OptimizeResult> runLM(const vector<vector<double>>& thetaList);
+	OptimizeResult runLM(const vector<double>& theta0, const TerminationCondition& termCond);
+	vector<OptimizeResult> runLM(const vector<vector<double>>& thetaList, const TerminationCondition& termCond);
 
 	// 差分進化法の実行
-	vector<OptimizeResult> runDE(int maxGen, int popSize, double lowerLim = 1e-3, double upperLim = 1e4);
+	vector<OptimizeResult> runDE(int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond);
 
-	vector<OptimizeResult> runDE(vector<vector<double>> arg);
+	vector<OptimizeResult> runDE(vector<vector<double>> arg, const TerminationCondition& termCond);
 
 	void putCVODESim(const vector<double>& constant);
 

@@ -298,7 +298,7 @@ events:
       Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
       
       The C compiler identification is GNU, found in:
-        /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/4.1.1/CompilerIdC/a.out
+        /home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/4.1.1/CompilerIdC/a.out
       
   -
     kind: "find-v1"
@@ -1293,7 +1293,7 @@ events:
       Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
       
       The CXX compiler identification is GNU, found in:
-        /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/4.1.1/CompilerIdCXX/a.out
+        /home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/4.1.1/CompilerIdCXX/a.out
       
   -
     kind: "find-v1"
@@ -1468,8 +1468,8 @@ events:
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Rdpj9i"
-      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Rdpj9i"
+      source: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-zWw9Tl"
+      binary: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-zWw9Tl"
     cmakeVariables:
       CMAKE_C_FLAGS: ""
       CMAKE_C_FLAGS_DEBUG: "-g"
@@ -1478,13 +1478,13 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Rdpj9i'
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-zWw9Tl'
         
-        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_656c7/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_656c7.dir/build.make CMakeFiles/cmTC_656c7.dir/build
-        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Rdpj9i'
-        Building C object CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o
-        /usr/bin/cc   -v -o CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o -c /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCCompilerABI.c
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_7bbcb/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_7bbcb.dir/build.make CMakeFiles/cmTC_7bbcb.dir/build
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-zWw9Tl'
+        Building C object CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o
+        /usr/bin/cc   -v -o CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o -c /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCCompilerABI.c
         Using built-in specs.
         COLLECT_GCC=/usr/bin/cc
         OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
@@ -1494,8 +1494,8 @@ events:
         Thread model: posix
         Supported LTO compression algorithms: zlib zstd
         gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_656c7.dir/'
-         /usr/lib/gcc/x86_64-linux-gnu/12/cc1 -quiet -v -imultiarch x86_64-linux-gnu /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_656c7.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccG7OUeF.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7bbcb.dir/'
+         /usr/lib/gcc/x86_64-linux-gnu/12/cc1 -quiet -v -imultiarch x86_64-linux-gnu /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_7bbcb.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccr4SFdc.s
         GNU C17 (Ubuntu 12.4.0-2ubuntu1~24.04.1) version 12.4.0 (x86_64-linux-gnu)
         	compiled by GNU C version 12.4.0, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version isl-0.26-GMP
         
@@ -1515,14 +1515,14 @@ events:
         
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: d5116aac85c50925c00ab962e20207de
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_656c7.dir/'
-         as -v --64 -o CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o /tmp/ccG7OUeF.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7bbcb.dir/'
+         as -v --64 -o CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o /tmp/ccr4SFdc.s
         GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42
         COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.'
-        Linking C executable cmTC_656c7
-        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_656c7.dir/link.txt --verbose=1
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.'
+        Linking C executable cmTC_7bbcb
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7bbcb.dir/link.txt --verbose=1
         Using built-in specs.
         COLLECT_GCC=/usr/bin/cc
         COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper
@@ -1535,14 +1535,14 @@ events:
         gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) 
         COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_656c7' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_656c7.'
-         /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccdL4EOP.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_656c7 /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_7bbcb' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_7bbcb.'
+         /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccup06nA.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_7bbcb /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o
         collect2 version 12.4.0
-        /usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccdL4EOP.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_656c7 /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o
+        /usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccup06nA.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_7bbcb /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o
         GNU ld (GNU Binutils for Ubuntu) 2.42
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_656c7' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_656c7.'
-        /usr/bin/cc  -v -Wl,-v CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o -o cmTC_656c7
-        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Rdpj9i'
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_7bbcb' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_7bbcb.'
+        /usr/bin/cc  -v -Wl,-v CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o -o cmTC_7bbcb
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-zWw9Tl'
         
       exitCode: 0
   -
@@ -1577,13 +1577,13 @@ events:
       Parsed C implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
-        ignore line: [Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Rdpj9i']
+        ignore line: [Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-zWw9Tl']
         ignore line: []
-        ignore line: [Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_656c7/fast]
-        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_656c7.dir/build.make CMakeFiles/cmTC_656c7.dir/build]
-        ignore line: [gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-Rdpj9i']
-        ignore line: [Building C object CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o]
-        ignore line: [/usr/bin/cc   -v -o CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o -c /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCCompilerABI.c]
+        ignore line: [Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_7bbcb/fast]
+        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_7bbcb.dir/build.make CMakeFiles/cmTC_7bbcb.dir/build]
+        ignore line: [gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-zWw9Tl']
+        ignore line: [Building C object CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o]
+        ignore line: [/usr/bin/cc   -v -o CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o -c /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCCompilerABI.c]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/cc]
         ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
@@ -1593,8 +1593,8 @@ events:
         ignore line: [Thread model: posix]
         ignore line: [Supported LTO compression algorithms: zlib zstd]
         ignore line: [gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_656c7.dir/']
-        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/12/cc1 -quiet -v -imultiarch x86_64-linux-gnu /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_656c7.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccG7OUeF.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7bbcb.dir/']
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/12/cc1 -quiet -v -imultiarch x86_64-linux-gnu /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_7bbcb.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccr4SFdc.s]
         ignore line: [GNU C17 (Ubuntu 12.4.0-2ubuntu1~24.04.1) version 12.4.0 (x86_64-linux-gnu)]
         ignore line: [	compiled by GNU C version 12.4.0  GMP version 6.3.0  MPFR version 4.2.1  MPC version 1.3.1  isl version isl-0.26-GMP]
         ignore line: []
@@ -1614,14 +1614,14 @@ events:
         ignore line: []
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [Compiler executable checksum: d5116aac85c50925c00ab962e20207de]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_656c7.dir/']
-        ignore line: [ as -v --64 -o CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o /tmp/ccG7OUeF.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7bbcb.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o /tmp/ccr4SFdc.s]
         ignore line: [GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.']
-        ignore line: [Linking C executable cmTC_656c7]
-        ignore line: [/opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_656c7.dir/link.txt --verbose=1]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.']
+        ignore line: [Linking C executable cmTC_7bbcb]
+        ignore line: [/opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7bbcb.dir/link.txt --verbose=1]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/cc]
         ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper]
@@ -1634,13 +1634,13 @@ events:
         ignore line: [gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) ]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_656c7' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_656c7.']
-        link line: [ /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccdL4EOP.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_656c7 /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_7bbcb' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_7bbcb.']
+        link line: [ /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccup06nA.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_7bbcb /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/tmp/ccdL4EOP.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccup06nA.res] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
           arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -1658,7 +1658,7 @@ events:
           arg [-znow] ==> ignore
           arg [-zrelro] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_656c7] ==> ignore
+          arg [cmTC_7bbcb] ==> ignore
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o]
@@ -1671,7 +1671,7 @@ events:
           arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
           arg [-L/usr/lib/gcc/x86_64-linux-gnu/12/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../..]
           arg [-v] ==> ignore
-          arg [CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o] ==> ignore
           arg [-lgcc] ==> lib [gcc]
           arg [--push-state] ==> ignore
           arg [--as-needed] ==> ignore
@@ -1686,7 +1686,7 @@ events:
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
         ignore line: [collect2 version 12.4.0]
-        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccdL4EOP.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_656c7 /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_656c7.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
+        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccup06nA.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_7bbcb /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_7bbcb.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
         linker tool for 'C': /usr/bin/ld
         collapse obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o] ==> [/usr/lib/x86_64-linux-gnu/Scrt1.o]
         collapse obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o] ==> [/usr/lib/x86_64-linux-gnu/crti.o]
@@ -1724,8 +1724,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-2QvoO2"
-      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-2QvoO2"
+      source: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-ZvuClk"
+      binary: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-ZvuClk"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -1735,13 +1735,13 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-2QvoO2'
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-ZvuClk'
         
-        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_8ccda/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_8ccda.dir/build.make CMakeFiles/cmTC_8ccda.dir/build
-        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-2QvoO2'
-        Building CXX object CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o
-        /usr/bin/c++   -v -o CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o -c /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_f943a/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_f943a.dir/build.make CMakeFiles/cmTC_f943a.dir/build
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-ZvuClk'
+        Building CXX object CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o
+        /usr/bin/c++   -v -o CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o -c /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
         COLLECT_GCC=/usr/bin/c++
         OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
@@ -1751,8 +1751,8 @@ events:
         Thread model: posix
         Supported LTO compression algorithms: zlib zstd
         gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_8ccda.dir/'
-         /usr/lib/gcc/x86_64-linux-gnu/12/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_8ccda.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/cc1Hot9p.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_f943a.dir/'
+         /usr/lib/gcc/x86_64-linux-gnu/12/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_f943a.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccTcF0RO.s
         GNU C++17 (Ubuntu 12.4.0-2ubuntu1~24.04.1) version 12.4.0 (x86_64-linux-gnu)
         	compiled by GNU C version 12.4.0, GMP version 6.3.0, MPFR version 4.2.1, MPC version 1.3.1, isl version isl-0.26-GMP
         
@@ -1776,14 +1776,14 @@ events:
         
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: 14a79cff496ee8965fa5d116dc00d6b4
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_8ccda.dir/'
-         as -v --64 -o CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o /tmp/cc1Hot9p.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_f943a.dir/'
+         as -v --64 -o CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccTcF0RO.s
         GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42
         COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.'
-        Linking CXX executable cmTC_8ccda
-        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8ccda.dir/link.txt --verbose=1
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.'
+        Linking CXX executable cmTC_f943a
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f943a.dir/link.txt --verbose=1
         Using built-in specs.
         COLLECT_GCC=/usr/bin/c++
         COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper
@@ -1796,14 +1796,14 @@ events:
         gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) 
         COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_8ccda' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_8ccda.'
-         /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccclJ0Vf.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_8ccda /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_f943a' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_f943a.'
+         /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccSafWAM.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_f943a /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o
         collect2 version 12.4.0
-        /usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccclJ0Vf.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_8ccda /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o
+        /usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccSafWAM.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_f943a /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o
         GNU ld (GNU Binutils for Ubuntu) 2.42
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_8ccda' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_8ccda.'
-        /usr/bin/c++  -v -Wl,-v CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_8ccda
-        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-2QvoO2'
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_f943a' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_f943a.'
+        /usr/bin/c++  -v -Wl,-v CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_f943a
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-ZvuClk'
         
       exitCode: 0
   -
@@ -1844,13 +1844,13 @@ events:
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
-        ignore line: [Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-2QvoO2']
+        ignore line: [Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-ZvuClk']
         ignore line: []
-        ignore line: [Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_8ccda/fast]
-        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_8ccda.dir/build.make CMakeFiles/cmTC_8ccda.dir/build]
-        ignore line: [gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-2QvoO2']
-        ignore line: [Building CXX object CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o]
-        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o -c /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_f943a/fast]
+        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_f943a.dir/build.make CMakeFiles/cmTC_f943a.dir/build]
+        ignore line: [gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-ZvuClk']
+        ignore line: [Building CXX object CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o -c /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/c++]
         ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
@@ -1860,8 +1860,8 @@ events:
         ignore line: [Thread model: posix]
         ignore line: [Supported LTO compression algorithms: zlib zstd]
         ignore line: [gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_8ccda.dir/']
-        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/12/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_8ccda.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/cc1Hot9p.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_f943a.dir/']
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/12/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_f943a.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccTcF0RO.s]
         ignore line: [GNU C++17 (Ubuntu 12.4.0-2ubuntu1~24.04.1) version 12.4.0 (x86_64-linux-gnu)]
         ignore line: [	compiled by GNU C version 12.4.0  GMP version 6.3.0  MPFR version 4.2.1  MPC version 1.3.1  isl version isl-0.26-GMP]
         ignore line: []
@@ -1885,14 +1885,14 @@ events:
         ignore line: []
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [Compiler executable checksum: 14a79cff496ee8965fa5d116dc00d6b4]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_8ccda.dir/']
-        ignore line: [ as -v --64 -o CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o /tmp/cc1Hot9p.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_f943a.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccTcF0RO.s]
         ignore line: [GNU assembler version 2.42 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.42]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.']
-        ignore line: [Linking CXX executable cmTC_8ccda]
-        ignore line: [/opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8ccda.dir/link.txt --verbose=1]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.']
+        ignore line: [Linking CXX executable cmTC_f943a]
+        ignore line: [/opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f943a.dir/link.txt --verbose=1]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/c++]
         ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper]
@@ -1905,13 +1905,13 @@ events:
         ignore line: [gcc version 12.4.0 (Ubuntu 12.4.0-2ubuntu1~24.04.1) ]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/12/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/12/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_8ccda' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_8ccda.']
-        link line: [ /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccclJ0Vf.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_8ccda /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_f943a' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_f943a.']
+        link line: [ /usr/lib/gcc/x86_64-linux-gnu/12/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccSafWAM.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_f943a /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/tmp/ccclJ0Vf.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccSafWAM.res] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
           arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -1929,7 +1929,7 @@ events:
           arg [-znow] ==> ignore
           arg [-zrelro] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_8ccda] ==> ignore
+          arg [cmTC_f943a] ==> ignore
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o]
@@ -1942,7 +1942,7 @@ events:
           arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
           arg [-L/usr/lib/gcc/x86_64-linux-gnu/12/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/12/../../..]
           arg [-v] ==> ignore
-          arg [CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
           arg [-lstdc++] ==> lib [stdc++]
           arg [-lm] ==> lib [m]
           arg [-lgcc_s] ==> lib [gcc_s]
@@ -1953,7 +1953,7 @@ events:
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
         ignore line: [collect2 version 12.4.0]
-        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccclJ0Vf.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_8ccda /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_8ccda.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
+        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/12/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/12/lto-wrapper -plugin-opt=-fresolution=/tmp/ccSafWAM.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_f943a /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/12 -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/12/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/12/../../.. -v CMakeFiles/cmTC_f943a.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/12/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crtn.o]
         linker tool for 'CXX': /usr/bin/ld
         collapse obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o] ==> [/usr/lib/x86_64-linux-gnu/Scrt1.o]
         collapse obj [/usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/crti.o] ==> [/usr/lib/x86_64-linux-gnu/crti.o]
@@ -1987,7 +1987,7 @@ events:
     backtrace:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindPkgConfig.cmake:69 (find_program)"
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:270 (find_package)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     mode: "program"
     variable: "PKG_CONFIG_EXECUTABLE"
     description: "pkg-config executable"
@@ -2099,7 +2099,7 @@ events:
     kind: "find-v1"
     backtrace:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1374 (find_program)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     mode: "program"
     variable: "MPIEXEC_EXECUTABLE"
     description: "Executable for running MPI programs."
@@ -2301,7 +2301,7 @@ events:
     kind: "find-v1"
     backtrace:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1525 (find_program)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     mode: "program"
     variable: "MPI_C_COMPILER"
     description: "MPI compiler for C"
@@ -2378,7 +2378,7 @@ events:
     backtrace:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:836 (find_library)"
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1561 (_MPI_interrogate_compiler)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     mode: "library"
     variable: "MPI_mpi_LIBRARY"
     description: "Location of the mpi library for MPI"
@@ -2479,7 +2479,7 @@ events:
     backtrace:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1168 (find_path)"
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1642 (_MPI_split_include_dirs)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     mode: "path"
     variable: "MPI_C_HEADER_DIR"
     description: "Path to a file."
@@ -2576,11 +2576,11 @@ events:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1330 (_MPI_try_staged_settings)"
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1653 (_MPI_check_lang_works)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     description: "The MPI test test_mpi for C in mode normal"
     directories:
-      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-j0EPnZ"
-      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-j0EPnZ"
+      source: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-pLheYE"
+      binary: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-pLheYE"
     cmakeVariables:
       CMAKE_C_FLAGS: ""
       CMAKE_C_FLAGS_DEBUG: "-g"
@@ -2589,24 +2589,24 @@ events:
       variable: "MPI_RESULT_C_test_mpi_normal"
       cached: true
       stdout: |
-        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-j0EPnZ'
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-pLheYE'
         
-        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_876bb/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_876bb.dir/build.make CMakeFiles/cmTC_876bb.dir/build
-        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-j0EPnZ'
-        Building C object CMakeFiles/cmTC_876bb.dir/test_mpi.c.o
-        /usr/bin/cc  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_876bb.dir/test_mpi.c.o -c /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-j0EPnZ/test_mpi.c
-        Linking C executable cmTC_876bb
-        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_876bb.dir/link.txt --verbose=1
-        /usr/bin/cc CMakeFiles/cmTC_876bb.dir/test_mpi.c.o -o cmTC_876bb  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
-        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-j0EPnZ'
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_ba594/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_ba594.dir/build.make CMakeFiles/cmTC_ba594.dir/build
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-pLheYE'
+        Building C object CMakeFiles/cmTC_ba594.dir/test_mpi.c.o
+        /usr/bin/cc  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_ba594.dir/test_mpi.c.o -c /home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-pLheYE/test_mpi.c
+        Linking C executable cmTC_ba594
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ba594.dir/link.txt --verbose=1
+        /usr/bin/cc CMakeFiles/cmTC_ba594.dir/test_mpi.c.o -o cmTC_ba594  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-pLheYE'
         
       exitCode: 0
   -
     kind: "find-v1"
     backtrace:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1525 (find_program)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     mode: "program"
     variable: "MPI_CXX_COMPILER"
     description: "MPI compiler for CXX"
@@ -2695,7 +2695,7 @@ events:
     backtrace:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:836 (find_library)"
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1561 (_MPI_interrogate_compiler)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     mode: "library"
     variable: "MPI_mpi_cxx_LIBRARY"
     description: "Location of the mpi_cxx library for MPI"
@@ -2796,7 +2796,7 @@ events:
     backtrace:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1168 (find_path)"
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1642 (_MPI_split_include_dirs)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     mode: "path"
     variable: "MPI_CXX_HEADER_DIR"
     description: "Path to a file."
@@ -2893,11 +2893,11 @@ events:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1330 (_MPI_try_staged_settings)"
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1653 (_MPI_check_lang_works)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     description: "The MPI test test_mpi for CXX in mode normal"
     directories:
-      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-dFrgWU"
-      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-dFrgWU"
+      source: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-v3H2wQ"
+      binary: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-v3H2wQ"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -2906,17 +2906,17 @@ events:
       variable: "MPI_RESULT_CXX_test_mpi_normal"
       cached: true
       stdout: |
-        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-dFrgWU'
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-v3H2wQ'
         
-        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_f0682/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_f0682.dir/build.make CMakeFiles/cmTC_f0682.dir/build
-        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-dFrgWU'
-        Building CXX object CMakeFiles/cmTC_f0682.dir/test_mpi.cpp.o
-        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -std=c++20 -o CMakeFiles/cmTC_f0682.dir/test_mpi.cpp.o -c /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-dFrgWU/test_mpi.cpp
-        Linking CXX executable cmTC_f0682
-        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f0682.dir/link.txt --verbose=1
-        /usr/bin/c++ CMakeFiles/cmTC_f0682.dir/test_mpi.cpp.o -o cmTC_f0682  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
-        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-dFrgWU'
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_46d9d/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_46d9d.dir/build.make CMakeFiles/cmTC_46d9d.dir/build
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-v3H2wQ'
+        Building CXX object CMakeFiles/cmTC_46d9d.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -std=c++20 -o CMakeFiles/cmTC_46d9d.dir/test_mpi.cpp.o -c /home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-v3H2wQ/test_mpi.cpp
+        Linking CXX executable cmTC_46d9d
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_46d9d.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_46d9d.dir/test_mpi.cpp.o -o cmTC_46d9d  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-v3H2wQ'
         
       exitCode: 0
   -
@@ -2924,11 +2924,11 @@ events:
     backtrace:
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
       - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1680 (_MPI_try_staged_settings)"
-      - "CMakeLists.txt:29 (find_package)"
+      - "CMakeLists.txt:35 (find_package)"
     description: "The MPI test test_mpi for CXX in mode MPICXX"
     directories:
-      source: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-wqYsTP"
-      binary: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-wqYsTP"
+      source: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-EUnEmo"
+      binary: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-EUnEmo"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -2937,23 +2937,23 @@ events:
       variable: "MPI_RESULT_CXX_test_mpi_MPICXX"
       cached: true
       stdout: |
-        Change Dir: '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-wqYsTP'
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-EUnEmo'
         
-        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_bf316/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_bf316.dir/build.make CMakeFiles/cmTC_bf316.dir/build
-        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-wqYsTP'
-        Building CXX object CMakeFiles/cmTC_bf316.dir/test_mpi.cpp.o
-        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -std=c++20 -o CMakeFiles/cmTC_bf316.dir/test_mpi.cpp.o -c /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-wqYsTP/test_mpi.cpp
-        Linking CXX executable cmTC_bf316
-        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bf316.dir/link.txt --verbose=1
-        /usr/bin/c++ CMakeFiles/cmTC_bf316.dir/test_mpi.cpp.o -o cmTC_bf316  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
-        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/CMakeScratch/TryCompile-wqYsTP'
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_4e41c/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_4e41c.dir/build.make CMakeFiles/cmTC_4e41c.dir/build
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-EUnEmo'
+        Building CXX object CMakeFiles/cmTC_4e41c.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -std=c++20 -o CMakeFiles/cmTC_4e41c.dir/test_mpi.cpp.o -c /home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-EUnEmo/test_mpi.cpp
+        Linking CXX executable cmTC_4e41c
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4e41c.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_4e41c.dir/test_mpi.cpp.o -o cmTC_4e41c  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-EUnEmo'
         
       exitCode: 0
   -
     kind: "find_package-v1"
     backtrace:
-      - "CMakeLists.txt:32 (find_package)"
+      - "CMakeLists.txt:38 (find_package)"
     name: "Eigen3"
     configs:
       -
@@ -2986,11 +2986,11 @@ events:
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/pkgRedirects/Eigen3Config.cmake"
+        path: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/pkgRedirects/Eigen3Config.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/pkgRedirects/eigen3-config.cmake"
+        path: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/pkgRedirects/eigen3-config.cmake"
         mode: "config"
         reason: "no_exist"
       -
@@ -3105,7 +3105,7 @@ events:
   -
     kind: "find_package-v1"
     backtrace:
-      - "CMakeLists.txt:35 (find_package)"
+      - "CMakeLists.txt:41 (find_package)"
     name: "SUNDIALS"
     configs:
       -
@@ -3138,11 +3138,11 @@ events:
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/pkgRedirects/SUNDIALSConfig.cmake"
+        path: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/pkgRedirects/SUNDIALSConfig.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/pkgRedirects/sundials-config.cmake"
+        path: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/pkgRedirects/sundials-config.cmake"
         mode: "config"
         reason: "no_exist"
       -
@@ -3217,7 +3217,7 @@ events:
   -
     kind: "find-v1"
     backtrace:
-      - "CMakeLists.txt:36 (find_library)"
+      - "CMakeLists.txt:42 (find_library)"
     mode: "library"
     variable: "KLU_LIBRARY"
     description: "Path to a library."
@@ -3310,7 +3310,7 @@ events:
   -
     kind: "find_package-v1"
     backtrace:
-      - "CMakeLists.txt:39 (find_package)"
+      - "CMakeLists.txt:45 (find_package)"
     name: "casadi"
     configs:
       -
@@ -3343,11 +3343,11 @@ events:
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/pkgRedirects/casadiConfig.cmake"
+        path: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/pkgRedirects/casadiConfig.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/pkgRedirects/casadi-config.cmake"
+        path: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/pkgRedirects/casadi-config.cmake"
         mode: "config"
         reason: "no_exist"
       -
@@ -3390,6 +3390,393 @@ events:
       path: "/usr/local/lib/cmake/casadi/casadi-config.cmake"
       mode: "config"
       version: "3.7.2+"
+    search_context:
+      ENV{PATH}:
+        - "/opt/cmake-4.1.1-linux-x86_64/bin"
+        - "/home/aspi/.volta/bin"
+        - "/home/linuxbrew/.linuxbrew/bin"
+        - "/home/linuxbrew/.linuxbrew/sbin"
+        - "/usr/local/bin"
+        - "/usr/local/sbin"
+        - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/home/aspi/.vscode-server/bin/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/bin/remote-cli"
+        - "/opt/cmake-4.1.1-linux-x86_64/bin"
+        - "/home/aspi/.volta/bin"
+        - "/home/linuxbrew/.linuxbrew/bin"
+        - "/home/linuxbrew/.linuxbrew/sbin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/usr/lib/wsl/lib"
+        - "/home/aspi/.vscode-server/extensions/ms-python.debugpy-2025.18.0-linux-x64/bundled/scripts/noConfigScripts"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/opt/cmake-4.1.1-linux-x86_64"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindPythonInterp.cmake:127 (find_program)"
+      - "/usr/lib/cmake/pybind11/FindPythonLibsNew.cmake:98 (find_package)"
+      - "/usr/lib/cmake/pybind11/pybind11Tools.cmake:50 (find_package)"
+      - "/usr/lib/cmake/pybind11/pybind11Common.cmake:188 (include)"
+      - "/usr/lib/cmake/pybind11/pybind11Config.cmake:250 (include)"
+      - "CMakeLists.txt:100 (find_package)"
+    mode: "program"
+    variable: "PYTHON_EXECUTABLE"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "python3.6"
+      - "python3"
+    candidate_directories:
+      - "/opt/cmake-4.1.1-linux-x86_64/bin/"
+      - "/home/aspi/.volta/bin/"
+      - "/home/linuxbrew/.linuxbrew/bin/"
+      - "/home/linuxbrew/.linuxbrew/sbin/"
+      - "/usr/local/bin/"
+      - "/usr/local/sbin/"
+      - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli/"
+      - "/home/aspi/.vscode-server/bin/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/bin/remote-cli/"
+      - "/usr/sbin/"
+      - "/usr/bin/"
+      - "/sbin/"
+      - "/bin/"
+      - "/usr/games/"
+      - "/usr/local/games/"
+      - "/usr/lib/wsl/lib/"
+      - "/home/aspi/.vscode-server/extensions/ms-python.debugpy-2025.18.0-linux-x64/bundled/scripts/noConfigScripts/"
+      - "/usr/local/bin/"
+      - "/usr/local/sbin/"
+      - "/usr/local/"
+      - "/usr/bin/"
+      - "/usr/sbin/"
+      - "/usr/"
+      - "/bin/"
+      - "/sbin/"
+      - "/opt/cmake-4.1.1-linux-x86_64/bin/"
+      - "/opt/cmake-4.1.1-linux-x86_64/sbin/"
+      - "/opt/cmake-4.1.1-linux-x86_64/"
+      - "/usr/X11R6/bin/"
+      - "/usr/X11R6/sbin/"
+      - "/usr/X11R6/"
+      - "/usr/pkg/bin/"
+      - "/usr/pkg/sbin/"
+      - "/usr/pkg/"
+      - "/opt/bin/"
+      - "/opt/sbin/"
+      - "/opt/"
+    searched_directories:
+      - "/opt/cmake-4.1.1-linux-x86_64/bin/python3.6"
+      - "/home/aspi/.volta/bin/python3.6"
+      - "/home/linuxbrew/.linuxbrew/bin/python3.6"
+      - "/home/linuxbrew/.linuxbrew/sbin/python3.6"
+      - "/usr/local/bin/python3.6"
+      - "/usr/local/sbin/python3.6"
+      - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand/python3.6"
+      - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli/python3.6"
+      - "/home/aspi/.vscode-server/bin/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/bin/remote-cli/python3.6"
+      - "/usr/sbin/python3.6"
+      - "/usr/bin/python3.6"
+      - "/sbin/python3.6"
+      - "/bin/python3.6"
+      - "/usr/games/python3.6"
+      - "/usr/local/games/python3.6"
+      - "/usr/lib/wsl/lib/python3.6"
+      - "/home/aspi/.vscode-server/extensions/ms-python.debugpy-2025.18.0-linux-x64/bundled/scripts/noConfigScripts/python3.6"
+      - "/usr/local/bin/python3.6"
+      - "/usr/local/sbin/python3.6"
+      - "/usr/local/python3.6"
+      - "/usr/bin/python3.6"
+      - "/usr/sbin/python3.6"
+      - "/usr/python3.6"
+      - "/bin/python3.6"
+      - "/sbin/python3.6"
+      - "/opt/cmake-4.1.1-linux-x86_64/bin/python3.6"
+      - "/opt/cmake-4.1.1-linux-x86_64/sbin/python3.6"
+      - "/opt/cmake-4.1.1-linux-x86_64/python3.6"
+      - "/usr/X11R6/bin/python3.6"
+      - "/usr/X11R6/sbin/python3.6"
+      - "/usr/X11R6/python3.6"
+      - "/usr/pkg/bin/python3.6"
+      - "/usr/pkg/sbin/python3.6"
+      - "/usr/pkg/python3.6"
+      - "/opt/bin/python3.6"
+      - "/opt/sbin/python3.6"
+      - "/opt/python3.6"
+      - "/opt/cmake-4.1.1-linux-x86_64/bin/python3"
+      - "/home/aspi/.volta/bin/python3"
+      - "/home/linuxbrew/.linuxbrew/bin/python3"
+      - "/home/linuxbrew/.linuxbrew/sbin/python3"
+      - "/usr/local/bin/python3"
+      - "/usr/local/sbin/python3"
+      - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand/python3"
+      - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli/python3"
+      - "/home/aspi/.vscode-server/bin/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/bin/remote-cli/python3"
+      - "/usr/sbin/python3"
+    found: "/usr/bin/python3"
+    search_context:
+      ENV{PATH}:
+        - "/opt/cmake-4.1.1-linux-x86_64/bin"
+        - "/home/aspi/.volta/bin"
+        - "/home/linuxbrew/.linuxbrew/bin"
+        - "/home/linuxbrew/.linuxbrew/sbin"
+        - "/usr/local/bin"
+        - "/usr/local/sbin"
+        - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/home/aspi/.vscode-server/bin/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/bin/remote-cli"
+        - "/opt/cmake-4.1.1-linux-x86_64/bin"
+        - "/home/aspi/.volta/bin"
+        - "/home/linuxbrew/.linuxbrew/bin"
+        - "/home/linuxbrew/.linuxbrew/sbin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/usr/lib/wsl/lib"
+        - "/home/aspi/.vscode-server/extensions/ms-python.debugpy-2025.18.0-linux-x64/bundled/scripts/noConfigScripts"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/opt/cmake-4.1.1-linux-x86_64"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/lib/cmake/pybind11/FindPythonLibsNew.cmake:254 (find_library)"
+      - "/usr/lib/cmake/pybind11/pybind11Tools.cmake:50 (find_package)"
+      - "/usr/lib/cmake/pybind11/pybind11Common.cmake:188 (include)"
+      - "/usr/lib/cmake/pybind11/pybind11Config.cmake:250 (include)"
+      - "CMakeLists.txt:100 (find_package)"
+    mode: "library"
+    variable: "PYTHON_LIBRARY"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "python3.12"
+    candidate_directories:
+      - "/usr/lib/x86_64-linux-gnu/x86_64-linux-gnu/"
+      - "/usr/lib/x86_64-linux-gnu/"
+    searched_directories:
+      - "/usr/lib/x86_64-linux-gnu/x86_64-linux-gnu/"
+    found: "/usr/lib/x86_64-linux-gnu/libpython3.12.so"
+    search_context:
+      ENV{PATH}:
+        - "/opt/cmake-4.1.1-linux-x86_64/bin"
+        - "/home/aspi/.volta/bin"
+        - "/home/linuxbrew/.linuxbrew/bin"
+        - "/home/linuxbrew/.linuxbrew/sbin"
+        - "/usr/local/bin"
+        - "/usr/local/sbin"
+        - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/home/aspi/.vscode-server/bin/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/bin/remote-cli"
+        - "/opt/cmake-4.1.1-linux-x86_64/bin"
+        - "/home/aspi/.volta/bin"
+        - "/home/linuxbrew/.linuxbrew/bin"
+        - "/home/linuxbrew/.linuxbrew/sbin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/usr/lib/wsl/lib"
+        - "/home/aspi/.vscode-server/extensions/ms-python.debugpy-2025.18.0-linux-x64/bundled/scripts/noConfigScripts"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/opt/cmake-4.1.1-linux-x86_64"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "/usr/lib/X11"
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/Internal/CheckSourceCompiles.cmake:104 (try_compile)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/CheckCXXCompilerFlag.cmake:103 (cmake_check_compiler_flag)"
+      - "/usr/lib/cmake/pybind11/pybind11Common.cmake:276 (check_cxx_compiler_flag)"
+      - "/usr/lib/cmake/pybind11/pybind11Common.cmake:318 (_pybind11_return_if_cxx_and_linker_flags_work)"
+      - "/usr/lib/cmake/pybind11/pybind11Common.cmake:385 (_pybind11_generate_lto)"
+      - "/usr/lib/cmake/pybind11/pybind11Config.cmake:250 (include)"
+      - "CMakeLists.txt:100 (find_package)"
+    checks:
+      - "Performing Test HAS_FLTO"
+    directories:
+      source: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-VWwToB"
+      binary: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-VWwToB"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: ""
+    buildResult:
+      variable: "HAS_FLTO"
+      cached: true
+      stdout: |
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-VWwToB'
+        
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_832c8/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_832c8.dir/build.make CMakeFiles/cmTC_832c8.dir/build
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-VWwToB'
+        Building CXX object CMakeFiles/cmTC_832c8.dir/src.cxx.o
+        /usr/bin/c++ -DHAS_FLTO  -std=c++20   -flto -fno-fat-lto-objects -o CMakeFiles/cmTC_832c8.dir/src.cxx.o -c /home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-VWwToB/src.cxx
+        Linking CXX executable cmTC_832c8
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_832c8.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_832c8.dir/src.cxx.o -o cmTC_832c8  -flto
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-VWwToB'
+        
+      exitCode: 0
+  -
+    kind: "find_package-v1"
+    backtrace:
+      - "CMakeLists.txt:100 (find_package)"
+    name: "pybind11"
+    configs:
+      -
+        filename: "pybind11Config.cmake"
+        kind: "cmake"
+      -
+        filename: "pybind11-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "required_explicit"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "pybind11"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/pkgRedirects/pybind11Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/pkgRedirects/pybind11-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/opt/cmake-4.1.1-linux-x86_64/pybind11Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/opt/cmake-4.1.1-linux-x86_64/pybind11-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/aspi/.volta/pybind11Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/aspi/.volta/pybind11-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/linuxbrew/.linuxbrew/pybind11Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/linuxbrew/.linuxbrew/pybind11-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/pybind11Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/local/pybind11-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand/pybind11Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand/pybind11-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli/pybind11Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/aspi/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli/pybind11-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/aspi/.vscode-server/bin/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/bin/remote-cli/pybind11Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/home/aspi/.vscode-server/bin/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/bin/remote-cli/pybind11-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/pybind11Config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "/usr/pybind11-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: "/usr/lib/cmake/pybind11/pybind11Config.cmake"
+      mode: "config"
+      version: "2.11.1"
     search_context:
       ENV{PATH}:
         - "/opt/cmake-4.1.1-linux-x86_64/bin"

@@ -38,7 +38,7 @@ signed main(int argc, char** argv) {
     cfg.species = config::species;
     cfg.constantSize = config::constantSize;
     cfg.trackedSpecies = config::trackedSpecies;
-    cfg.trackedNames=vector<std::string_view>(std::begin(config::trackedNames), std::end(config::trackedNames));
+    cfg.trackedNames=vector<std::string>(std::begin(config::trackedNames), std::end(config::trackedNames));
     cfg.trackedIndex=vector<int>(std::begin(config::trackedIndex), std::end(config::trackedIndex));
     cfg.fullConc=vector<double>(std::begin(config::fullConc), std::end(config::fullConc));
     cfg.initConc = config::initConc;
@@ -55,10 +55,11 @@ signed main(int argc, char** argv) {
 
 	
 	NASAP_fit diffEvo(cfg);
-	
 
 	startTime = std::chrono::system_clock::now();
-	auto opt = diffEvo.runDE(50, 128);
+	NASAP_fit::TerminationCondition deTerm;
+	deTerm.maxIter = 50;
+	auto opt = diffEvo.runDE(128, cfg.lowerLim, cfg.upperLim, deTerm);
 	endTimeGlobal = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTimeGlobal - startTime).count();
 
@@ -67,7 +68,9 @@ signed main(int argc, char** argv) {
 	std::vector<double> bestConstants(config::constantSize);
 	double minerror;
 	// LM refinement on the best solution returned by DE
-	auto refined = diffEvo.runLM(opt[4].constants);
+	NASAP_fit::TerminationCondition lmTerm;
+	lmTerm.maxIter = 200;
+	auto refined = diffEvo.runLM(opt[4].constants, lmTerm);
 	bestConstants = refined.constants;
 	minerror = refined.error;
 	std::vector<std::string>kinds(config::constantSize);
