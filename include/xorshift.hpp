@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <random>
 #include <climits>
+#include <cassert>
+#include <cmath>
 
 static std::random_device seed_gen;
 class xorshift {
@@ -35,4 +37,74 @@ public:
 extern xorshift myRand;
 inline double randbet(double lower, double upper) {
 	return lower + (upper - lower) * myRand.prob();
+}
+
+// Deterministic, stateless hashing utilities for reproducible pseudo-randomness.
+// Useful for counter-based RNG: hash(seed, gen, individual, dim, tag, attempt, ...)
+// and derive uniform values from the resulting 64-bit value.
+namespace det_rng {
+	// SplitMix64 finalizer / mixer. Public domain-quality mixing.
+	inline uint64_t splitmix64(uint64_t x) {
+		x += 0x9E3779B97F4A7C15ull;
+		x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9ull;
+		x = (x ^ (x >> 27)) * 0x94D049BB133111EBull;
+		return x ^ (x >> 31);
+	}
+
+	inline uint64_t hash_init(uint64_t seed) {
+		return splitmix64(seed);
+	}
+
+	inline uint64_t hash_append(uint64_t h, uint64_t v) {
+		// Order-sensitive combine.
+		return splitmix64(h ^ splitmix64(v));
+	}
+
+	inline uint64_t hash64(uint64_t a) {
+		return splitmix64(a);
+	}
+
+	inline uint64_t hash64(uint64_t a, uint64_t b) {
+		uint64_t h = hash_init(a);
+		h = hash_append(h, b);
+		return h;
+	}
+
+	inline uint64_t hash64(uint64_t a, uint64_t b, uint64_t c) {
+		uint64_t h = hash_init(a);
+		h = hash_append(h, b);
+		h = hash_append(h, c);
+		return h;
+	}
+
+	inline uint64_t hash64(uint64_t a, uint64_t b, uint64_t c, uint64_t d) {
+		uint64_t h = hash_init(a);
+		h = hash_append(h, b);
+		h = hash_append(h, c);
+		h = hash_append(h, d);
+		return h;
+	}
+
+	inline uint64_t hash64(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e) {
+		uint64_t h = hash_init(a);
+		h = hash_append(h, b);
+		h = hash_append(h, c);
+		h = hash_append(h, d);
+		h = hash_append(h, e);
+		return h;
+	}
+
+	// Convert 64-bit value to double in [0,1) using top 53 bits.
+	inline double u01_from_u64(uint64_t x) {
+		// 53-bit precision: take the top 53 bits and scale.
+		constexpr double inv_2pow53 = 1.0 / 9007199254740992.0; // 2^53
+		return static_cast<double>(x >> 11) * inv_2pow53;
+	}
+
+	// Deterministic uniform integer in [0, bound) with minimal bias (multiply-high).
+	inline uint32_t uniform_index(uint64_t x, uint32_t bound) {
+		assert(bound > 0);
+		__uint128_t prod = static_cast<__uint128_t>(x) * static_cast<__uint128_t>(bound);
+		return static_cast<uint32_t>(prod >> 64);
+	}
 }

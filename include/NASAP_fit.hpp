@@ -9,6 +9,7 @@
 #include <vector>
 #include <cassert>
 #include <fstream>
+#include <cstdint>
 
 
 #include <cvode/cvode.h>
@@ -52,19 +53,19 @@ struct NASAP_fit {
 	//最適化の終了条件を記述する構造体
 	struct TerminationCondition {
 		//最大世代数
-		int maxIter=-1;
+		int maxIter=INT_MAX;
 		//実行時間の上限（秒）
-		double timeLimit=-1;
+		double timeLimit=DBL_MAX;
 		//パラメータ空間における最適解の近傍の大きさの基準値(DEでは無効)
-		double xtol=-1;
+		double xtol=0;
 		//目的関数の改善率の基準値
-		double ftolAbs=-1;
+		double ftolAbs=0;
 		//目的関数の改善率の基準値
-		double ftolRel=-1;
+		double ftolRel=0;
 		//目的関数が目標値を下回ったときに終了
 		double targetError=0;
-		//停滞期間（世代数）
-		int stall=-1;
+		//停滞期間の基準値（世代数）（この値を超過すると終了）
+		int stall=1;
 	};
 private:
 	double endTime; //シミュレーション終了時間
@@ -88,16 +89,16 @@ private:
 	sundials::Context sunctx;
 	void* cvode_mem = CVodeCreate(CV_BDF, sunctx);
 
-	vector<double> crossingOver(const vector<double>& baseV, const vector<double>& randV1, const vector<double>& randV2);
+	vector<double> crossingOver(const vector<double>& baseV, const vector<double>& randV1, const vector<double>& randV2, uint64_t seed, int gen, int j);
 
 	void validateConstants(const vector<double>& constants);
 
 	void sortByError(vector<OptimizeResult>& populations);
 
-	vector<OptimizeResult> runDE_single(int maxGen, int popSize, double lowerLim, double upperLim);
-	vector<OptimizeResult> runDE_single(const vector<vector<double>>& arg);
+	vector<OptimizeResult> runDE_single(int maxGen, int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed = 1);
+	vector<OptimizeResult> runDE_single(const vector<vector<double>>& arg, const TerminationCondition& termCond, uint64_t seed = 1);
 public:
-	vector<vector<double>> makeRandomPopulation(int popSize, double lower, double upper, int seed);
+	vector<vector<double>> makeRandomPopulation(int popSize, double lower, double upper, uint64_t seed);
 
 // jac_fun_と res_fun_のセットアップ
 	void setUpCasADiFunctions();
@@ -129,9 +130,9 @@ public:
 	vector<OptimizeResult> runLM(const vector<vector<double>>& thetaList, const TerminationCondition& termCond);
 
 	// 差分進化法の実行
-	vector<OptimizeResult> runDE(int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond);
+	vector<OptimizeResult> runDE(int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed = 1);
 
-	vector<OptimizeResult> runDE(vector<vector<double>> arg, const TerminationCondition& termCond);
+	vector<OptimizeResult> runDE(vector<vector<double>> arg, const TerminationCondition& termCond, uint64_t seed = 1);
 
 	void putCVODESim(const vector<double>& constant);
 

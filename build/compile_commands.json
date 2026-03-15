@@ -1,25 +1,25 @@
 [
 {
   "directory": "/home/aspi/Project/nasap-fit-cpp/build",
-  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -isystem /usr/include/eigen3 -std=c++20 -o CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/NASAP_fit.cpp",
+  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -isystem /usr/include/eigen3 -g -std=c++20 -o CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/NASAP_fit.cpp",
   "file": "/home/aspi/Project/nasap-fit-cpp/src/NASAP_fit.cpp",
   "output": "CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.o"
 },
 {
   "directory": "/home/aspi/Project/nasap-fit-cpp/build",
-  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -isystem /usr/include/eigen3 -std=c++20 -o CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/main.cpp",
+  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -isystem /usr/include/eigen3 -g -std=c++20 -o CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/main.cpp",
   "file": "/home/aspi/Project/nasap-fit-cpp/src/main.cpp",
   "output": "CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o"
 },
 {
   "directory": "/home/aspi/Project/nasap-fit-cpp/build",
-  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -isystem /usr/include/eigen3 -std=c++20 -o CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/reactionNetwork.cpp",
+  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -isystem /usr/include/eigen3 -g -std=c++20 -o CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/reactionNetwork.cpp",
   "file": "/home/aspi/Project/nasap-fit-cpp/src/reactionNetwork.cpp",
   "output": "CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.o"
 },
 {
   "directory": "/home/aspi/Project/nasap-fit-cpp/build",
-  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -isystem /usr/include/eigen3 -std=c++20 -o CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp",
+  "command": "/usr/bin/c++  -I/home/aspi/Project/nasap-fit-cpp/include -I/usr/include/suitesparse -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -isystem /usr/include/eigen3 -g -std=c++20 -o CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o -c /home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp",
   "file": "/home/aspi/Project/nasap-fit-cpp/src/readcsv.cpp",
   "output": "CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o"
 }

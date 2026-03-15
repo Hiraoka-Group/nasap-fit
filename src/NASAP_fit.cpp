@@ -38,12 +38,23 @@ using std::sqrt;
 
 
 
-std::vector<double> NASAP_fit::crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2){
+std::vector<double> NASAP_fit::crossingOver(
+    const std::vector<double>& baseV,
+    const std::vector<double>& randV1,
+    const std::vector<double>& randV2,
+    uint64_t seed,
+    int gen,
+    int j) {
     std::vector<double> v(cfg.constantSize);
-    int jr = myRand(cfg.constantSize);
+
+	// Deterministic crossover randomness derived from (seed, gen, j, k).
+	constexpr uint64_t TAG_JR = 0xD3B54A1Du;
+	constexpr uint64_t TAG_CROSS = 0xBEEF1234u;
+	int jr = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_JR), (uint32_t)cfg.constantSize);
     for (int k = 0; k < cfg.constantSize; k++) {
         //交叉
-        if (jr == k || myRand.prob() < cfg.crossOver) {
+		double u = det_rng::u01_from_u64(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, (uint64_t)k, TAG_CROSS));
+		if (jr == k || u < cfg.crossOver) {
             v[k] = baseV[k] * pow(randV1[k] / randV2[k], cfg.scalar);
             v[k]=std::clamp(v[k], cfg.lowerLim, cfg.upperLim);
         }
@@ -106,7 +117,7 @@ double NASAP_fit::calcError(const std::vector<double>& constant) {
     return SSR;
 }
 
-std::vector<std::vector<double>> NASAP_fit::makeRandomPopulation(int popSize, double lower, double upper, int seed) {
+std::vector<std::vector<double>> NASAP_fit::makeRandomPopulation(int popSize, double lower, double upper, uint64_t seed) {
     std::vector<std::vector<double>> population(popSize);
     xorshift rand(seed);
     for (int i = 0; i < popSize; i++) {
@@ -392,70 +403,19 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     assert(flag == CV_SUCCESS);
 }
 
-std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(int maxGen, int popSize, double lowerLim, double upperLim) {
-    const int world_size = mpi_env.size();
-    const int world_rank = mpi_env.rank();
-    assert(world_size == 1);
-    assert(world_rank == 0);
-
-    auto transProb = [&](double temp, double oldE, double newE) {
-        if (newE < oldE) return true;
-        if (temp <= 0) return false;
-        return myRand.prob() < exp((oldE - newE) / temp);
-    };
-    assert(maxGen > 0);
-    assert(popSize > 0);
-    assert(lowerLim > 0 && upperLim > 0 && lowerLim < upperLim);
-
-    std::vector<OptimizeResult> populations;
-    populations.reserve((size_t)popSize);
-    for (int i = 0; i < popSize; ++i) populations.emplace_back(cfg.constantSize);
-
-    for (int idx = 0; idx < popSize; ++idx) {
-        for (int j = 0; j < cfg.constantSize; ++j) {
-            double v = myRand.randbetExp(lowerLim, upperLim);
-            populations[idx].constants[j] = v;
-        }
-        populations[idx].error = calcError(populations[idx].constants);
-    }
-
-    struct Triple { int j, xb, xr1, xr2; };
-
-    for (int gen = 0; gen < maxGen; ++gen) {
-        cout << "current generation : " << gen << " / " << maxGen << "\n";
-        double temp = 0;
-
-        std::vector<Triple> triples;
-        triples.reserve((size_t)popSize);
-        for (int j = 0; j < popSize; ++j) {
-            int xb = myRand(popSize), xr1 = myRand(popSize), xr2 = myRand(popSize);
-            while (xb == xr1) { xr1 = myRand(popSize); }
-            while (xb == xr2 || xr1 == xr2) { xr2 = myRand(popSize); }
-            triples.push_back({j, xb, xr1, xr2});
-        }
-
-        for (const auto& t : triples) {
-            const std::vector<double>& baseV = populations[t.xb].constants;
-            const std::vector<double>& randV1 = populations[t.xr1].constants;
-            const std::vector<double>& randV2 = populations[t.xr2].constants;
-            std::vector<double> v = crossingOver(baseV, randV1, randV2);
-            double newError = calcError(v);
-            if (transProb(temp, populations[t.j].error, newError) || !std::isfinite(populations[t.j].error)) {
-                populations[t.j].constants = std::move(v);
-                populations[t.j].error = newError;
-            }
-        }
-    }
-
-    sortByError(populations);
-    return populations;
+std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(int maxGen, int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed) {
+    assert(popSize >= 3);
+	TerminationCondition tc = termCond;
+	tc.maxIter = std::min(tc.maxIter, maxGen);
+	uint64_t seed = (seed == 0) ? 1 : seed;
+    std::vector<std::vector<double>> init = makeRandomPopulation(popSize, lowerLim, upperLim, seed);
+    return runDE(std::move(init), tc);
 }
 
-std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector<std::vector<double>>& arg) {
+std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector<std::vector<double>>& arg, const TerminationCondition& termCond, uint64_t seed) {
     const int world_size = mpi_env.size();
     const int world_rank = mpi_env.rank();
     assert(world_size == 1);
-    assert(world_rank == 0);
 
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
@@ -464,30 +424,43 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector
     };
 
     const int n = (int)arg.size();
-    for (int i = 0; i < n; ++i) validateConstants(arg[(size_t)i]);
+    for (int i = 0; i < n; ++i) validateConstants(arg[i]);
 
     std::vector<OptimizeResult> populations;
-    populations.reserve((size_t)n);
+    populations.reserve(n);
     for (int i = 0; i < n; ++i) populations.emplace_back(cfg.constantSize);
 
     for (int idx = 0; idx < n; ++idx) {
-        populations[idx].constants = arg[(size_t)idx];
+        populations[idx].constants = arg[idx];
         populations[idx].error = calcError(populations[idx].constants);
     }
 
-    struct Triple { int j, xb, xr1, xr2; };
-    int maxGen = 100;
 
-    for (int gen = 0; gen < maxGen; ++gen) {
-        cout << "current generation : " << gen << " / " << maxGen << "\n";
+	struct Triple { int j, xb, xr1, xr2; };
+    int maxGen = 100;
+    double bestSoFar = DBL_MAX;
+    int stallCount = 0;
+    auto startTime = std::chrono::steady_clock::now();
+
+    for (int gen = 0; gen < termCond.maxIter; ++gen) {
+        cout << "current generation : " << gen << " / " << termCond.maxIter << "\n";
         double temp = 0;
 
         std::vector<Triple> triples;
         triples.reserve((size_t)n);
+        constexpr uint64_t TAG_XB  = 0xA11CE001u;
+        constexpr uint64_t TAG_XR1 = 0xA11CE002u;
+        constexpr uint64_t TAG_XR2 = 0xA11CE003u;
         for (int j = 0; j < n; ++j) {
-            int xb = myRand(n), xr1 = myRand(n), xr2 = myRand(n);
-            while (xb == xr1) { xr1 = myRand(n); }
-            while (xb == xr2 || xr1 == xr2) { xr2 = myRand(n); }
+            int xb = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XB), (uint32_t)n);
+            int xr1 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR1), (uint32_t)n);
+            for (int attempt = 0; xr1 == xb; ++attempt) {
+                xr1 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR1, (uint64_t)attempt), (uint32_t)n);
+            }
+            int xr2 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR2), (uint32_t)n);
+            for (int attempt = 0; (xr2 == xb || xr2 == xr1); ++attempt) {
+                xr2 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR2, (uint64_t)attempt), (uint32_t)n);
+            }
             triples.push_back({j, xb, xr1, xr2});
         }
 
@@ -495,111 +468,59 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector
             const std::vector<double>& baseV = populations[t.xb].constants;
             const std::vector<double>& randV1 = populations[t.xr1].constants;
             const std::vector<double>& randV2 = populations[t.xr2].constants;
-            std::vector<double> v = crossingOver(baseV, randV1, randV2);
+			std::vector<double> v = crossingOver(baseV, randV1, randV2, seed, gen, t.j);
             double newError = calcError(v);
             if (transProb(temp, populations[t.j].error, newError) || !std::isfinite(populations[t.j].error)) {
                 populations[t.j].constants = std::move(v);
                 populations[t.j].error = newError;
             }
         }
+        
+        double bestpop = DBL_MAX;
+        for (int idx = 0; idx < n; idx ++) {
+            bestpop = std::min(bestpop, populations[(size_t)idx].error);
+        }
+
+        bool stop = false;
+        if (termCond.targetError > 0 && bestpop <= termCond.targetError) stop = true;
+
+        if (!stop && termCond.timeLimit > 0) {
+            double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
+            if (elapsed >= termCond.timeLimit) stop = true;
+        }
+        if (!stop && termCond.stall > 0) {
+            //|a-b| <= (atol + rtol * |b|) なら改善なしとみなす
+            if (abs(bestSoFar - bestpop) > termCond.ftolAbs + termCond.ftolRel * abs(bestpop)) {
+                bestSoFar = bestpop;
+                stallCount = 0;
+            } else {
+                stallCount++;
+            }
+            if (stallCount >= termCond.stall) stop = true;
+        }
+        if (stop) break;
     }
 
     sortByError(populations);
     return populations;
 }
 
-std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond) {
+std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed) {
     assert(popSize >= 3);
-    const int seed = 1;
     std::vector<std::vector<double>> init = makeRandomPopulation(popSize, lowerLim, upperLim, seed);
-    return runDE(std::move(init), termCond);
+    return runDE(std::move(init), termCond, seed);
 }
 
 
-std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<double>> arg, const TerminationCondition& termCond){
+std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<double>> arg, const TerminationCondition& termCond, uint64_t seed){
     assert(arg.size() >= 3);
     const int world_size = mpi_env.size();
     const int world_rank = mpi_env.rank();
 
-    const int maxGen = (termCond.maxIter > 0) ? termCond.maxIter : 100;
-    assert(maxGen > 0);
     if (world_size == 1) {
-        auto transProb = [&](double temp, double oldE, double newE) {
-            if (newE < oldE) return true;
-            if (temp <= 0) return false;
-            return myRand.prob() < exp((oldE - newE) / temp);
-        };
-        const int n = (int)arg.size();
-        for (int i = 0; i < n; ++i) validateConstants(arg[(size_t)i]);
-
-        std::vector<OptimizeResult> populations;
-        populations.reserve((size_t)n);
-        for (int i = 0; i < n; ++i) populations.emplace_back(cfg.constantSize);
-
-        for (int idx = 0; idx < n; ++idx) {
-            populations[idx].constants = arg[(size_t)idx];
-            populations[idx].error = calcError(populations[idx].constants);
-        }
-
-        struct Triple { int j, xb, xr1, xr2; };
-        double bestSoFar = DBL_MAX;
-        int stallCount = 0;
-        auto startTime = std::chrono::steady_clock::now();
-
-        for (int gen = 0; gen < maxGen; ++gen) {
-            cout << "current generation : " << gen << " / " << maxGen << "\n";
-            double temp = 0;
-
-            std::vector<Triple> triples;
-            triples.reserve((size_t)n);
-            for (int j = 0; j < n; ++j) {
-                int xb = myRand(n), xr1 = myRand(n), xr2 = myRand(n);
-                while (xb == xr1) { xr1 = myRand(n); }
-                while (xb == xr2 || xr1 == xr2) { xr2 = myRand(n); }
-                triples.push_back({j, xb, xr1, xr2});
-            }
-
-            for (const auto& t : triples) {
-                const std::vector<double>& baseV = populations[t.xb].constants;
-                const std::vector<double>& randV1 = populations[t.xr1].constants;
-                const std::vector<double>& randV2 = populations[t.xr2].constants;
-                std::vector<double> v = crossingOver(baseV, randV1, randV2);
-                double newError = calcError(v);
-                if (transProb(temp, populations[t.j].error, newError) || !std::isfinite(populations[t.j].error)) {
-                    populations[t.j].constants = std::move(v);
-                    populations[t.j].error = newError;
-                }
-            }
-
-            // termination check (single)
-            double currentBest = DBL_MAX;
-            for (const auto& p : populations) currentBest = std::min(currentBest, p.error);
-
-            bool stop = false;
-            if (termCond.targetError > 0 && currentBest <= termCond.targetError) stop = true;
-            if (!stop && termCond.timeLimit > 0) {
-                double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
-                if (elapsed >= termCond.timeLimit) stop = true;
-            }
-            if (!stop && termCond.stall > 0) {
-                const double absImprove = bestSoFar - currentBest;
-                const double relImprove = (bestSoFar < DBL_MAX && bestSoFar > 0) ? (absImprove / bestSoFar) : DBL_MAX;
-                const bool improvedAbs = (termCond.ftolAbs > 0) ? (absImprove > termCond.ftolAbs) : (absImprove > 0);
-                const bool improvedRel = (termCond.ftolRel > 0) ? (relImprove > termCond.ftolRel) : true;
-                if (improvedAbs && improvedRel) {
-                    bestSoFar = currentBest;
-                    stallCount = 0;
-                } else {
-                    stallCount++;
-                }
-                if (stallCount >= termCond.stall) stop = true;
-            }
-            if (stop) break;
-        }
-
-        sortByError(populations);
-        return populations;
+        return runDE_single(arg, termCond, seed);
     }
+	uint64_t seed = (seed == 0) ? 1 : seed;
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
         if (temp <= 0) return false;
@@ -648,8 +569,8 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     int stallCount = 0;
     auto startTime = std::chrono::steady_clock::now();
 
-    for (int gen = 0; gen < maxGen; ++gen) {
-        if (world_rank == 0) cout << "current generation : " << gen << " / " << maxGen << "\n";
+    for (int gen = 0; gen < termCond.maxIter; ++gen) {
+        if (world_rank == 0) cout << "current generation : " << gen << " / " << termCond.maxIter << "\n";
         double temp = 0;
 
         std::vector<Triple> triples;
@@ -661,10 +582,19 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
             if (idx % world_size != world_rank) remoteIndices.push_back(idx);
         };
 
+        constexpr uint64_t TAG_XB  = 0xA11CE001u;
+        constexpr uint64_t TAG_XR1 = 0xA11CE002u;
+        constexpr uint64_t TAG_XR2 = 0xA11CE003u;
         for (int j = world_rank; j < n; j += world_size) {
-            int xb = myRand(n), xr1 = myRand(n), xr2 = myRand(n);
-            while (xb == xr1) { xr1 = myRand(n); }
-            while (xb == xr2 || xr1 == xr2) { xr2 = myRand(n); }
+            int xb = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XB), (uint32_t)n);
+            int xr1 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR1), (uint32_t)n);
+            for (int attempt = 0; xr1 == xb; ++attempt) {
+                xr1 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR1, (uint64_t)attempt), (uint32_t)n);
+            }
+            int xr2 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR2), (uint32_t)n);
+            for (int attempt = 0; (xr2 == xb || xr2 == xr1); ++attempt) {
+                xr2 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR2, (uint64_t)attempt), (uint32_t)n);
+            }
             triples.push_back({j, xb, xr1, xr2});
             needRemote(xb);
             needRemote(xr1);
@@ -698,7 +628,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
             const std::vector<double>& baseV = populations[t.xb].constants;
             const std::vector<double>& randV1 = populations[t.xr1].constants;
             const std::vector<double>& randV2 = populations[t.xr2].constants;
-            std::vector<double> v = crossingOver(baseV, randV1, randV2);
+			std::vector<double> v = crossingOver(baseV, randV1, randV2, seed, gen, t.j);
             double newError = calcError(v);
             if (transProb(temp, populations[t.j].error, newError) || !std::isfinite(populations[t.j].error)) {
                 populations[t.j].constants = std::move(v);
@@ -719,16 +649,18 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
 
         bool stop = false;
         if (termCond.targetError > 0 && globalBest <= termCond.targetError) stop = true;
+
         if (!stop && termCond.timeLimit > 0) {
             double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
             if (elapsed >= termCond.timeLimit) stop = true;
         }
         if (!stop && termCond.stall > 0) {
+            //|a-b| <= (atol + rtol * |b|) なら改善なしとみなす
             const double absImprove = bestSoFar - globalBest;
             const double relImprove = (bestSoFar < DBL_MAX && bestSoFar > 0) ? (absImprove / bestSoFar) : DBL_MAX;
             const bool improvedAbs = (termCond.ftolAbs > 0) ? (absImprove > termCond.ftolAbs) : (absImprove > 0);
             const bool improvedRel = (termCond.ftolRel > 0) ? (relImprove > termCond.ftolRel) : true;
-            if (improvedAbs && improvedRel) {
+            if (abs(bestSoFar - globalBest) > termCond.ftolAbs + termCond.ftolRel * abs(globalBest)) {
                 bestSoFar = globalBest;
                 stallCount = 0;
             } else {
@@ -736,11 +668,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
             }
             if (stallCount >= termCond.stall) stop = true;
         }
-
-        int stopFlag = stop ? 1 : 0;
-        int stopAny = 0;
-        MPI_Allreduce(&stopFlag, &stopAny, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-        if (stopAny) break;
+        if (stop) break;
     }
 
     for (int j = world_rank; j < n; j += world_size){
@@ -793,12 +721,14 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, co
     
     std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
     for (int iter = 0; ; ++iter) {
+
         if (maxIter > 0 && iter >= maxIter) break;
         if (termCond.timeLimit > 0) {
             double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
             if (elapsed >= termCond.timeLimit) break;
         }
         if (termCond.targetError > 0 && bestErr <= termCond.targetError) break;
+
         if (world_rank == 0) {
             for (int i = 0; i < cfg.constantSize; i++) {
                 cout << std::setprecision(4) << theta[i] << ", ";
@@ -847,24 +777,21 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, co
                 lambda *= 2.0;
             }
             const double stepNorm = delta.norm();
-            const double xtol = (termCond.xtol > 0) ? termCond.xtol : 1e-6;
-            if (stepNorm < xtol) break;
+            if (stepNorm < termCond.xtol) break;
 
             // ftol / stall
             if (termCond.stall > 0 || termCond.ftolAbs > 0 || termCond.ftolRel > 0) {
-                const double absImprove = bestSoFar - bestErr;
-                const double relImprove = (bestSoFar > 0) ? (absImprove / bestSoFar) : DBL_MAX;
-                const bool improvedAbs = (termCond.ftolAbs > 0) ? (absImprove > termCond.ftolAbs) : (absImprove > 0);
-                const bool improvedRel = (termCond.ftolRel > 0) ? (relImprove > termCond.ftolRel) : true;
-                if (improvedAbs && improvedRel) {
+                //const double absImprove = bestSoFar - bestErr;
+                //const double relImprove = (bestSoFar > 0) ? (absImprove / bestSoFar) : DBL_MAX;
+                //const bool improvedAbs = (termCond.ftolAbs > 0) ? (absImprove > termCond.ftolAbs) : (absImprove > 0);
+                //const bool improvedRel = (termCond.ftolRel > 0) ? (relImprove > termCond.ftolRel) : true;
+                if (std::abs(bestSoFar - newErr) > termCond.ftolAbs + termCond.ftolRel * std::abs(newErr)) {
                     bestSoFar = bestErr;
                     stallCount = 0;
                 } else {
                     stallCount++;
                 }
                 if (termCond.stall > 0 && stallCount >= termCond.stall) break;
-                if (termCond.ftolAbs > 0 && absImprove <= termCond.ftolAbs) break;
-                if (termCond.ftolRel > 0 && relImprove <= termCond.ftolRel) break;
             }
         } else {
             isChanged = false;
@@ -949,27 +876,31 @@ NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const v
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
-    N_Vector yQ0 = N_VNew_Serial(reaction_ids.size(), sunctx);
-    for(int i=0; i<reaction_ids.size(); i++){
-        int rid = reaction_ids[i];
+    vector<int> sorted_reaction_ids = reaction_ids;
+    std::sort(sorted_reaction_ids.begin(), sorted_reaction_ids.end());
+    sorted_reaction_ids.erase(std::unique(sorted_reaction_ids.begin(), sorted_reaction_ids.end()), sorted_reaction_ids.end());
+
+    N_Vector yQ0 = N_VNew_Serial(sorted_reaction_ids.size(), sunctx);
+    for(int i=0; i<sorted_reaction_ids.size(); i++){
+        int rid = sorted_reaction_ids[i];
         assert(0 <= rid && rid < rxnNet.data.size());
         NV_Ith_S(yQ0, i) = 0.0;
     }
 
     CVodeReInit(cvode_mem, 0.0, y);
     CVodeQuadReInit(cvode_mem, yQ0);
-    ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), &reaction_ids };
+    ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), &sorted_reaction_ids };
     CVodeSetUserData(cvode_mem, (void*)&ud);
     
     SimulationResult result;
     result.t = t;
     result.timePoints = t.size();
     result.y.resize(t.size(), vector<double>(cfg.species, 0.0));
-    result.reactionProgress.J.resize(t.size(), vector<double>(reaction_ids.size(), 0.0));
-    result.reactionProgress.reaction_ids = reaction_ids;
-    result.reactionProgress.reaction_labels.resize(reaction_ids.size(),"");
-    for(size_t i=0; i<reaction_ids.size(); i++){
-        int rid = reaction_ids[i];
+    result.reactionProgress.J.resize(t.size(), vector<double>(sorted_reaction_ids.size(), 0.0));
+    result.reactionProgress.reaction_ids = sorted_reaction_ids;
+    result.reactionProgress.reaction_labels.resize(sorted_reaction_ids.size(),"");
+    for(size_t i=0; i<sorted_reaction_ids.size(); i++){
+        int rid = sorted_reaction_ids[i];
         std::string& label = result.reactionProgress.reaction_labels[i];
         assert(0 <= rid && rid < rxnNet.data.size());
         int init = rxnNet.data[rid][0];
@@ -1005,8 +936,8 @@ NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const v
         for (int j = 0; j < cfg.species; j++) {
             result.y[i][j] = y_data[j];
         }
-        for (size_t j = 0; j < reaction_ids.size(); j++) {
-            int rid = reaction_ids[j];
+        for (size_t j = 0; j < sorted_reaction_ids.size(); j++) {
+            int rid = sorted_reaction_ids[j];
             assert(0 <= rid && rid < rxnNet.data.size());
             result.reactionProgress.J[i][j] = q_data[j];
         }
