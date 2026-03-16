@@ -28,6 +28,12 @@
 using std::vector;
 
 struct NASAP_fit {
+	enum class LogLevel : uint8_t {
+		quiet = 0,
+		normal = 1,
+		verbose = 2,
+	};
+
 	struct Config {
 		std::string QASAPFile;
 		std::string reactNetworkFile;
@@ -44,6 +50,10 @@ struct NASAP_fit {
 		double crossOver = 0.4;//optimize時
 		double upperLim = 1e4;//popset時
 		double lowerLim = 1e-3;//popset時
+		// CVODEの内部ステップ数上限（CVodeSetMaxNumSteps）
+		long int cvodeMaxNumSteps = 10000;
+		// ログ出力レベル
+		LogLevel logLevel = LogLevel::verbose;
 	};
 	struct OptimizeResult {
 		std::vector<double> constants;
@@ -65,7 +75,7 @@ struct NASAP_fit {
 		//目的関数が目標値を下回ったときに終了
 		double targetError=0;
 		//停滞期間の基準値（世代数）（この値を超過すると終了）
-		int stall=1;
+		int stall=INT_MAX;
 	};
 private:
 	double endTime; //シミュレーション終了時間
@@ -88,6 +98,7 @@ private:
 
 	sundials::Context sunctx;
 	void* cvode_mem = CVodeCreate(CV_BDF, sunctx);
+	N_Vector cvode_constraints_ = nullptr;
 
 	vector<double> crossingOver(const vector<double>& baseV, const vector<double>& randV1, const vector<double>& randV2, uint64_t seed, int gen, int j);
 
@@ -97,16 +108,16 @@ private:
 
 	vector<OptimizeResult> runDE_single(int maxGen, int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed = 1);
 	vector<OptimizeResult> runDE_single(const vector<vector<double>>& arg, const TerminationCondition& termCond, uint64_t seed = 1);
-public:
-	vector<vector<double>> makeRandomPopulation(int popSize, double lower, double upper, uint64_t seed);
 
+	vector<vector<double>> makeRandomPopulation(int popSize, double lower, double upper, uint64_t seed);
+public:
 // jac_fun_と res_fun_のセットアップ
 	void setUpCasADiFunctions();
 
 	const Config& constants() const { return cfg; }
 
-	// expose reaction-network metadata (e.g., kind->index map)
-	const ReactionNetwork& reactionNetwork() const { return rxnNet; }
+	// Expose reaction-network term index (kind -> index)
+	const std::map<std::string, int>& termIndex() const { return rxnNet.termIndex; }
 
 	//平方残差和の計算（CVODEを用いる）
 	double calcError(const vector<double>& constant);

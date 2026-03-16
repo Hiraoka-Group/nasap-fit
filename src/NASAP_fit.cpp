@@ -25,7 +25,7 @@
 #include "../include/xorshift.hpp"
 #include "../include/readcsv.hpp"
 
-xorshift myRand(2);
+
 int cnt=0;
     
 using namespace casadi;
@@ -101,10 +101,15 @@ double NASAP_fit::calcError(const std::vector<double>& constant) {
         assert(0 <= t && t <= endTime);
         if(t!=tret) flag=CVode(cvode_mem, t, y, &tret, CV_NORMAL);
         if(flag!=CV_SUCCESS){
-            for(int j=0;j<cfg.constantSize;j++){
-                cout<<constant[j]<<", ";
+            // Always print an error message, regardless of log level.
+            std::cerr << "CVode failed (flag=" << flag << ") at t=" << t
+                      << " (rank=" << mpi_env.rank() << ")\n";
+            if (cfg.logLevel == LogLevel::verbose) {
+                for(int j=0;j<cfg.constantSize;j++){
+                    std::cerr << constant[j] << ", ";
+                }
+                std::cerr << "\n";
             }
-            cout<<endl;
             exit(1);
         }
         double* y_data = N_VGetArrayPointer(y);
@@ -123,7 +128,7 @@ std::vector<std::vector<double>> NASAP_fit::makeRandomPopulation(int popSize, do
     for (int i = 0; i < popSize; i++) {
         population[i].resize(cfg.constantSize);
         for (int j = 0; j < cfg.constantSize; j++) {
-            population[i][j] = std::clamp(rand.randbetExp(lower, upper), lower, upper);
+            population[i][j] = rand.randbetExp(lower, upper);
         }
     }
     return population;
@@ -360,7 +365,6 @@ void NASAP_fit::setQASAPData(const vector<vector<std::string>>& arg) {
 }
 
 NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
-    myRand=xorshift(1 + mpi_env.rank());
 
     // allocate initialState according to runtime species
     initialState.assign(cfg.species, 0.0);
@@ -389,6 +393,15 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     flag = CVodeSStolerances(cvode_mem, cfg.tolRelError, cfg.tolAbsError);
     assert(flag == CV_SUCCESS);
 
+    // Enforce non-negativity on all state variables: y_i >= 0.
+    // IMPORTANT: the constraint vector must remain alive for the lifetime of cvode_mem.
+    //cvode_constraints_ = N_VNew_Serial(cfg.species, sunctx);
+    //for (int i = 0; i < cfg.species; ++i) {
+    //    NV_Ith_S(cvode_constraints_, i) = 1.0;
+    //}
+    //flag = CVodeSetConstraints(cvode_mem, cvode_constraints_);
+    //assert(flag == CV_SUCCESS);
+
     SUNMatrix J = SUNSparseMatrix(cfg.species, cfg.species, rxnNet.jacNonZeros, CSC_MAT, sunctx);
     SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
     flag = CVodeSetLinearSolver(cvode_mem, LS, J);
@@ -399,7 +412,7 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     flag = CVodeQuadInit(cvode_mem, ReactionNetwork::quadRhsCb, yQ0);
     assert(flag == CV_SUCCESS);
 
-    flag = CVodeSetMaxNumSteps(cvode_mem, 10000);
+    flag = CVodeSetMaxNumSteps(cvode_mem, cfg.cvodeMaxNumSteps);
     assert(flag == CV_SUCCESS);
 }
 
@@ -407,7 +420,6 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(int maxGen, int p
     assert(popSize >= 3);
 	TerminationCondition tc = termCond;
 	tc.maxIter = std::min(tc.maxIter, maxGen);
-	uint64_t seed = (seed == 0) ? 1 : seed;
     std::vector<std::vector<double>> init = makeRandomPopulation(popSize, lowerLim, upperLim, seed);
     return runDE(std::move(init), tc);
 }
@@ -420,7 +432,8 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
         if (temp <= 0) return false;
-        return myRand.prob() < exp((oldE - newE) / temp);
+        return false;
+        //return myRand.prob() < exp((oldE - newE) / temp);
     };
 
     const int n = (int)arg.size();
@@ -442,8 +455,10 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector
     int stallCount = 0;
     auto startTime = std::chrono::steady_clock::now();
 
-    for (int gen = 0; gen < termCond.maxIter; ++gen) {
-        cout << "current generation : " << gen << " / " << termCond.maxIter << "\n";
+        for (int gen = 0; gen < termCond.maxIter; ++gen) {
+		if (cfg.logLevel != LogLevel::quiet) {
+			cout << "current generation : " << gen << " / " << termCond.maxIter << "\n";
+		}
         double temp = 0;
 
         std::vector<Triple> triples;
@@ -480,6 +495,9 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector
         for (int idx = 0; idx < n; idx ++) {
             bestpop = std::min(bestpop, populations[(size_t)idx].error);
         }
+		if (cfg.logLevel == LogLevel::verbose) {
+			cout << "best error: " << std::setprecision(10) << bestpop << "\n";
+		}
 
         bool stop = false;
         if (termCond.targetError > 0 && bestpop <= termCond.targetError) stop = true;
@@ -520,11 +538,11 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     if (world_size == 1) {
         return runDE_single(arg, termCond, seed);
     }
-	uint64_t seed = (seed == 0) ? 1 : seed;
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
         if (temp <= 0) return false;
-        return myRand.prob() < exp((oldE - newE) / temp);
+        //return myRand.prob() < exp((oldE - newE) / temp);
+        return false;
     };
     const int n = arg.size();
 
@@ -569,8 +587,10 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     int stallCount = 0;
     auto startTime = std::chrono::steady_clock::now();
 
-    for (int gen = 0; gen < termCond.maxIter; ++gen) {
-        if (world_rank == 0) cout << "current generation : " << gen << " / " << termCond.maxIter << "\n";
+        for (int gen = 0; gen < termCond.maxIter; ++gen) {
+		if (world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+			cout << "current generation : " << gen << " / " << termCond.maxIter << "\n";
+		}
         double temp = 0;
 
         std::vector<Triple> triples;
@@ -646,13 +666,26 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
         }
         double globalBest = DBL_MAX;
         MPI_Allreduce(&localBest, &globalBest, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+        if (world_rank == 0 && cfg.logLevel == LogLevel::verbose) {
+            cout << "best error: " << std::setprecision(10) << globalBest << "bestSofar: " << bestSoFar << "\n";
+        }
 
         bool stop = false;
-        if (termCond.targetError > 0 && globalBest <= termCond.targetError) stop = true;
+        if (termCond.targetError > 0 && globalBest <= termCond.targetError) {
+            stop = true;
+            if(world_rank == 0 && cfg.logLevel == LogLevel::verbose) {
+                cout << "Target error reached: " << std::setprecision(10) << globalBest << " <= " << termCond.targetError << "\n";
+            }
+        }
 
         if (!stop && termCond.timeLimit > 0) {
             double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
-            if (elapsed >= termCond.timeLimit) stop = true;
+            if (elapsed >= termCond.timeLimit) {
+                stop = true;
+                if(world_rank == 0 && cfg.logLevel == LogLevel::verbose) {
+                    cout << "Time limit reached: " << std::setprecision(10) << elapsed << " >= " << termCond.timeLimit << "\n";
+                }
+            }
         }
         if (!stop && termCond.stall > 0) {
             //|a-b| <= (atol + rtol * |b|) なら改善なしとみなす
@@ -666,7 +699,12 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
             } else {
                 stallCount++;
             }
-            if (stallCount >= termCond.stall) stop = true;
+            if (stallCount >= termCond.stall) {
+                stop = true;
+                if(world_rank == 0 && cfg.logLevel == LogLevel::verbose) {
+                    cout << "Stall limit reached: " << stallCount << " >= " << termCond.stall << "\n";
+                }
+            }
         }
         if (stop) break;
     }
@@ -722,20 +760,40 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, co
     std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
     for (int iter = 0; ; ++iter) {
 
-        if (maxIter > 0 && iter >= maxIter) break;
+        if (maxIter > 0 && iter >= maxIter) {
+            if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                cout << "Maximum iterations reached: " << iter << " >= " << maxIter << endl;
+            }
+            break;
+        } 
         if (termCond.timeLimit > 0) {
             double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
-            if (elapsed >= termCond.timeLimit) break;
-        }
-        if (termCond.targetError > 0 && bestErr <= termCond.targetError) break;
-
-        if (world_rank == 0) {
-            for (int i = 0; i < cfg.constantSize; i++) {
-                cout << std::setprecision(4) << theta[i] << ", ";
+            if (elapsed >= termCond.timeLimit) {
+                if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                    cout << "Time limit reached: " << std::setprecision(10) << elapsed << " >= " << termCond.timeLimit << "\n";
+                }
+                break;
             }
-            cout << endl;
-            cout << "Current error: " << std::setprecision(6) << bestErr << endl;
-            cout << "Iter : " << iter << ", Lambda: " << std::setprecision(6) << lambda << endl;
+        }
+        if (termCond.targetError > 0 && bestErr <= termCond.targetError) {
+            if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                cout << "Target error reached: " << bestErr << " <= " << termCond.targetError << "\n";
+            }
+            break;
+        }
+
+        if (world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+            if (cfg.logLevel == LogLevel::verbose) {
+                for (int i = 0; i < cfg.constantSize; i++) {
+                    cout << std::setprecision(4) << theta[i] << ", ";
+                }
+                cout << endl;
+                cout << "Current error: " << std::setprecision(10) << bestErr << endl;
+                cout << "Iter : " << iter << ", Lambda: " << std::setprecision(10) << lambda << endl;
+            } else {
+                cout << "Iter : " << iter << " / " << maxIter
+                     << ", error: " << std::setprecision(10) << bestErr << endl;
+            }
         }
 
         if (isChanged) {
@@ -777,7 +835,12 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, co
                 lambda *= 2.0;
             }
             const double stepNorm = delta.norm();
-            if (stepNorm < termCond.xtol) break;
+            if (stepNorm < termCond.xtol) {
+                if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                    cout << "XTOL reached: " << stepNorm << " < " << termCond.xtol << "\n";
+                }
+                break;
+            }
 
             // ftol / stall
             if (termCond.stall > 0 || termCond.ftolAbs > 0 || termCond.ftolRel > 0) {
@@ -791,7 +854,12 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, co
                 } else {
                     stallCount++;
                 }
-                if (termCond.stall > 0 && stallCount >= termCond.stall) break;
+                if (termCond.stall > 0 && stallCount >= termCond.stall){
+                    if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                        cout << "Stall limit reached: " << stallCount << " >= " << termCond.stall << "\n";
+                    }
+                    break;
+                }
             }
         } else {
             isChanged = false;

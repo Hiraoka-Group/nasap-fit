@@ -3811,3 +3811,108 @@ events:
         - "/usr/pkg"
         - "/opt"
 ...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1330 (_MPI_try_staged_settings)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1653 (_MPI_check_lang_works)"
+      - "CMakeLists.txt:36 (find_package)"
+    description: "The MPI test test_mpi for C in mode normal"
+    directories:
+      source: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-hWrPxq"
+      binary: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-hWrPxq"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_C_test_mpi_normal"
+      cached: true
+      stdout: |
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-hWrPxq'
+        
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_a141e/fast
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-hWrPxq'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_a141e.dir/build.make CMakeFiles/cmTC_a141e.dir/build
+        gmake[2]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-hWrPxq'
+        Building C object CMakeFiles/cmTC_a141e.dir/test_mpi.c.o
+        /usr/bin/cc  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_a141e.dir/test_mpi.c.o -c /home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-hWrPxq/test_mpi.c
+        Linking C executable cmTC_a141e
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a141e.dir/link.txt --verbose=1
+        /usr/bin/cc CMakeFiles/cmTC_a141e.dir/test_mpi.c.o -o cmTC_a141e  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[2]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-hWrPxq'
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-hWrPxq'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1330 (_MPI_try_staged_settings)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1653 (_MPI_check_lang_works)"
+      - "CMakeLists.txt:36 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode normal"
+    directories:
+      source: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-aPIGg2"
+      binary: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-aPIGg2"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_normal"
+      cached: true
+      stdout: |
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-aPIGg2'
+        
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_49d6a/fast
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-aPIGg2'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_49d6a.dir/build.make CMakeFiles/cmTC_49d6a.dir/build
+        gmake[2]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-aPIGg2'
+        Building CXX object CMakeFiles/cmTC_49d6a.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -std=c++20 -o CMakeFiles/cmTC_49d6a.dir/test_mpi.cpp.o -c /home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-aPIGg2/test_mpi.cpp
+        Linking CXX executable cmTC_49d6a
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_49d6a.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_49d6a.dir/test_mpi.cpp.o -o cmTC_49d6a  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[2]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-aPIGg2'
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-aPIGg2'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1286 (try_compile)"
+      - "/opt/cmake-4.1.1-linux-x86_64/share/cmake-4.1/Modules/FindMPI.cmake:1680 (_MPI_try_staged_settings)"
+      - "CMakeLists.txt:36 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode MPICXX"
+    directories:
+      source: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-YzJ1P2"
+      binary: "/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-YzJ1P2"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_MPICXX"
+      cached: true
+      stdout: |
+        Change Dir: '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-YzJ1P2'
+        
+        Run Build Command(s): /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_8c02a/fast
+        gmake[1]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-YzJ1P2'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_8c02a.dir/build.make CMakeFiles/cmTC_8c02a.dir/build
+        gmake[2]: Entering directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-YzJ1P2'
+        Building CXX object CMakeFiles/cmTC_8c02a.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -std=c++20 -o CMakeFiles/cmTC_8c02a.dir/test_mpi.cpp.o -c /home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-YzJ1P2/test_mpi.cpp
+        Linking CXX executable cmTC_8c02a
+        /opt/cmake-4.1.1-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8c02a.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_8c02a.dir/test_mpi.cpp.o -o cmTC_8c02a  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+        gmake[2]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-YzJ1P2'
+        gmake[1]: Leaving directory '/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/CMakeScratch/TryCompile-YzJ1P2'
+        
+      exitCode: 0
+...

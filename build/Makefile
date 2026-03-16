@@ -113,6 +113,7 @@ preinstall/fast:
 
 # clear depends
 depend:
+	$(CMAKE_COMMAND) -P /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
@@ -129,12 +130,26 @@ nasap_fit_cpp/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/build
 .PHONY : nasap_fit_cpp/fast
 
+#=============================================================================
+# Target rules for targets named _core
+
+# Build rule for target.
+_core: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 _core
+.PHONY : _core
+
+# fast build rule for target.
+_core/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/build
+.PHONY : _core/fast
+
 src/NASAP_fit.o: src/NASAP_fit.cpp.o
 .PHONY : src/NASAP_fit.o
 
 # target to build an object file
 src/NASAP_fit.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/NASAP_fit.cpp.o
 .PHONY : src/NASAP_fit.cpp.o
 
 src/NASAP_fit.i: src/NASAP_fit.cpp.i
@@ -143,6 +158,7 @@ src/NASAP_fit.i: src/NASAP_fit.cpp.i
 # target to preprocess a source file
 src/NASAP_fit.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/NASAP_fit.cpp.i
 .PHONY : src/NASAP_fit.cpp.i
 
 src/NASAP_fit.s: src/NASAP_fit.cpp.s
@@ -151,7 +167,56 @@ src/NASAP_fit.s: src/NASAP_fit.cpp.s
 # target to generate assembly for a file
 src/NASAP_fit.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/NASAP_fit.cpp.s
 .PHONY : src/NASAP_fit.cpp.s
+
+src/bindings.o: src/bindings.cpp.o
+.PHONY : src/bindings.o
+
+# target to build an object file
+src/bindings.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/bindings.cpp.o
+.PHONY : src/bindings.cpp.o
+
+src/bindings.i: src/bindings.cpp.i
+.PHONY : src/bindings.i
+
+# target to preprocess a source file
+src/bindings.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/bindings.cpp.i
+.PHONY : src/bindings.cpp.i
+
+src/bindings.s: src/bindings.cpp.s
+.PHONY : src/bindings.s
+
+# target to generate assembly for a file
+src/bindings.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/bindings.cpp.s
+.PHONY : src/bindings.cpp.s
+
+src/bindings/module.o: src/bindings/module.cpp.o
+.PHONY : src/bindings/module.o
+
+# target to build an object file
+src/bindings/module.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/bindings/module.cpp.o
+.PHONY : src/bindings/module.cpp.o
+
+src/bindings/module.i: src/bindings/module.cpp.i
+.PHONY : src/bindings/module.i
+
+# target to preprocess a source file
+src/bindings/module.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/bindings/module.cpp.i
+.PHONY : src/bindings/module.cpp.i
+
+src/bindings/module.s: src/bindings/module.cpp.s
+.PHONY : src/bindings/module.s
+
+# target to generate assembly for a file
+src/bindings/module.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/bindings/module.cpp.s
+.PHONY : src/bindings/module.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -183,6 +248,7 @@ src/reactionNetwork.o: src/reactionNetwork.cpp.o
 # target to build an object file
 src/reactionNetwork.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/reactionNetwork.cpp.o
 .PHONY : src/reactionNetwork.cpp.o
 
 src/reactionNetwork.i: src/reactionNetwork.cpp.i
@@ -191,6 +257,7 @@ src/reactionNetwork.i: src/reactionNetwork.cpp.i
 # target to preprocess a source file
 src/reactionNetwork.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/reactionNetwork.cpp.i
 .PHONY : src/reactionNetwork.cpp.i
 
 src/reactionNetwork.s: src/reactionNetwork.cpp.s
@@ -199,6 +266,7 @@ src/reactionNetwork.s: src/reactionNetwork.cpp.s
 # target to generate assembly for a file
 src/reactionNetwork.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/reactionNetwork.cpp.s
 .PHONY : src/reactionNetwork.cpp.s
 
 src/readcsv.o: src/readcsv.cpp.o
@@ -207,6 +275,7 @@ src/readcsv.o: src/readcsv.cpp.o
 # target to build an object file
 src/readcsv.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/readcsv.cpp.o
 .PHONY : src/readcsv.cpp.o
 
 src/readcsv.i: src/readcsv.cpp.i
@@ -215,6 +284,7 @@ src/readcsv.i: src/readcsv.cpp.i
 # target to preprocess a source file
 src/readcsv.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/readcsv.cpp.i
 .PHONY : src/readcsv.cpp.i
 
 src/readcsv.s: src/readcsv.cpp.s
@@ -223,6 +293,7 @@ src/readcsv.s: src/readcsv.cpp.s
 # target to generate assembly for a file
 src/readcsv.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/readcsv.cpp.s
 .PHONY : src/readcsv.cpp.s
 
 # Help Target
@@ -233,10 +304,17 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... _core"
 	@echo "... nasap_fit_cpp"
 	@echo "... src/NASAP_fit.o"
 	@echo "... src/NASAP_fit.i"
 	@echo "... src/NASAP_fit.s"
+	@echo "... src/bindings.o"
+	@echo "... src/bindings.i"
+	@echo "... src/bindings.s"
+	@echo "... src/bindings/module.o"
+	@echo "... src/bindings/module.i"
+	@echo "... src/bindings/module.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
@@ -257,6 +335,7 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
+	$(CMAKE_COMMAND) -P /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

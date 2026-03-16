@@ -5,40 +5,6 @@
 #include <cassert>
 #include <cmath>
 
-static std::random_device seed_gen;
-class xorshift {
-	uint64_t seed;
-public:
-	xorshift() { seed = (uint64_t(seed_gen()) << 32) + seed_gen(); }
-	inline uint64_t get64() {
-		seed ^= (seed << 13); seed ^= (seed >> 7);
-		return seed ^= (seed << 17);
-	}
-	xorshift(uint64_t arg) {
-		assert(arg != 0);
-		seed=arg;
-		for(int i=0; i<8; i++){
-			seed ^= (seed << 13); seed ^= (seed >> 7); seed ^= (seed << 17);
-		}
-	}
-	// [0, 2^64-1)
-	inline uint32_t operator()() { return get64(); }
-	// [0, r)
-	inline uint32_t operator()(uint32_t r) { return operator()() % r; }
-	// [mi, ma)
-	inline int operator()(int mi, int ma) { return mi + operator()(ma - mi); }
-	// [0,1)
-	inline double prob() { return double(operator()()) / 0xffffffff; }
-
-	inline double randbetExp(double lower, double upper) { 
-	return lower * exp(log(upper / lower) * prob());
-}
-};
-extern xorshift myRand;
-inline double randbet(double lower, double upper) {
-	return lower + (upper - lower) * myRand.prob();
-}
-
 // Deterministic, stateless hashing utilities for reproducible pseudo-randomness.
 // Useful for counter-based RNG: hash(seed, gen, individual, dim, tag, attempt, ...)
 // and derive uniform values from the resulting 64-bit value.
@@ -107,4 +73,40 @@ namespace det_rng {
 		__uint128_t prod = static_cast<__uint128_t>(x) * static_cast<__uint128_t>(bound);
 		return static_cast<uint32_t>(prod >> 64);
 	}
+}
+
+static std::random_device seed_gen;
+class xorshift {
+	uint64_t seed;
+public:
+	xorshift() { seed = (uint64_t(seed_gen()) << 32) + seed_gen(); }
+	inline uint64_t get64() {
+		seed ^= (seed << 13); seed ^= (seed >> 7);
+		return seed ^= (seed << 17);
+	}
+	xorshift(uint64_t arg) {
+		// Expand input seed to a well-mixed internal state, allowing arg==0.
+		seed = det_rng::splitmix64(arg);
+		// xorshift has an absorbing all-zero state; guard the internal state, not the API seed.
+		if (seed == 0) seed = 0x9E3779B97F4A7C15ull;
+		for(int i=0; i<8; i++){
+			seed ^= (seed << 13); seed ^= (seed >> 7); seed ^= (seed << 17);
+		}
+	}
+	// [0, 2^64-1)
+	inline uint32_t operator()() { return get64(); }
+	// [0, r)
+	inline uint32_t operator()(uint32_t r) { return operator()() % r; }
+	// [mi, ma)
+	inline int operator()(int mi, int ma) { return mi + operator()(ma - mi); }
+	// [0,1)
+	inline double prob() { return double(operator()()) / 0xffffffff; }
+
+	inline double randbetExp(double lower, double upper) { 
+	return lower * exp(log(upper / lower) * prob());
+}
+};
+extern xorshift myRand;
+inline double randbet(double lower, double upper) {
+	return lower + (upper - lower) * myRand.prob();
 }

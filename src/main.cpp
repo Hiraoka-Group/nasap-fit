@@ -69,12 +69,12 @@ signed main(int argc, char** argv) {
 	double minerror;
 	// LM refinement on the best solution returned by DE
 	NASAP_fit::TerminationCondition lmTerm;
-	lmTerm.maxIter = 200;
+	lmTerm.maxIter = 10;
 	auto refined = diffEvo.runLM(opt[4].constants, lmTerm);
 	bestConstants = refined.constants;
 	minerror = refined.error;
 	std::vector<std::string>kinds(config::constantSize);
-	for(const auto& [key, val] : diffEvo.reactionNetwork().termIndex){
+	for(const auto& [key, val] : diffEvo.termIndex()){
 		kinds[val]=key;
 	}
 	if(mpi_env.rank()==0){

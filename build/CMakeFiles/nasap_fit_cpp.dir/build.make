@@ -144,12 +144,18 @@ nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/build.make
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/compiler_depend.ts
-nasap_fit_cpp: /usr/local/lib/libcppad_lib.so
-nasap_fit_cpp: /usr/local/lib/libsundials_core.so
-nasap_fit_cpp: /usr/local/lib/libsundials_sunlinsolklu.so
 nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/libklu.so
 nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so
 nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
+nasap_fit_cpp: /usr/local/lib/libsundials_cvodes.so.7.5.0
+nasap_fit_cpp: /usr/local/lib/libsundials_sunlinsolklu.so.5.5.0
+nasap_fit_cpp: /usr/local/lib/libsundials_sunmatrixsparse.so.5.5.0
+nasap_fit_cpp: /usr/local/lib/libsundials_core.so.7.5.0
+nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/libklu.so
+nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/libamd.so
+nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/libcolamd.so
+nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/libbtf.so
+nasap_fit_cpp: /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so
 nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable nasap_fit_cpp"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/nasap_fit_cpp.dir/link.txt --verbose=$(VERBOSE)

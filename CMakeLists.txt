@@ -1,3 +1,4 @@
+# pybind11ビルド用のCMakeLists
 # CMakeLists.txt
 
 # Minimum CMake version
@@ -13,17 +14,23 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# ソースコードを収集
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+option(NASAP_BUILD_EXECUTABLE "Build the nasap_fit_cpp executable" ON)
+option(NASAP_BUILD_PYTHON_MODULE "Build the Python extension module (_core)" ON)
 
-list(REMOVE_ITEM SOURCES
+# ソースコードを収集
+file(GLOB_RECURSE NASAP_ALL_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+
+set(NASAP_EXE_SOURCES ${NASAP_ALL_SOURCES})
+list(REMOVE_ITEM NASAP_EXE_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/bindings.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/bindings/module.cpp"
 )
 
+set(NASAP_PY_SOURCES ${NASAP_ALL_SOURCES})
+list(REMOVE_ITEM NASAP_PY_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
+)
 
-# src/bindings.cpp is a pybind11 demo/stub and should not be part of the main C++ executable.
-list(FILTER SOURCES EXCLUDE REGEX "/src/bindings\\.cpp$")
 
 # MPIを探す
 find_package(MPI REQUIRED)
@@ -38,36 +45,69 @@ find_library(KLU_LIBRARY klu HINTS /usr/lib/x86_64-linux-gnu)
 # CasADiを探す
 find_package(casadi REQUIRED)
 
-# 実行ファイルを作成
-add_executable(${PROJECT_NAME} ${SOURCES})
+function(nasap_apply_common_settings target_name)
+    target_include_directories(${target_name}
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/include
+            ${MPI_INCLUDE_PATH}
+            /usr/include/suitesparse
+    )
 
-# include ディレクトリを設定
-target_include_directories(${PROJECT_NAME} 
-    PRIVATE 
-        ${PROJECT_SOURCE_DIR}/include
-        ${MPI_INCLUDE_PATH}
-        ${SUNDIALS_INCLUDE_DIR}
-        /usr/include/suitesparse
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+    if (DEFINED SUNDIALS_INCLUDE_DIRS)
+        target_include_directories(${target_name} PRIVATE ${SUNDIALS_INCLUDE_DIRS})
+    elseif (DEFINED SUNDIALS_INCLUDE_DIR)
+        target_include_directories(${target_name} PRIVATE ${SUNDIALS_INCLUDE_DIR})
+    endif()
 
-# CppADライブラリをリンク
-target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libcppad_lib.so)
+    target_link_libraries(${target_name} PRIVATE MPI::MPI_CXX)
+    target_link_libraries(${target_name} PRIVATE Eigen3::Eigen)
+    target_link_libraries(${target_name} PRIVATE casadi)
 
-# MPIライブラリをリンク
-target_link_libraries(${PROJECT_NAME} PRIVATE MPI::MPI_CXX)
+    # SUNDIALS libraries (prefer imported targets when available)
+    if (TARGET SUNDIALS::cvodes)
+        target_link_libraries(${target_name} PRIVATE SUNDIALS::cvodes)
+    else()
+        target_link_libraries(${target_name} PRIVATE sundials_cvodes)
+    endif()
 
-# Eigen3ライブラリをリンク
-target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
+    if (TARGET SUNDIALS::core)
+        target_link_libraries(${target_name} PRIVATE SUNDIALS::core)
+    elseif (EXISTS "/usr/local/lib/libsundials_core.so")
+        target_link_libraries(${target_name} PRIVATE /usr/local/lib/libsundials_core.so)
+    endif()
 
-# SUNDIALSライブラリをリンク
-target_link_libraries(${PROJECT_NAME} PRIVATE sundials_cvodes)
-target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_core.so)
-target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_sunlinsolklu.so)
+    if (TARGET SUNDIALS::sunlinsolklu)
+        target_link_libraries(${target_name} PRIVATE SUNDIALS::sunlinsolklu)
+    elseif (EXISTS "/usr/local/lib/libsundials_sunlinsolklu.so")
+        target_link_libraries(${target_name} PRIVATE /usr/local/lib/libsundials_sunlinsolklu.so)
+    endif()
 
-# CasADiライブラリをリンク
-target_link_libraries(${PROJECT_NAME} PRIVATE casadi)
+    if (KLU_LIBRARY)
+        target_link_libraries(${target_name} PRIVATE ${KLU_LIBRARY})
+    endif()
+endfunction()
 
-if (KLU_LIBRARY)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${KLU_LIBRARY})
+if (NASAP_BUILD_EXECUTABLE)
+    add_executable(${PROJECT_NAME} ${NASAP_EXE_SOURCES})
+    nasap_apply_common_settings(${PROJECT_NAME})
+endif()
+
+if (NASAP_BUILD_PYTHON_MODULE)
+    # Prefer system/venv pybind11; fall back to in-tree submodule if present.
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pybind11/CMakeLists.txt")
+        add_subdirectory(pybind11)
+    else()
+        find_package(pybind11 CONFIG REQUIRED)
+    endif()
+
+    # Build the Python extension module that matches PYBIND11_MODULE(_core, ...)
+    pybind11_add_module(_core ${NASAP_PY_SOURCES})
+    nasap_apply_common_settings(_core)
+
+    # VERSION_INFO is optionally passed by the build system; provide a sane default.
+    if (NOT DEFINED EXAMPLE_VERSION_INFO)
+        set(EXAMPLE_VERSION_INFO "dev")
+    endif()
+    target_compile_definitions(_core PRIVATE VERSION_INFO=\"${EXAMPLE_VERSION_INFO}\")
 endif()
