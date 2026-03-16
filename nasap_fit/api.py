@@ -15,11 +15,6 @@ from ._validation import (
 )
 
 
-def expected_input_columns() -> int:
-    # time + trackedSpecies columns
-    return int(_core.default_config().trackedSpecies) + 1
-
-
 def default_config() -> Any:
     return _core.default_config()
 
@@ -119,7 +114,12 @@ class NASAP_fit:
         # This wrapper accepts qasap_data for validation/backwards-compatibility only.
         # If you want in-memory QASAP data injection, extend the bindings to expose setQASAPData + setUpCasADiFunctions.
         if qasap_data is not None:
-            columns = expected_input_columns()
+            if cfg is not None and hasattr(cfg, "trackedSpecies"):
+                tracked_species = int(getattr(cfg, "trackedSpecies"))
+            else:
+                tracked_species = int(_core.default_config().trackedSpecies)
+            # time + trackedSpecies columns
+            columns = tracked_species + 1
             validate_qasap_data(qasap_data, expected_columns=columns)
 
         self._engine = _core.NASAP_fit() if cfg is None else _core.NASAP_fit(cfg)
