@@ -8,7 +8,7 @@ name = "nasap-fit-cpp"
 version = "0.1.0"
 description = "C++ implementation for high-performance fitting and numerical optimization in NASAP."
 authors = [
-    "Shumbo Tanabe <>",
+    "Shumbo Tanabe <8703904728@g.ecc.u-tokyo.ac.jp>",
     "Keisuke Takeuchi <142223934+takeuchi-sci@users.noreply.github.com>"
 ]
 readme = "README.md"
