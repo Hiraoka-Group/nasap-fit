@@ -139,23 +139,33 @@ class NASAP_fit:
     def config(self) -> Any:
         return self._engine.constants()
 
+    def calcError(self, constant: Sequence[float]) -> float:
+        constant_size = int(self._engine.constants().constantSize)
+        vec = validate_constants_vector(constant, expected_size=constant_size)
+        return float(self._engine.calcError(vec))
+
+    def reactionCount(self) -> int:
+        return int(self._engine.reactionCount())
+
+    def termIndex(self) -> Mapping[str, int]:
+        # pybind11 converts std::map to dict-like; normalize to a plain dict.
+        return dict(self._engine.termIndex())
+
     def run_de(
         self,
-        max_gen: int,
         pop_size: int,
+        terminationCondition: Mapping[str, Any],
         lower_lim: float = 1e-3,
         upper_lim: float = 1e4,
-        terminationCondition: Mapping[str, Any] | None = None,
         seed: int = 1,
     ) -> list[Any]:
-        term_defaults = {"maxIter": int(max_gen)}
-        term = build_termination_condition(_core, terminationCondition, defaults=term_defaults)
+        term = build_termination_condition(_core, terminationCondition)
         return list(self._engine.runDE(int(pop_size), float(lower_lim), float(upper_lim), term, int(seed)))
 
     def run_de_from_population(
         self,
         population: Sequence[Sequence[float]],
-        terminationCondition: Mapping[str, Any] | None = None,
+        terminationCondition: Mapping[str, Any],
         seed: int = 1,
     ) -> list[Any]:
         constant_size = int(self._engine.constants().constantSize)
@@ -163,7 +173,7 @@ class NASAP_fit:
         term = build_termination_condition(_core, terminationCondition)
         return list(self._engine.runDE(normalized, term, int(seed)))
 
-    def run_lm(self, theta0: Sequence[float], terminationCondition: Mapping[str, Any] | None = None) -> Any:
+    def run_lm(self, theta0: Sequence[float], terminationCondition: Mapping[str, Any]) -> Any:
         constant_size = int(self._engine.constants().constantSize)
         vec = validate_constants_vector(theta0, expected_size=constant_size)
         term = build_termination_condition(_core, terminationCondition)
@@ -172,7 +182,7 @@ class NASAP_fit:
     def run_lm_batch(
         self,
         thetas: Sequence[Sequence[float]],
-        terminationCondition: Mapping[str, Any] | None = None,
+        terminationCondition: Mapping[str, Any],
     ) -> list[Any]:
         constant_size = int(self._engine.constants().constantSize)
         normalized = validate_population(thetas, constant_size=constant_size, min_size=1)
@@ -180,6 +190,7 @@ class NASAP_fit:
         return list(self._engine.runLM(normalized, term))
 
     def get_hessian(self, point: Sequence[float]) -> list[list[float]]:
+        validate_constants_vector(point, expected_size=int(self._engine.constants().constantSize))
         vec = [float(v) for v in point]
         return [list(row) for row in self._engine.getHessian(vec)]
 
@@ -188,6 +199,7 @@ class NASAP_fit:
 #        return [list(row) for row in self._engine.getHessian_parallel(vec)]
 
     def pseudo_hessian(self, point: Sequence[float]) -> list[list[float]]:
+        validate_constants_vector(point, expected_size=int(self._engine.constants().constantSize))
         vec = [float(v) for v in point]
         return [list(row) for row in self._engine.pseudoHessian(vec)]
 
@@ -201,6 +213,14 @@ class NASAP_fit:
         constant: Sequence[float],
         reaction_ids: Iterable[int],
     ) -> Any:
+        validate_constants_vector(constant, expected_size=int(self._engine.constants().constantSize))
+        for v in t:
+            if v < 0.0:
+                raise ValueError(f"Time points must be non-negative (got {v})")
+        id_upper = self.reactionCount()
+        for i in reaction_ids:
+            if not (0 <= i < id_upper):
+                raise ValueError(f"Reaction IDs must be in [0, {id_upper}) (got {i})")
         t_vec = [float(v) for v in t]
         c_vec = [float(v) for v in constant]
         ids = [int(i) for i in reaction_ids]

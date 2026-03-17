@@ -20,7 +20,6 @@
 #include <sundials/sundials_context.hpp>
 #include <casadi/casadi.hpp>
 
-#include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
 #include "../include/reactionNetwork.hpp"
 #include "../include/MPIEnvironment.hpp"
@@ -99,6 +98,10 @@ private:
 	sundials::Context sunctx;
 	void* cvode_mem = CVodeCreate(CV_BDF, sunctx);
 	N_Vector cvode_constraints_ = nullptr;
+	SUNMatrix J;
+    SUNLinearSolver LS;
+	N_Vector y;
+    N_Vector yQ0;
 
 	vector<double> crossingOver(const vector<double>& baseV, const vector<double>& randV1, const vector<double>& randV2, uint64_t seed, int gen, int j);
 
@@ -119,6 +122,9 @@ public:
 	// Expose reaction-network term index (kind -> index)
 	const std::map<std::string, int>& termIndex() const { return rxnNet.termIndex; }
 
+	//reactionNetwork内の素反応の数を返す
+	const int reactionCount() const { return rxnNet.data.size(); }
+
 	//平方残差和の計算（CVODEを用いる）
 	double calcError(const vector<double>& constant);
 
@@ -135,6 +141,8 @@ public:
 
 	// Constructor
 	NASAP_fit(const Config& arg);
+
+	//~NASAP_fit();
 
 	// Levenberg-Marquardt法による最適化の実行
 	OptimizeResult runLM(const vector<double>& theta0, const TerminationCondition& termCond);

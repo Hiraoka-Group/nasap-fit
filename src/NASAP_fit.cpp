@@ -21,7 +21,6 @@
 #include <casadi/casadi.hpp>
 
 #include "../include/NASAP_fit.hpp"
-#include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
 #include "../include/readcsv.hpp"
 
@@ -31,7 +30,6 @@ int cnt=0;
 using namespace casadi;
 using std::vector;
 using std::cout;
-using std::endl;
 using std::endl;
 using std::flush;
 using std::sqrt;
@@ -84,11 +82,9 @@ void NASAP_fit::validateConstants(const vector<double>& constants){
 double NASAP_fit::calcError(const std::vector<double>& constant) {
     int flag=CV_SUCCESS;
 
-    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
-    N_Vector yQ0 = N_VNew_Serial(0, sunctx);
     CVodeReInit(cvode_mem, 0.0, y);
     CVodeQuadReInit(cvode_mem, yQ0);
     ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), nullptr };
@@ -379,9 +375,9 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     setUpCasADiFunctions();
     
     //seting up CVODE
-    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
+    y = N_VNew_Serial(cfg.species, sunctx);
 
-    N_Vector yQ0 = N_VNew_Serial(rxnNet.data.size(), sunctx);
+    yQ0 = N_VNew_Serial(rxnNet.data.size(), sunctx);
 
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
@@ -402,8 +398,8 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     //flag = CVodeSetConstraints(cvode_mem, cvode_constraints_);
     //assert(flag == CV_SUCCESS);
 
-    SUNMatrix J = SUNSparseMatrix(cfg.species, cfg.species, rxnNet.jacNonZeros, CSC_MAT, sunctx);
-    SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
+    J = SUNSparseMatrix(cfg.species, cfg.species, rxnNet.jacNonZeros, CSC_MAT, sunctx);
+    LS = SUNLinSol_KLU(y, J, sunctx);
     flag = CVodeSetLinearSolver(cvode_mem, LS, J);
     assert(flag == CV_SUCCESS);
     flag = CVodeSetJacFn(cvode_mem, ReactionNetwork::JacFnCb);
@@ -415,6 +411,15 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     flag = CVodeSetMaxNumSteps(cvode_mem, cfg.cvodeMaxNumSteps);
     assert(flag == CV_SUCCESS);
 }
+/*
+NASAP_fit::~NASAP_fit() {
+    CVodeFree(&cvode_mem);
+    SUNLinSolFree(LS);
+    SUNMatDestroy(J);
+    N_VDestroy(y);
+    N_VDestroy(yQ0);
+}
+    */
 
 std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(int maxGen, int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed) {
     assert(popSize >= 3);
@@ -906,7 +911,7 @@ vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>&
 
 void NASAP_fit::putCVODESim(const std::vector<double>& constant) {
     if (mpi_env.rank() != 0) return;
-    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
+    
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
@@ -940,7 +945,6 @@ NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const v
     if (mpi_env.rank() != 0) return {};
     validateConstants(constant);
 
-    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
@@ -948,7 +952,6 @@ NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const v
     std::sort(sorted_reaction_ids.begin(), sorted_reaction_ids.end());
     sorted_reaction_ids.erase(std::unique(sorted_reaction_ids.begin(), sorted_reaction_ids.end()), sorted_reaction_ids.end());
 
-    N_Vector yQ0 = N_VNew_Serial(sorted_reaction_ids.size(), sunctx);
     for(int i=0; i<sorted_reaction_ids.size(); i++){
         int rid = sorted_reaction_ids[i];
         assert(0 <= rid && rid < rxnNet.data.size());

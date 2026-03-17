@@ -404,15 +404,14 @@ def validate_population(population: Sequence[Sequence[float]], *, constant_size:
 
 def build_termination_condition(
     core: Any,
-    term: Mapping[str, Any] | None,
-    *,
-    defaults: Mapping[str, Any] | None = None,
+    term: Mapping[str, Any],
 ) -> Any:
     """Create _core.TerminationCondition from a dict.
 
     - Unknown keys: warning
     - Invalid values: ValueError
     """
+    default = core.TerminationCondition()  # for checking if any field is set
     tc = core.TerminationCondition()
     allowed = {
         "maxIter": ("int", 0),
@@ -424,15 +423,7 @@ def build_termination_condition(
         "stall": ("int", 0),
     }
 
-    # apply defaults first
-    if defaults:
-        for k, v in defaults.items():
-            if k not in allowed:
-                continue
-            _set_tc_field(tc, k, v, allowed)
 
-    if term is None:
-        return tc
     if not isinstance(term, Mapping):
         raise TypeError("terminationCondition must be a dict-like mapping")
 
@@ -441,8 +432,13 @@ def build_termination_condition(
             warnings.warn(f"Unknown TerminationCondition key: {k!r}", UserWarning, stacklevel=2)
             continue
         _set_tc_field(tc, k, v, allowed)
-    return tc
 
+    if tc == default:
+        raise ValueError("no effective termination conditions specified")
+    if (tc.ftolAbs > 0.0 or tc.ftolRel > 0.0) and tc.stall == default.stall:
+        tc.stall = 1
+        warnings.warn( "ftolAbs or ftolRel is set without stall; enabling stall with stall=1", UserWarning, stacklevel=2)
+    return tc
 
 def _set_tc_field(tc: Any, key: str, value: Any, allowed: Mapping[str, tuple[str, Any]]) -> None:
     kind, min_v = allowed[key]

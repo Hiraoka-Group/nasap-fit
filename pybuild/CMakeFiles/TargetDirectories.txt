@@ -1,4 +1,0 @@
-/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/nasap_fit_cpp.dir
-/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/_core.dir
-/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/edit_cache.dir
-/home/aspi/Project/nasap-fit-cpp/pybuild/CMakeFiles/rebuild_cache.dir

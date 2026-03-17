@@ -15,21 +15,23 @@ namespace py = pybind11;
 namespace {
 NASAP_fit::Config make_default_config() {
     NASAP_fit::Config cfg;
-    cfg.QASAPFile = config::QASAPFile;
-    cfg.reactNetworkFile = config::reactNetworkFile;
-    cfg.species = config::species;
-    cfg.constantSize = config::constantSize;
-    cfg.trackedSpecies = config::trackedSpecies;
-    cfg.trackedNames = std::vector<std::string>(std::begin(config::trackedNames), std::end(config::trackedNames));
-    cfg.trackedIndex = std::vector<int>(std::begin(config::trackedIndex), std::end(config::trackedIndex));
-    cfg.fullConc = std::vector<double>(std::begin(config::fullConc), std::end(config::fullConc));
-    cfg.initConc = config::initConc;
-    cfg.tolAbsError = config::tolAbsError;
-    cfg.tolRelError = config::tolRelError;
-    cfg.scalar = config::scalar;
-    cfg.crossOver = config::crossOver;
-    cfg.upperLim = config::upperLim;
-    cfg.lowerLim = config::lowerLim;
+    cfg.QASAPFile = "";
+    cfg.reactNetworkFile = "";
+    cfg.species = 0;
+    cfg.constantSize = 0;
+    cfg.trackedSpecies = 0;
+    cfg.trackedNames = {};
+    cfg.trackedIndex = {};
+    cfg.fullConc = {};
+    cfg.initConc = {};
+    cfg.tolAbsError = 1e-10;
+    cfg.tolRelError = 1e-06;
+    cfg.scalar = 0.7;
+    cfg.crossOver = 0.4;
+    cfg.upperLim = 1e4;
+    cfg.lowerLim = 1e-3;
+    cfg.cvodeMaxNumSteps = 10000;
+	cfg.logLevel = NASAP_fit::LogLevel::normal;
     return cfg;
 }
 }
@@ -93,10 +95,13 @@ void init_core(pybind11::module_ &m) {
         .def_readonly("reactionProgress", &NASAP_fit::SimulationResult::reactionProgress);
 
     py::class_<NASAP_fit>(m, "NASAP_fit")
-        .def(py::init([]() { return NASAP_fit(make_default_config()); }))
+        // NASAP_fit owns non-copyable/non-movable resources (e.g., sundials::Context),
+        // so avoid return-by-value factory init which requires move construction.
         .def(py::init<const NASAP_fit::Config&>(), py::arg("cfg"))
         .def("constants", &NASAP_fit::constants, py::return_value_policy::reference_internal)
 		.def("termIndex", &NASAP_fit::termIndex, py::return_value_policy::reference_internal)
+		.def("reactionCount", &NASAP_fit::reactionCount)
+		.def("calcError", &NASAP_fit::calcError, py::arg("constant"))
         .def("runDE",
             py::overload_cast<int, double, double, const NASAP_fit::TerminationCondition&, uint64_t>(&NASAP_fit::runDE),
             py::arg("popSize"),

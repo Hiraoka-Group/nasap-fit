@@ -7,7 +7,6 @@ engine = NASAP_fit.from_yaml("../data/config.yaml")  # YAML検証→Config生成
 
 # DE（terminationConditionはdict、未知キーはwarning、不正値はValueError）
 pop = engine.run_de(
-    max_gen=50,
     pop_size=128,
     terminationCondition={"maxIter": 50},
     seed=1,
