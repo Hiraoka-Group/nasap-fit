@@ -142,7 +142,7 @@ public:
 	// Constructor
 	NASAP_fit(const Config& arg);
 
-	//~NASAP_fit();
+	~NASAP_fit();
 
 	// Levenberg-Marquardt法による最適化の実行
 	OptimizeResult runLM(const vector<double>& theta0, const TerminationCondition& termCond);

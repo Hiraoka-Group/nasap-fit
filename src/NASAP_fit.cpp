@@ -411,7 +411,7 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     flag = CVodeSetMaxNumSteps(cvode_mem, cfg.cvodeMaxNumSteps);
     assert(flag == CV_SUCCESS);
 }
-/*
+
 NASAP_fit::~NASAP_fit() {
     CVodeFree(&cvode_mem);
     SUNLinSolFree(LS);
@@ -419,7 +419,6 @@ NASAP_fit::~NASAP_fit() {
     N_VDestroy(y);
     N_VDestroy(yQ0);
 }
-    */
 
 std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(int maxGen, int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed) {
     assert(popSize >= 3);
@@ -948,6 +947,10 @@ NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const v
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
+    vector<double> sorted_t = t;
+    std::sort(sorted_t.begin(), sorted_t.end());
+    assert(0 <= sorted_t.front());
+
     vector<int> sorted_reaction_ids = reaction_ids;
     std::sort(sorted_reaction_ids.begin(), sorted_reaction_ids.end());
     sorted_reaction_ids.erase(std::unique(sorted_reaction_ids.begin(), sorted_reaction_ids.end()), sorted_reaction_ids.end());
@@ -964,10 +967,10 @@ NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const v
     CVodeSetUserData(cvode_mem, (void*)&ud);
     
     SimulationResult result;
-    result.t = t;
-    result.timePoints = t.size();
-    result.y.resize(t.size(), vector<double>(cfg.species, 0.0));
-    result.reactionProgress.J.resize(t.size(), vector<double>(sorted_reaction_ids.size(), 0.0));
+    result.t = sorted_t;
+    result.timePoints = sorted_t.size();
+    result.y.resize(sorted_t.size(), vector<double>(cfg.species, 0.0));
+    result.reactionProgress.J.resize(sorted_t.size(), vector<double>(sorted_reaction_ids.size(), 0.0));
     result.reactionProgress.reaction_ids = sorted_reaction_ids;
     result.reactionProgress.reaction_labels.resize(sorted_reaction_ids.size(),"");
     for(size_t i=0; i<sorted_reaction_ids.size(); i++){
@@ -994,8 +997,8 @@ NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const v
     
     bool flag=CV_SUCCESS;
     double tret=0.0;
-    for (size_t i = 0; i < t.size(); i++) {
-        double time_point = t[i];
+    for (size_t i = 0; i < sorted_t.size(); i++) {
+        double time_point = sorted_t[i];
         assert(0 <= time_point && time_point <= endTime);
         if(!(tret-0.1<time_point&&time_point<tret+0.1)) flag=CVode(cvode_mem, time_point, y, &tret, CV_NORMAL);
         assert(flag >= 0);
