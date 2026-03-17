@@ -1,4 +1,12 @@
 
+/buildにて
+$cmake ..
+$cmake --build .
+生成された _core.cpython-312-x86_64-linux-gnu.so ファイル(環境によって名前が違うかもしれません)をnasap_fitへ移動
+/nasap_fit からNASAP_fitをimportすることでpythonから使えると思います
+
+
+
 TerminationConditionクラス
 最適化の終了条件を記述する
 maxIter(デフォルト: INT_MAX)
