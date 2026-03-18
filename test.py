@@ -3,7 +3,7 @@ warnings.simplefilter("default")  # 未知キーwarningを見たい場合
 
 from nasap_fit import NASAP_fit
 
-engine = NASAP_fit.from_yaml("../data/config.yaml")  # YAML検証→Config生成→C++初期化
+engine = NASAP_fit.from_yaml("data/config.yaml")  # YAML検証→Config生成→C++初期化
 
 # DE（terminationConditionはdict、未知キーはwarning、不正値はValueError）
 pop = engine.run_de(
