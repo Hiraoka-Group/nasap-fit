@@ -11,6 +11,7 @@
 #include <queue>
 #include <type_traits>
 #include <iterator>
+#include <chrono>
 
 #include <Eigen/Dense>
 #include <mpi.h>
@@ -20,30 +21,38 @@
 #include <casadi/casadi.hpp>
 
 #include "../include/NASAP_fit.hpp"
-#include "../include/constants.hpp"
 #include "../include/xorshift.hpp"
 #include "../include/readcsv.hpp"
 
-xorshift myRand(2);
+
 int cnt=0;
-extern int num_procs, proc_rank;
     
 using namespace casadi;
 using std::vector;
 using std::cout;
-using std::endl;
 using std::endl;
 using std::flush;
 using std::sqrt;
 
 
 
-std::vector<double> NASAP_fit::crossingOver(const std::vector<double>& baseV, const std::vector<double>& randV1, const std::vector<double>& randV2){
+std::vector<double> NASAP_fit::crossingOver(
+    const std::vector<double>& baseV,
+    const std::vector<double>& randV1,
+    const std::vector<double>& randV2,
+    uint64_t seed,
+    int gen,
+    int j) {
     std::vector<double> v(cfg.constantSize);
-    int jr = myRand(cfg.constantSize);
+
+	// Deterministic crossover randomness derived from (seed, gen, j, k).
+	constexpr uint64_t TAG_JR = 0xD3B54A1Du;
+	constexpr uint64_t TAG_CROSS = 0xBEEF1234u;
+	int jr = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_JR), (uint32_t)cfg.constantSize);
     for (int k = 0; k < cfg.constantSize; k++) {
         //交叉
-        if (jr == k || myRand.prob() < cfg.crossOver) {
+		double u = det_rng::u01_from_u64(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, (uint64_t)k, TAG_CROSS));
+		if (jr == k || u < cfg.crossOver) {
             v[k] = baseV[k] * pow(randV1[k] / randV2[k], cfg.scalar);
             v[k]=std::clamp(v[k], cfg.lowerLim, cfg.upperLim);
         }
@@ -73,11 +82,9 @@ void NASAP_fit::validateConstants(const vector<double>& constants){
 double NASAP_fit::calcError(const std::vector<double>& constant) {
     int flag=CV_SUCCESS;
 
-    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
-    N_Vector yQ0 = N_VNew_Serial(0, sunctx);
     CVodeReInit(cvode_mem, 0.0, y);
     CVodeQuadReInit(cvode_mem, yQ0);
     ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), nullptr };
@@ -90,10 +97,15 @@ double NASAP_fit::calcError(const std::vector<double>& constant) {
         assert(0 <= t && t <= endTime);
         if(t!=tret) flag=CVode(cvode_mem, t, y, &tret, CV_NORMAL);
         if(flag!=CV_SUCCESS){
-            for(int j=0;j<cfg.constantSize;j++){
-                cout<<constant[j]<<", ";
+            // Always print an error message, regardless of log level.
+            std::cerr << "CVode failed (flag=" << flag << ") at t=" << t
+                      << " (rank=" << mpi_env.rank() << ")\n";
+            if (cfg.logLevel == LogLevel::verbose) {
+                for(int j=0;j<cfg.constantSize;j++){
+                    std::cerr << constant[j] << ", ";
+                }
+                std::cerr << "\n";
             }
-            cout<<endl;
             exit(1);
         }
         double* y_data = N_VGetArrayPointer(y);
@@ -104,6 +116,18 @@ double NASAP_fit::calcError(const std::vector<double>& constant) {
         }
     }
     return SSR;
+}
+
+std::vector<std::vector<double>> NASAP_fit::makeRandomPopulation(int popSize, double lower, double upper, uint64_t seed) {
+    std::vector<std::vector<double>> population(popSize);
+    xorshift rand(seed);
+    for (int i = 0; i < popSize; i++) {
+        population[i].resize(cfg.constantSize);
+        for (int j = 0; j < cfg.constantSize; j++) {
+            population[i][j] = rand.randbetExp(lower, upper);
+        }
+    }
+    return population;
 }
 
 static Function build_integrator(std::string name,
@@ -238,7 +262,7 @@ std::vector<std::vector<double>> NASAP_fit::getHessian_parallel(const std::vecto
     MPI_Win win;
     MPI_Win_create(buffer.data(), sizeof(double)*2*n*n, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
     MPI_Win_fence(0, win);
-    for(int i=proc_rank; i<2*n; i+=num_procs){
+    for(int i=mpi_env.rank(); i<2*n; i+=mpi_env.size()){
         int idx = i/2;
         bool isUpper = (i % 2 == 0);
         DM pert = DM::zeros(n);
@@ -250,7 +274,7 @@ std::vector<std::vector<double>> NASAP_fit::getHessian_parallel(const std::vecto
         MPI_Put(vec.data(), n, MPI_DOUBLE, 0, i*n, n, MPI_DOUBLE, win);
     }
     MPI_Win_fence(0, win);
-    if(proc_rank==0){
+    if(mpi_env.rank()==0){
         for(int i=0;i<n;i++){
             for(int j=0;j<n;j++){
                 double f_plus = buffer[(2*i)*n + j];
@@ -260,7 +284,7 @@ std::vector<std::vector<double>> NASAP_fit::getHessian_parallel(const std::vecto
         }
     }
     std::vector<double> hflat(n * n, 0.0);
-    if (proc_rank == 0) {
+    if (mpi_env.rank() == 0) {
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
                 hflat[i * n + j] = H[i][j];
@@ -268,7 +292,7 @@ std::vector<std::vector<double>> NASAP_fit::getHessian_parallel(const std::vecto
         }
     }
     MPI_Bcast(hflat.data(), n * n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    if (proc_rank != 0) {
+    if (mpi_env.rank() != 0) {
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
                 H[i][j] = hflat[i * n + j];
@@ -337,7 +361,6 @@ void NASAP_fit::setQASAPData(const vector<vector<std::string>>& arg) {
 }
 
 NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
-    myRand=xorshift(1+proc_rank);
 
     // allocate initialState according to runtime species
     initialState.assign(cfg.species, 0.0);
@@ -352,11 +375,9 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     setUpCasADiFunctions();
     
     //seting up CVODE
-    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
+    y = N_VNew_Serial(cfg.species, sunctx);
 
-    //あとで修正する
-    N_Vector yQ0 = N_VNew_Serial(136, sunctx);
-    //あとで修正する
+    yQ0 = N_VNew_Serial(rxnNet.data.size(), sunctx);
 
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
@@ -368,8 +389,17 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     flag = CVodeSStolerances(cvode_mem, cfg.tolRelError, cfg.tolAbsError);
     assert(flag == CV_SUCCESS);
 
-    SUNMatrix J = SUNSparseMatrix(cfg.species, cfg.species, rxnNet.jacNonZeros, CSC_MAT, sunctx);
-    SUNLinearSolver LS = SUNLinSol_KLU(y, J, sunctx);
+    // Enforce non-negativity on all state variables: y_i >= 0.
+    // IMPORTANT: the constraint vector must remain alive for the lifetime of cvode_mem.
+    //cvode_constraints_ = N_VNew_Serial(cfg.species, sunctx);
+    //for (int i = 0; i < cfg.species; ++i) {
+    //    NV_Ith_S(cvode_constraints_, i) = 1.0;
+    //}
+    //flag = CVodeSetConstraints(cvode_mem, cvode_constraints_);
+    //assert(flag == CV_SUCCESS);
+
+    J = SUNSparseMatrix(cfg.species, cfg.species, rxnNet.jacNonZeros, CSC_MAT, sunctx);
+    LS = SUNLinSol_KLU(y, J, sunctx);
     flag = CVodeSetLinearSolver(cvode_mem, LS, J);
     assert(flag == CV_SUCCESS);
     flag = CVodeSetJacFn(cvode_mem, ReactionNetwork::JacFnCb);
@@ -378,138 +408,145 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
     flag = CVodeQuadInit(cvode_mem, ReactionNetwork::quadRhsCb, yQ0);
     assert(flag == CV_SUCCESS);
 
-    flag = CVodeSetMaxNumSteps(cvode_mem, 10000);
+    flag = CVodeSetMaxNumSteps(cvode_mem, cfg.cvodeMaxNumSteps);
     assert(flag == CV_SUCCESS);
 }
 
-std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int maxGen, int popSize, double lowerLim, double upperLim) {
+NASAP_fit::~NASAP_fit() {
+    CVodeFree(&cvode_mem);
+    SUNLinSolFree(LS);
+    SUNMatDestroy(J);
+    N_VDestroy(y);
+    N_VDestroy(yQ0);
+}
+
+std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(int maxGen, int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed) {
+    assert(popSize >= 3);
+	TerminationCondition tc = termCond;
+	tc.maxIter = std::min(tc.maxIter, maxGen);
+    std::vector<std::vector<double>> init = makeRandomPopulation(popSize, lowerLim, upperLim, seed);
+    return runDE(std::move(init), tc);
+}
+
+std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector<std::vector<double>>& arg, const TerminationCondition& termCond, uint64_t seed) {
+    const int world_size = mpi_env.size();
+    const int world_rank = mpi_env.rank();
+    assert(world_size == 1);
+
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
         if (temp <= 0) return false;
-        return myRand.prob() < exp((oldE - newE) / temp);
+        return false;
+        //return myRand.prob() < exp((oldE - newE) / temp);
     };
-    assert(maxGen > 0);
-    assert(popSize > 0);
-    assert(lowerLim > 0 && upperLim > 0 && lowerLim < upperLim);
+
+    const int n = (int)arg.size();
+    for (int i = 0; i < n; ++i) validateConstants(arg[i]);
 
     std::vector<OptimizeResult> populations;
-    populations.reserve((size_t)popSize);
-    for (int i = 0; i < popSize; ++i) populations.emplace_back(cfg.constantSize);
-    std::vector<double> populationsFlat((size_t)popSize * (size_t)cfg.constantSize, 0.0);
-    std::vector<double> populationsErrorFlat((size_t)popSize, DBL_MAX);
+    populations.reserve(n);
+    for (int i = 0; i < n; ++i) populations.emplace_back(cfg.constantSize);
 
-    // initialize owned individuals only
-    for (int idx = proc_rank; idx < popSize; idx += num_procs) {
-        for (int j = 0; j < cfg.constantSize; ++j) {
-            double v = randbetExp(lowerLim, upperLim);
-            populations[idx].constants[j] = v;
-            populationsFlat[(size_t)idx * (size_t)cfg.constantSize + (size_t)j] = v;
-        }
+    for (int idx = 0; idx < n; ++idx) {
+        populations[idx].constants = arg[idx];
         populations[idx].error = calcError(populations[idx].constants);
-        populationsErrorFlat[(size_t)idx] = populations[idx].error;
     }
 
-    MPI_Win winConst, winErr;
-    MPI_Win_create(
-        populationsFlat.data(),
-        (MPI_Aint)(sizeof(double) * populationsFlat.size()),
-        (int)sizeof(double),
-        MPI_INFO_NULL,
-        MPI_COMM_WORLD,
-        &winConst);
-    MPI_Win_create(
-        populationsErrorFlat.data(),
-        (MPI_Aint)(sizeof(double) * populationsErrorFlat.size()),
-        (int)sizeof(double),
-        MPI_INFO_NULL,
-        MPI_COMM_WORLD,
-        &winErr);
 
-    struct Triple { int j, xb, xr1, xr2; };
+	struct Triple { int j, xb, xr1, xr2; };
+    int maxGen = 100;
+    double bestSoFar = DBL_MAX;
+    int stallCount = 0;
+    auto startTime = std::chrono::steady_clock::now();
 
-    for (int gen = 0; gen < maxGen; ++gen) {
-        if (proc_rank == 0) cout << "current generation : " << gen << " / " << maxGen << "\n";
+        for (int gen = 0; gen < termCond.maxIter; ++gen) {
+		if (cfg.logLevel != LogLevel::quiet) {
+			cout << "current generation : " << gen << " / " << termCond.maxIter << "\n";
+		}
         double temp = 0;
 
         std::vector<Triple> triples;
-        triples.reserve((size_t)((popSize + num_procs - 1) / num_procs));
-
-        std::vector<int> remoteIndices;
-        remoteIndices.reserve((size_t)popSize);
-        auto needRemote = [&](int idx) {
-            if (idx % num_procs != proc_rank) remoteIndices.push_back(idx);
-        };
-
-        for (int j = proc_rank; j < popSize; j += num_procs) {
-            int xb = myRand(popSize), xr1 = myRand(popSize), xr2 = myRand(popSize);
-            while (xb == xr1) { xr1 = myRand(popSize); }
-            while (xb == xr2 || xr1 == xr2) { xr2 = myRand(popSize); }
+        triples.reserve((size_t)n);
+        constexpr uint64_t TAG_XB  = 0xA11CE001u;
+        constexpr uint64_t TAG_XR1 = 0xA11CE002u;
+        constexpr uint64_t TAG_XR2 = 0xA11CE003u;
+        for (int j = 0; j < n; ++j) {
+            int xb = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XB), (uint32_t)n);
+            int xr1 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR1), (uint32_t)n);
+            for (int attempt = 0; xr1 == xb; ++attempt) {
+                xr1 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR1, (uint64_t)attempt), (uint32_t)n);
+            }
+            int xr2 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR2), (uint32_t)n);
+            for (int attempt = 0; (xr2 == xb || xr2 == xr1); ++attempt) {
+                xr2 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR2, (uint64_t)attempt), (uint32_t)n);
+            }
             triples.push_back({j, xb, xr1, xr2});
-            needRemote(xb);
-            needRemote(xr1);
-            needRemote(xr2);
         }
-
-        std::sort(remoteIndices.begin(), 
-            remoteIndices.end(),
-            [](int left, int right){
-                if (left % num_procs != right % num_procs) return (left % num_procs) < (right % num_procs);
-                return left < right;
-            });
-        remoteIndices.erase(std::unique(remoteIndices.begin(), remoteIndices.end()), remoteIndices.end());
-
-        MPI_Win_fence(0, winConst);
-        for (int idx : remoteIndices) {
-            int owner = idx % num_procs;
-            MPI_Get(
-                populations[idx].constants.data(),
-                cfg.constantSize,
-                MPI_DOUBLE,
-                owner,
-                (MPI_Aint)idx * (MPI_Aint)cfg.constantSize,
-                cfg.constantSize,
-                MPI_DOUBLE,
-                winConst);
-        }
-        MPI_Win_fence(0, winConst);
 
         for (const auto& t : triples) {
             const std::vector<double>& baseV = populations[t.xb].constants;
             const std::vector<double>& randV1 = populations[t.xr1].constants;
             const std::vector<double>& randV2 = populations[t.xr2].constants;
-            std::vector<double> v = crossingOver(baseV, randV1, randV2);
+			std::vector<double> v = crossingOver(baseV, randV1, randV2, seed, gen, t.j);
             double newError = calcError(v);
             if (transProb(temp, populations[t.j].error, newError) || !std::isfinite(populations[t.j].error)) {
                 populations[t.j].constants = std::move(v);
                 populations[t.j].error = newError;
-                for (int kk = 0; kk < cfg.constantSize; ++kk) {
-                    populationsFlat[(size_t)t.j * (size_t)cfg.constantSize + (size_t)kk] = populations[t.j].constants[kk];
-                }
             }
         }
+        
+        double bestpop = DBL_MAX;
+        for (int idx = 0; idx < n; idx ++) {
+            bestpop = std::min(bestpop, populations[(size_t)idx].error);
+        }
+		if (cfg.logLevel == LogLevel::verbose) {
+			cout << "best error: " << std::setprecision(10) << bestpop << "\n";
+		}
+
+        bool stop = false;
+        if (termCond.targetError > 0 && bestpop <= termCond.targetError) stop = true;
+
+        if (!stop && termCond.timeLimit > 0) {
+            double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
+            if (elapsed >= termCond.timeLimit) stop = true;
+        }
+        if (!stop && termCond.stall > 0) {
+            //|a-b| <= (atol + rtol * |b|) なら改善なしとみなす
+            if (abs(bestSoFar - bestpop) > termCond.ftolAbs + termCond.ftolRel * abs(bestpop)) {
+                bestSoFar = bestpop;
+                stallCount = 0;
+            } else {
+                stallCount++;
+            }
+            if (stallCount >= termCond.stall) stop = true;
+        }
+        if (stop) break;
     }
 
-    for (int j = proc_rank; j < popSize; j += num_procs){
-        populationsErrorFlat[(size_t)j] = populations[j].error;
-    }
-    // broadcast all constants & errors
-    for (int i=0; i<popSize; ++i) {
-        int owner = i % num_procs;
-        MPI_Bcast(populationsFlat.data() + (size_t)i * (size_t)cfg.constantSize, cfg.constantSize, MPI_DOUBLE, owner, MPI_COMM_WORLD);
-        MPI_Bcast(&populationsErrorFlat[(size_t)i], 1, MPI_DOUBLE, owner, MPI_COMM_WORLD);
-        populations[i].constants.assign(populationsFlat.begin() + (size_t)i * (size_t)cfg.constantSize, populationsFlat.begin() + ((size_t)i + 1) * (size_t)cfg.constantSize);
-        populations[i].error = populationsErrorFlat[(size_t)i];
-    }
     sortByError(populations);
-
     return populations;
 }
 
-std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<double>> arg){
+std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed) {
+    assert(popSize >= 3);
+    std::vector<std::vector<double>> init = makeRandomPopulation(popSize, lowerLim, upperLim, seed);
+    return runDE(std::move(init), termCond, seed);
+}
+
+
+std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<double>> arg, const TerminationCondition& termCond, uint64_t seed){
+    assert(arg.size() >= 3);
+    const int world_size = mpi_env.size();
+    const int world_rank = mpi_env.rank();
+
+    if (world_size == 1) {
+        return runDE_single(arg, termCond, seed);
+    }
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
         if (temp <= 0) return false;
-        return myRand.prob() < exp((oldE - newE) / temp);
+        //return myRand.prob() < exp((oldE - newE) / temp);
+        return false;
     };
     const int n = arg.size();
 
@@ -524,7 +561,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     std::vector<double> populationsErrorFlat((size_t)n, DBL_MAX);
 
     // initialize with provided arg
-    for (int idx = proc_rank; idx < n; idx += num_procs) {
+    for (int idx = world_rank; idx < n; idx += world_size) {
         for (int j = 0; j < cfg.constantSize; ++j) {
             populations[idx].constants[j] = arg[idx][j];
             populationsFlat[(size_t)idx * (size_t)cfg.constantSize + (size_t)j] = arg[idx][j];
@@ -550,25 +587,38 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
         &winErr);
 
     struct Triple { int j, xb, xr1, xr2; };
-    int maxGen = 100;
+    double bestSoFar = DBL_MAX;
+    int stallCount = 0;
+    auto startTime = std::chrono::steady_clock::now();
 
-    for (int gen = 0; gen < maxGen; ++gen) {
-        if (proc_rank == 0) cout << "current generation : " << gen << " / " << maxGen << "\n";
+        for (int gen = 0; gen < termCond.maxIter; ++gen) {
+		if (world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+			cout << "current generation : " << gen << " / " << termCond.maxIter << "\n";
+		}
         double temp = 0;
 
         std::vector<Triple> triples;
-        triples.reserve((size_t)((n + num_procs - 1) / num_procs));
+        triples.reserve((size_t)((n + world_size - 1) / world_size));
 
         std::vector<int> remoteIndices;
         remoteIndices.reserve((size_t)n);
         auto needRemote = [&](int idx) {
-            if (idx % num_procs != proc_rank) remoteIndices.push_back(idx);
+            if (idx % world_size != world_rank) remoteIndices.push_back(idx);
         };
 
-        for (int j = proc_rank; j < n; j += num_procs) {
-            int xb = myRand(n), xr1 = myRand(n), xr2 = myRand(n);
-            while (xb == xr1) { xr1 = myRand(n); }
-            while (xb == xr2 || xr1 == xr2) { xr2 = myRand(n); }
+        constexpr uint64_t TAG_XB  = 0xA11CE001u;
+        constexpr uint64_t TAG_XR1 = 0xA11CE002u;
+        constexpr uint64_t TAG_XR2 = 0xA11CE003u;
+        for (int j = world_rank; j < n; j += world_size) {
+            int xb = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XB), (uint32_t)n);
+            int xr1 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR1), (uint32_t)n);
+            for (int attempt = 0; xr1 == xb; ++attempt) {
+                xr1 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR1, (uint64_t)attempt), (uint32_t)n);
+            }
+            int xr2 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR2), (uint32_t)n);
+            for (int attempt = 0; (xr2 == xb || xr2 == xr1); ++attempt) {
+                xr2 = (int)det_rng::uniform_index(det_rng::hash64(seed, (uint64_t)gen, (uint64_t)j, TAG_XR2, (uint64_t)attempt), (uint32_t)n);
+            }
             triples.push_back({j, xb, xr1, xr2});
             needRemote(xb);
             needRemote(xr1);
@@ -577,15 +627,15 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
 
         std::sort(remoteIndices.begin(), 
             remoteIndices.end(),
-            [](int left, int right){
-                if (left % num_procs != right % num_procs) return (left % num_procs) < (right % num_procs);
+            [world_size](int left, int right){
+                if (left % world_size != right % world_size) return (left % world_size) < (right % world_size);
                 return left < right;
             });
         remoteIndices.erase(std::unique(remoteIndices.begin(), remoteIndices.end()), remoteIndices.end());
 
         MPI_Win_fence(0, winConst);
         for (int idx : remoteIndices) {
-            int owner = idx % num_procs;
+            int owner = idx % world_size;
             MPI_Get(
                 populations[idx].constants.data(),
                 cfg.constantSize,
@@ -602,7 +652,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
             const std::vector<double>& baseV = populations[t.xb].constants;
             const std::vector<double>& randV1 = populations[t.xr1].constants;
             const std::vector<double>& randV2 = populations[t.xr2].constants;
-            std::vector<double> v = crossingOver(baseV, randV1, randV2);
+			std::vector<double> v = crossingOver(baseV, randV1, randV2, seed, gen, t.j);
             double newError = calcError(v);
             if (transProb(temp, populations[t.j].error, newError) || !std::isfinite(populations[t.j].error)) {
                 populations[t.j].constants = std::move(v);
@@ -612,14 +662,63 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
                 }
             }
         }
+
+        // termination check (MPI islands): use best among owned indices (idx % world_size == rank)
+        double localBest = DBL_MAX;
+        for (int idx = world_rank; idx < n; idx += world_size) {
+            localBest = std::min(localBest, populations[(size_t)idx].error);
+        }
+        double globalBest = DBL_MAX;
+        MPI_Allreduce(&localBest, &globalBest, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+        if (world_rank == 0 && cfg.logLevel == LogLevel::verbose) {
+            cout << "best error: " << std::setprecision(10) << globalBest << "bestSofar: " << bestSoFar << "\n";
+        }
+
+        bool stop = false;
+        if (termCond.targetError > 0 && globalBest <= termCond.targetError) {
+            stop = true;
+            if(world_rank == 0 && cfg.logLevel == LogLevel::verbose) {
+                cout << "Target error reached: " << std::setprecision(10) << globalBest << " <= " << termCond.targetError << "\n";
+            }
+        }
+
+        if (!stop && termCond.timeLimit > 0) {
+            double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
+            if (elapsed >= termCond.timeLimit) {
+                stop = true;
+                if(world_rank == 0 && cfg.logLevel == LogLevel::verbose) {
+                    cout << "Time limit reached: " << std::setprecision(10) << elapsed << " >= " << termCond.timeLimit << "\n";
+                }
+            }
+        }
+        if (!stop && termCond.stall > 0) {
+            //|a-b| <= (atol + rtol * |b|) なら改善なしとみなす
+            const double absImprove = bestSoFar - globalBest;
+            const double relImprove = (bestSoFar < DBL_MAX && bestSoFar > 0) ? (absImprove / bestSoFar) : DBL_MAX;
+            const bool improvedAbs = (termCond.ftolAbs > 0) ? (absImprove > termCond.ftolAbs) : (absImprove > 0);
+            const bool improvedRel = (termCond.ftolRel > 0) ? (relImprove > termCond.ftolRel) : true;
+            if (abs(bestSoFar - globalBest) > termCond.ftolAbs + termCond.ftolRel * abs(globalBest)) {
+                bestSoFar = globalBest;
+                stallCount = 0;
+            } else {
+                stallCount++;
+            }
+            if (stallCount >= termCond.stall) {
+                stop = true;
+                if(world_rank == 0 && cfg.logLevel == LogLevel::verbose) {
+                    cout << "Stall limit reached: " << stallCount << " >= " << termCond.stall << "\n";
+                }
+            }
+        }
+        if (stop) break;
     }
 
-    for (int j = proc_rank; j < n; j += num_procs){
+    for (int j = world_rank; j < n; j += world_size){
         populationsErrorFlat[(size_t)j] = populations[j].error;
     }
     // broadcast all constants & errors
     for (int i=0; i<n; ++i) {
-        int owner = i % num_procs;
+        int owner = i % world_size;
         MPI_Bcast(populationsFlat.data() + (size_t)i * (size_t)cfg.constantSize, cfg.constantSize, MPI_DOUBLE, owner, MPI_COMM_WORLD);
         MPI_Bcast(&populationsErrorFlat[(size_t)i], 1, MPI_DOUBLE, owner, MPI_COMM_WORLD);
         populations[i].constants.assign(populationsFlat.begin() + (size_t)i * (size_t)cfg.constantSize, populationsFlat.begin() + ((size_t)i + 1) * (size_t)cfg.constantSize);
@@ -634,7 +733,8 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
 }
 
 
-NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0){
+NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, const TerminationCondition& termCond){
+    const int world_rank = mpi_env.rank();
     const int n = cfg.constantSize;
     const int m = (int)QASAP.size() * cfg.trackedSpecies;
     validateConstants(theta0);
@@ -647,7 +747,9 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0){
     if (!std::isfinite(bestErr)) bestErr = DBL_MAX;
 
     double lambda = 10.0;
-    const int maxIter = 200;
+    const int maxIter = (termCond.maxIter > 0) ? termCond.maxIter : 200;
+    double bestSoFar = bestErr;
+    int stallCount = 0;
 
     std::vector<DM> arg(1);
     DM rdm, jdm;
@@ -658,14 +760,44 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0){
     Eigen::VectorXd g;
     bool isChanged = true;
 
-    for (int iter = 0; iter < maxIter; ++iter) {
-        if (proc_rank == 0) {
-            for (int i = 0; i < cfg.constantSize; i++) {
-                cout << std::setprecision(4) << theta[i] << ", ";
+    
+    std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+    for (int iter = 0; ; ++iter) {
+
+        if (maxIter > 0 && iter >= maxIter) {
+            if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                cout << "Maximum iterations reached: " << iter << " >= " << maxIter << endl;
             }
-            cout << endl;
-            cout << "Current error: " << std::setprecision(6) << bestErr << endl;
-            cout << "Iter : " << iter << ", Lambda: " << std::setprecision(6) << lambda << endl;
+            break;
+        } 
+        if (termCond.timeLimit > 0) {
+            double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
+            if (elapsed >= termCond.timeLimit) {
+                if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                    cout << "Time limit reached: " << std::setprecision(10) << elapsed << " >= " << termCond.timeLimit << "\n";
+                }
+                break;
+            }
+        }
+        if (termCond.targetError > 0 && bestErr <= termCond.targetError) {
+            if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                cout << "Target error reached: " << bestErr << " <= " << termCond.targetError << "\n";
+            }
+            break;
+        }
+
+        if (world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+            if (cfg.logLevel == LogLevel::verbose) {
+                for (int i = 0; i < cfg.constantSize; i++) {
+                    cout << std::setprecision(4) << theta[i] << ", ";
+                }
+                cout << endl;
+                cout << "Current error: " << std::setprecision(10) << bestErr << endl;
+                cout << "Iter : " << iter << ", Lambda: " << std::setprecision(10) << lambda << endl;
+            } else {
+                cout << "Iter : " << iter << " / " << maxIter
+                     << ", error: " << std::setprecision(10) << bestErr << endl;
+            }
         }
 
         if (isChanged) {
@@ -692,10 +824,10 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0){
         }
 
         double predictedImprove = -(g.dot(delta) + 0.5 * delta.dot(A_try * delta));
-        double actualImprove = bestErr - calcError(trial);
+        double newErr = calcError(trial);
+        double actualImprove = bestErr - newErr;
         double reliabilityIndex = actualImprove / predictedImprove;
 
-        double newErr = calcError(trial);
         if (newErr < bestErr) {
             isChanged = true;
             theta = std::move(trial);
@@ -706,7 +838,33 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0){
             } else if (reliabilityIndex < 0.25) {
                 lambda *= 2.0;
             }
-            if (delta.norm() < 1e-6) break;
+            const double stepNorm = delta.norm();
+            if (stepNorm < termCond.xtol) {
+                if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                    cout << "XTOL reached: " << stepNorm << " < " << termCond.xtol << "\n";
+                }
+                break;
+            }
+
+            // ftol / stall
+            if (termCond.stall > 0 || termCond.ftolAbs > 0 || termCond.ftolRel > 0) {
+                //const double absImprove = bestSoFar - bestErr;
+                //const double relImprove = (bestSoFar > 0) ? (absImprove / bestSoFar) : DBL_MAX;
+                //const bool improvedAbs = (termCond.ftolAbs > 0) ? (absImprove > termCond.ftolAbs) : (absImprove > 0);
+                //const bool improvedRel = (termCond.ftolRel > 0) ? (relImprove > termCond.ftolRel) : true;
+                if (std::abs(bestSoFar - newErr) > termCond.ftolAbs + termCond.ftolRel * std::abs(newErr)) {
+                    bestSoFar = bestErr;
+                    stallCount = 0;
+                } else {
+                    stallCount++;
+                }
+                if (termCond.stall > 0 && stallCount >= termCond.stall){
+                    if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                        cout << "Stall limit reached: " << stallCount << " >= " << termCond.stall << "\n";
+                    }
+                    break;
+                }
+            }
         } else {
             isChanged = false;
             lambda *= 2.0;
@@ -718,7 +876,8 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0){
     return result;
 }
 
-vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>& thetaList){
+vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>& thetaList, const TerminationCondition& termCond){
+    const int world_size = mpi_env.size();
     const size_t n = thetaList.size();
     vector<OptimizeResult> results(n, OptimizeResult(cfg.constantSize));
     std::vector<double> populationsFlat(n * (size_t)cfg.constantSize, 0.0);
@@ -731,16 +890,16 @@ vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>&
         }
     }
 
-    for(int i=proc_rank;i<n;i+=num_procs){
-        results[i] = runLM(results[i].constants);
+    for(int i = mpi_env.rank(); i < (int)n; i += world_size){
+        results[i] = runLM(results[i].constants, termCond);
         for(int j=0;j<cfg.constantSize;j++){
             populationsFlat[(size_t)i * (size_t)cfg.constantSize + (size_t)j] = results[i].constants[j];
         }
         populationsErrorFlat[i] = results[i].error;
     }
     for(int i=0; i<n; i++){
-        MPI_Bcast(populationsFlat.data() + (size_t)i * (size_t)cfg.constantSize, cfg.constantSize, MPI_DOUBLE, i % num_procs, MPI_COMM_WORLD);
-        MPI_Bcast(&populationsErrorFlat[(size_t)i], 1, MPI_DOUBLE, i % num_procs, MPI_COMM_WORLD);
+        MPI_Bcast(populationsFlat.data() + (size_t)i * (size_t)cfg.constantSize, cfg.constantSize, MPI_DOUBLE, i % world_size, MPI_COMM_WORLD);
+        MPI_Bcast(&populationsErrorFlat[(size_t)i], 1, MPI_DOUBLE, i % world_size, MPI_COMM_WORLD);
         results[i].constants.assign(populationsFlat.begin() + (size_t)i * (size_t)cfg.constantSize, populationsFlat.begin() + ((size_t)i + 1) * (size_t)cfg.constantSize);
         results[i].error = populationsErrorFlat[(size_t)i];
     }
@@ -750,8 +909,8 @@ vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>&
 
 
 void NASAP_fit::putCVODESim(const std::vector<double>& constant) {
-    if(proc_rank!=0)return;
-    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
+    if (mpi_env.rank() != 0) return;
+    
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
@@ -782,34 +941,40 @@ void NASAP_fit::putCVODESim(const std::vector<double>& constant) {
 
 
 NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const vector<double>& constant, const vector<int>& reaction_ids) {
-    if(proc_rank!=0)return {};
+    if (mpi_env.rank() != 0) return {};
     validateConstants(constant);
 
-    N_Vector y = N_VNew_Serial(cfg.species, sunctx);
     for (int i = 0; i < cfg.species; ++i) {
         NV_Ith_S(y, i) = initialState[i];
     }
-    N_Vector yQ0 = N_VNew_Serial(reaction_ids.size(), sunctx);
-    for(int i=0; i<reaction_ids.size(); i++){
-        int rid = reaction_ids[i];
+    vector<double> sorted_t = t;
+    std::sort(sorted_t.begin(), sorted_t.end());
+    assert(0 <= sorted_t.front());
+
+    vector<int> sorted_reaction_ids = reaction_ids;
+    std::sort(sorted_reaction_ids.begin(), sorted_reaction_ids.end());
+    sorted_reaction_ids.erase(std::unique(sorted_reaction_ids.begin(), sorted_reaction_ids.end()), sorted_reaction_ids.end());
+
+    for(int i=0; i<sorted_reaction_ids.size(); i++){
+        int rid = sorted_reaction_ids[i];
         assert(0 <= rid && rid < rxnNet.data.size());
         NV_Ith_S(yQ0, i) = 0.0;
     }
 
     CVodeReInit(cvode_mem, 0.0, y);
     CVodeQuadReInit(cvode_mem, yQ0);
-    ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), &reaction_ids };
+    ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), &sorted_reaction_ids };
     CVodeSetUserData(cvode_mem, (void*)&ud);
     
     SimulationResult result;
-    result.t = t;
-    result.timePoints = t.size();
-    result.y.resize(t.size(), vector<double>(cfg.species, 0.0));
-    result.reactionProgress.J.resize(t.size(), vector<double>(reaction_ids.size(), 0.0));
-    result.reactionProgress.reaction_ids = reaction_ids;
-    result.reactionProgress.reaction_labels.resize(reaction_ids.size(),"");
-    for(size_t i=0; i<reaction_ids.size(); i++){
-        int rid = reaction_ids[i];
+    result.t = sorted_t;
+    result.timePoints = sorted_t.size();
+    result.y.resize(sorted_t.size(), vector<double>(cfg.species, 0.0));
+    result.reactionProgress.J.resize(sorted_t.size(), vector<double>(sorted_reaction_ids.size(), 0.0));
+    result.reactionProgress.reaction_ids = sorted_reaction_ids;
+    result.reactionProgress.reaction_labels.resize(sorted_reaction_ids.size(),"");
+    for(size_t i=0; i<sorted_reaction_ids.size(); i++){
+        int rid = sorted_reaction_ids[i];
         std::string& label = result.reactionProgress.reaction_labels[i];
         assert(0 <= rid && rid < rxnNet.data.size());
         int init = rxnNet.data[rid][0];
@@ -832,8 +997,8 @@ NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const v
     
     bool flag=CV_SUCCESS;
     double tret=0.0;
-    for (size_t i = 0; i < t.size(); i++) {
-        double time_point = t[i];
+    for (size_t i = 0; i < sorted_t.size(); i++) {
+        double time_point = sorted_t[i];
         assert(0 <= time_point && time_point <= endTime);
         if(!(tret-0.1<time_point&&time_point<tret+0.1)) flag=CVode(cvode_mem, time_point, y, &tret, CV_NORMAL);
         assert(flag >= 0);
@@ -845,8 +1010,8 @@ NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const v
         for (int j = 0; j < cfg.species; j++) {
             result.y[i][j] = y_data[j];
         }
-        for (size_t j = 0; j < reaction_ids.size(); j++) {
-            int rid = reaction_ids[j];
+        for (size_t j = 0; j < sorted_reaction_ids.size(); j++) {
+            int rid = sorted_reaction_ids[j];
             assert(0 <= rid && rid < rxnNet.data.size());
             result.reactionProgress.J[i][j] = q_data[j];
         }

@@ -1,0 +1,163 @@
+
+/buildにて
+$cmake ..
+$cmake --build .
+生成された _core.cpython-312-x86_64-linux-gnu.so ファイル(環境によって名前が違うかもしれません)をnasap_fitへ移動
+/nasap_fit からNASAP_fitをimportすることでpythonから使えると思います
+
+
+
+TerminationConditionクラス
+最適化の終了条件を記述する
+maxIter(デフォルト: INT_MAX)
+最大世代数
+
+timeLimit（デフォルト: DBL_MAX）
+実行時間の上限（秒）
+
+xtol（デフォルト: 0）
+パラメータ空間における最適解の近傍の大きさの基準値(DEでは無効)
+
+ftolAbs（デフォルト: 0）
+目的関数の改善率の基準値
+
+ftolRel（デフォルト: 0）
+目的関数の改善率の基準値
+
+targetError（デフォルト: 0）
+目的関数が目標値を下回ったときに終了
+
+stall（デフォルト: INT_MAX）
+停滞期間の基準値（世代数）
+bestSoFar = 残差平方和の今までの最小値
+currentBest = 残差平方和の現在の最小値
+|bestSoFar - currentBest| < ftolAbs + ftolRel * bestSoFar　であるような状態がstall世代続いたら終了
+
+
+
+
+def calcError(constant: Sequence[float]) -> float:
+与えられた反応速度定数に対してシミュレーションを行い、QASAPとの残差平方和を求めます。
+引数:
+constant - 反応速度定数の数列
+
+返り値:
+QASAPとの残差平方和
+
+
+def reactionCount(self) -> int:
+与えられたReaction Networkのファイル内の反応の数を返します。
+返り値:
+reactionNetwork内の反応の数
+
+
+def termIndex(self) -> Mapping[str, int]:
+Reaction Networkのファイル内での反応速度定数に与えられたラベルと、反応速度定数の数列におけるindexとの対応を返します
+
+
+
+def from_yaml(
+        config_yaml_path: str | Path,
+        *,
+        project_root: str | Path | None = None,
+        validate_files: bool = True,
+    ) -> "NASAP_fit"
+NASAP_fitを設定を記述した.yamlファイルから構築します
+引数:
+config_yaml_path - CWDから.yamlファイルへの相対パス
+
+
+
+def run_de(
+        pop_size: int,
+        terminationCondition: Mapping[str, Any],
+        lower_lim: float = 1e-3,
+        upper_lim: float = 1e4,
+        seed: int = 1,
+    ) -> list[Any]
+[lower_lim, upper_lim)の間で指数分布に基づいてランダムに速度定数の初期値を生成し、差分進化法を実行します
+引数:
+pop_size - 速度定数の組の数 ( >= 3)
+terminationCondition - 最適化の終了条件
+lower_lim - ランダム生成される速度定数の下限
+upper_lim - ランダム生成される速度定数の上限
+seed - シード値
+返り値:
+最適化終了後の速度定数の組の配列を返します。
+
+
+
+def run_de_from_population(
+        population: Sequence[Sequence[float]],
+        terminationCondition: Mapping[str, Any],
+        seed: int = 1,
+    ) -> list[Any]
+引数:
+population: 初期値として与える速度定数の組の配列
+terminationCondition - 最適化の終了条件
+seed - シード値
+返り値: 
+最適化終了後の速度定数の組の配列を返します
+
+
+def run_lm(theta0: Sequence[float], terminationCondition: Mapping[str, Any]) -> Any
+Levenberg–Marquardt法を用いて最適化を行います。
+引数:
+theta0 - Levenberg–Marquardt法の初期値
+terminationCondition - 最適化の終了条件 
+返り値:
+最適化終了後の速度定数の組
+
+
+def run_lm_batch(
+        thetas: Sequence[Sequence[float]],
+        terminationCondition: Mapping[str, Any],
+    ) -> list[Any]
+与えられた速度定数の組の配列に対して並列にLevenberg–Marquardt法を行います。
+※MPIが利用可能な時のみ有効です
+引数:
+theta0 - Levenberg–Marquardt法の初期値
+terminationCondition - 最適化の終了条件 
+返り値:
+最適化終了後の速度定数の組の配列
+
+
+
+def get_hessian(point: Sequence[float]) -> list[list[float]]
+残差平方和に対する、与えられた速度定数の組におけるヘッシアンを求めます
+引数:
+point - 速度定数の組
+返り値
+ヘッセ行列
+
+
+def pseudo_hessian(self, point: Sequence[float]) -> list[list[float]]:
+残差平方和に対する、与えられた速度定数の組におけるヘッシアンのガウス・ニュートン近似を求めます。
+get_hessianよりも高速です
+引数:
+point - 速度定数の組
+返り値
+ヘッセ行列
+
+
+ def simulate(
+        t: Sequence[float],
+        constant: Sequence[float],
+        reaction_ids: Iterable[int],
+    ) -> Any
+与えられた各tにおける化学種の濃度、および反応の進行度を求めます。
+引数
+t - 追跡する時点
+constant - 速度定数の組
+reaction_ids - 追跡する反応の反応id
+返り値
+ReactionProgressResult - 
+	timePoints - tの要素数
+	t - 追跡を行った時点
+	y - y[species][time_index] = t[time_index]分後におけるspecies番目の化学種の濃度  である二次元配列
+
+	reactionProgress - 
+		reaction_ids - 追跡した反応id
+		J - J[reaction_id][time_index] = t[time_index]分後におけるreaction_id番目の反応進行度 であるる二次元配列
+		reaction_labels - reaction_ids番目の反応のラベル (例: "1 + 2 -> 3 + 4")
+

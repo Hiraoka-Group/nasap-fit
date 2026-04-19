@@ -29,15 +29,10 @@ initConc:
   26: 8.55e-4
 
 
-#差分進化法のエージェント数(必須)
-popSize: 128
-#最大世代数(必須)
-maxGen: 200
-
 #シミュレーションの許容絶対誤差
-tolAbsError: 1e-9
+tolAbsError: 1e-10
 #シミュレーションの許容相対誤差
-tolRelError: 1e-6
+tolRelError: 1e-7
 
 #差分進化法のパラメータ
 scalar: 0.5
@@ -46,7 +41,7 @@ crossOver: 0.5
 upperLim: 1e4
 lowerLim: 1e-3
 
-#微分方程式の右辺値関数(rhsf)をpythonによって事前に生成したかどうか(任意、デフォルト:true)
-usePreGeneratedRhsf: true
-#rhsfのjacobian関数をpythonによって事前に生成したかどうか(任意、デフォルト:true)
-usePreGeneratedJacobian: true
+#CVODEの最大ステップ数
+cvodeMaxNumSteps: 10000
+# ログ出力レベル (quiet / normal / verbose)
+logLevel: verbose

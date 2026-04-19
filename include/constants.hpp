@@ -27,17 +27,10 @@ const std::map<int,double> initConc = {
     {26, 8.55e-4}
 };
 
-//差分進化法のエージェント数
-const int popSize = 128;
-//差分進化法の最大世代数
-const int maxGen = 50;
-
 //シミュレーションの許容絶対誤差
 const double tolAbsError = 1.0000000000000001e-10;
 //シミュレーションの許容相対誤差
-const double tolRelError = 3.2e-07;
-//適応型ルンゲクッタ法の安全係数
-const double safetyConstant=0.9;
+const double tolRelError = 1e-07;
 //差分進化法のパラメータ
 const double scalar = 0.5, crossOver = 0.5;
 //反応速度定数の上限下限

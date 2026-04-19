@@ -20,9 +20,7 @@
 #include "../include/constants.hpp"
 #include "../include/NASAP_fit.hpp"
 #include "../include/readcsv.hpp"
-
-int num_procs=1;//総プロセス数
-int proc_rank=0;//自分のプロセス番号
+#include "../include/MPIEnvironment.hpp"
 
 int stepCount[61];
 
@@ -32,9 +30,7 @@ std::chrono::system_clock::time_point startTime,endTimeGlobal;
 //rshift myRand(1);
 
 signed main(int argc, char** argv) {
-	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+	MpiEnvironment mpi_env(argc, argv);
 
 	NASAP_fit::Config cfg;
 	cfg.QASAPFile = config::QASAPFile;
@@ -42,7 +38,7 @@ signed main(int argc, char** argv) {
     cfg.species = config::species;
     cfg.constantSize = config::constantSize;
     cfg.trackedSpecies = config::trackedSpecies;
-    cfg.trackedNames=vector<std::string_view>(std::begin(config::trackedNames), std::end(config::trackedNames));
+    cfg.trackedNames=vector<std::string>(std::begin(config::trackedNames), std::end(config::trackedNames));
     cfg.trackedIndex=vector<int>(std::begin(config::trackedIndex), std::end(config::trackedIndex));
     cfg.fullConc=vector<double>(std::begin(config::fullConc), std::end(config::fullConc));
     cfg.initConc = config::initConc;
@@ -55,30 +51,33 @@ signed main(int argc, char** argv) {
 
 	std::vector<std::vector<std::string>> QASAPdata = read_csv(std::string(config::QASAPFile));
 
-	if(proc_rank==0)std::cout<<"Loaded "<<QASAPdata.size()<<" rows of data."<<std::endl;
+	if(mpi_env.rank()==0)std::cout<<"Loaded "<<QASAPdata.size()<<" rows of data."<<std::endl;
 
 	
 	NASAP_fit diffEvo(cfg);
-	
 
 	startTime = std::chrono::system_clock::now();
-	auto opt = diffEvo.runDE(50, 128);
+	NASAP_fit::TerminationCondition deTerm;
+	deTerm.maxIter = 50;
+	auto opt = diffEvo.runDE(128, cfg.lowerLim, cfg.upperLim, deTerm);
 	endTimeGlobal = std::chrono::system_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTimeGlobal - startTime).count();
 
-	if(proc_rank==0)std::cout << "Optimization took " << duration << " milliseconds." << std::endl;
+	if(mpi_env.rank()==0)std::cout << "Optimization took " << duration << " milliseconds." << std::endl;
 	
 	std::vector<double> bestConstants(config::constantSize);
 	double minerror;
 	// LM refinement on the best solution returned by DE
-	auto refined = diffEvo.runLM(opt[4].constants);
+	NASAP_fit::TerminationCondition lmTerm;
+	lmTerm.maxIter = 10;
+	auto refined = diffEvo.runLM(opt[4].constants, lmTerm);
 	bestConstants = refined.constants;
 	minerror = refined.error;
 	std::vector<std::string>kinds(config::constantSize);
-	for(const auto& [key, val] : diffEvo.reactionNetwork().termIndex){
+	for(const auto& [key, val] : diffEvo.termIndex()){
 		kinds[val]=key;
 	}
-	if(proc_rank==0){
+	if(mpi_env.rank()==0){
 		std::cout<<"Optimized Constants:"<<std::endl;
 		for(int i=0;i<config::constantSize;i++){
 			std::cout<<kinds[i]<<": "<<bestConstants[i]<<std::endl;
@@ -88,14 +87,13 @@ signed main(int argc, char** argv) {
 	}
 	diffEvo.putCVODESim(bestConstants);
 
-	MPI_Finalize();
 	return 0;
 
 	std::vector<std::vector<double>> hessianMat, hessianMatParallel;
-	if(proc_rank==0)std::cout<<"Calculating Hessian Matrix at optimum..."<<std::endl;
+	if(mpi_env.rank()==0)std::cout<<"Calculating Hessian Matrix at optimum..."<<std::endl;
 	hessianMat =diffEvo.getHessian(bestConstants);
 	hessianMatParallel = diffEvo.getHessian_parallel(bestConstants);
-	if(proc_rank==0){
+	if(mpi_env.rank()==0){
 		for (int i = 0; i < config::constantSize; i++) {
 			for (int j = 0; j < config::constantSize; j++) {
 				std::cout << std::setw(15) << hessianMat[i][j] << " ";
@@ -115,8 +113,6 @@ signed main(int argc, char** argv) {
 	
 	
 
-	MPI_Finalize();
-	
 }//0.0349428 7370.47 966.895 138.205 0.359602 972.249 0.00584204 0.144209
 
 /*

@@ -1,93 +1,44 @@
-import requests
-import pandas as pd
-from sklearn.metrics import mean_absolute_error, r2_score
+import warnings
+warnings.simplefilter("default")  # 未知キーwarningを見たい場合
 
-# APIのURL
-url = "https://archive-api.open-meteo.com/v1/archive"
+from nasap_fit import NASAP_fit
 
-# データとして用いる都市
-cities = {#"Tokyo": (35.6895,139.6917),
-          "Osaka": (34.6856, 135.5286),
-          "Nagoya": (35.185033, 136.899946),
-          "Okayama": (34.667384, 133.934447),
-          "Himeji": (34.837768, 134.693678),
-          "Hiroshima": (34.401292, 132.459853)}
+engine = NASAP_fit.from_yaml("../data/config.yaml")  # YAML検証→Config生成→C++初期化
 
-# 予測の対象
-targetCity = "Nagoya"
+# DE（terminationConditionはdict、未知キーはwarning、不正値はValueError）
+pop = engine.run_de(
+    pop_size=128,
+    terminationCondition={"maxIter": 50,
+                           "timeLimit": 60.0,
+                           "xtol": 1e-6, #runDEでは無効
+                           "ftolAbs": 1e-5,
+                           "ftolRel": 0.02,
+                           "stall": 20,},  
+    seed=1,
+)
 
-data={}
+best = min(pop, key=lambda r: r.error)
 
-for city,lonlat in cities.items():
-    params = {
-        "latitude": lonlat[0],  # 緯度
-        "longitude": lonlat[1], # 経度
-        "start_date": "2013-01-01",
-        "end_date": "2025-12-31",
-        "daily": ["temperature_2m_mean", "precipitation_sum"], # 降水量
-        "timezone": "Asia/Tokyo"
-    }
-    response = requests.get(url, params=params)
-    data[city] = response.json()
+# LM
+refined = engine.run_lm(
+    best.constants,
+    terminationCondition={"maxIter": 50,
+                           "timeLimit": 60.0,
+                           "xtol": 1e-6, 
+                           "timeLimit": 60.0,
+                           "ftolAbs": 1e-5,
+                           "ftolRel": 0.02,
+                           "stall": 10},
+)
 
-# 各都市のデータを格納するリスト
-df_list = []
+print("best error:", refined.error)
+print("best constants:", refined.constants)
 
-for city, raw_data in data.items():
-    # 各都市の「日付」と「平均気温」を取り出してDataFrame化
-    temp_df = pd.DataFrame({
-        "date": raw_data["daily"]["time"],
-        f"{city}_precip": raw_data["daily"]["precipitation_sum"],
-        f"{city}_temp": raw_data["daily"]["temperature_2m_mean"]
-    })
-    
-    # 日付をインデックス（行ラベル）に設定
-    temp_df.set_index("date", inplace=True)
-    df_list.append(temp_df)
-
-# 全てのDataFrameを列方向に結合
-final_df = pd.concat(df_list, axis=1)
-
-for city in cities.keys():
-    final_df[f'{city}_precip_prev1'] = final_df[f'{city}_precip'].shift(1)
-    final_df[f'{city}_temp_prev1'] = final_df[f'{city}_temp'].shift(1)
-final_df['Nagoya_temp_diff'] = final_df['Nagoya_temp'].diff()
-final_df['Nagoya_precip_ma3'] = final_df['Nagoya_precip'].rolling(window=3).mean().shift(1)
-
-# shiftや移動平均を使うと最初の数行に欠損値(NaN)が出るので削除
-final_df = final_df.dropna()
-final_df = final_df.sort_index()
-
-#学習用データ
-train_df = final_df.loc[:"2022-12-31"]
-#テスト用データ
-test_df = final_df.loc["2023-01-01":]
-
-model = LinearRegression()
-
-#パラメータを列挙
-param_list=['Nagoya_temp_prev1','Nagoya_temp_diff','Nagoya_precip_ma3']
-for city in cities.keys():
-    param_list.append(f'{city}_precip_prev1')
-
-# 目的変数 y (名古屋の降水量)
-y = train_df[f'{targetCity}_precip']
-
-# 説明変数 X (名古屋以外の都市と、自分で作った特徴量)
-X = train_df[param_list]
-
-# 学習プロセス
-model.fit(X, y)
-
-print(pd.DataFrame({"Name":X.columns,
-                    "Coefficients":model.coef_}).sort_values(by='Coefficients') )
-
-X_test = test_df[param_list]
-y_test = test_df[f'{targetCity}_precip']
-
-y_pred = model.predict(X_test)
-r2 = r2_score(y_test, y_pred)
-mae = mean_absolute_error(y_test, y_pred)
-
-print(f'決定係数 (R2): {r2:.3f}')
-print(f'平均絶対誤差 (MAE): {mae:.3f} 度')
+simulationResult = engine.simulate(
+    t=[1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 300.0],
+    constant=refined.constants,
+    reaction_ids=[22, 67],)
+for i, id in enumerate(simulationResult.reactionProgress.reaction_ids):
+    print(f"Reaction ID: {id}, label: {simulationResult.reactionProgress.reaction_labels[i]}")
+for i, time_point in enumerate(simulationResult.t):
+    print(f"Time: {time_point:.1f} min, J[{simulationResult.reactionProgress.reaction_ids[0]}]: {simulationResult.reactionProgress.J[i][0]}, J[{simulationResult.reactionProgress.reaction_ids[1]}]: {simulationResult.reactionProgress.J[i][1]}")
