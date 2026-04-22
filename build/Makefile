@@ -85,6 +85,51 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/cmake-4.1.1-linux-x86_64/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/cmake-4.1.1-linux-x86_64/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/cmake-4.1.1-linux-x86_64/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/cmake-4.1.1-linux-x86_64/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/cmake-4.1.1-linux-x86_64/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/cmake-4.1.1-linux-x86_64/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles /home/aspi/Project/nasap-fit-cpp/build//CMakeFiles/progress.marks
@@ -118,19 +163,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named nasap_fit_cpp
-
-# Build rule for target.
-nasap_fit_cpp: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 nasap_fit_cpp
-.PHONY : nasap_fit_cpp
-
-# fast build rule for target.
-nasap_fit_cpp/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/build
-.PHONY : nasap_fit_cpp/fast
-
-#=============================================================================
 # Target rules for targets named _core
 
 # Build rule for target.
@@ -148,7 +180,6 @@ src/NASAP_fit.o: src/NASAP_fit.cpp.o
 
 # target to build an object file
 src/NASAP_fit.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/NASAP_fit.cpp.o
 .PHONY : src/NASAP_fit.cpp.o
 
@@ -157,7 +188,6 @@ src/NASAP_fit.i: src/NASAP_fit.cpp.i
 
 # target to preprocess a source file
 src/NASAP_fit.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/NASAP_fit.cpp.i
 .PHONY : src/NASAP_fit.cpp.i
 
@@ -166,7 +196,6 @@ src/NASAP_fit.s: src/NASAP_fit.cpp.s
 
 # target to generate assembly for a file
 src/NASAP_fit.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/NASAP_fit.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/NASAP_fit.cpp.s
 .PHONY : src/NASAP_fit.cpp.s
 
@@ -218,36 +247,11 @@ src/bindings/module.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/bindings/module.cpp.s
 .PHONY : src/bindings/module.cpp.s
 
-src/main.o: src/main.cpp.o
-.PHONY : src/main.o
-
-# target to build an object file
-src/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.o
-.PHONY : src/main.cpp.o
-
-src/main.i: src/main.cpp.i
-.PHONY : src/main.i
-
-# target to preprocess a source file
-src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.i
-.PHONY : src/main.cpp.i
-
-src/main.s: src/main.cpp.s
-.PHONY : src/main.s
-
-# target to generate assembly for a file
-src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/main.cpp.s
-.PHONY : src/main.cpp.s
-
 src/reactionNetwork.o: src/reactionNetwork.cpp.o
 .PHONY : src/reactionNetwork.o
 
 # target to build an object file
 src/reactionNetwork.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/reactionNetwork.cpp.o
 .PHONY : src/reactionNetwork.cpp.o
 
@@ -256,7 +260,6 @@ src/reactionNetwork.i: src/reactionNetwork.cpp.i
 
 # target to preprocess a source file
 src/reactionNetwork.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/reactionNetwork.cpp.i
 .PHONY : src/reactionNetwork.cpp.i
 
@@ -265,7 +268,6 @@ src/reactionNetwork.s: src/reactionNetwork.cpp.s
 
 # target to generate assembly for a file
 src/reactionNetwork.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/reactionNetwork.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/reactionNetwork.cpp.s
 .PHONY : src/reactionNetwork.cpp.s
 
@@ -274,7 +276,6 @@ src/readcsv.o: src/readcsv.cpp.o
 
 # target to build an object file
 src/readcsv.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/readcsv.cpp.o
 .PHONY : src/readcsv.cpp.o
 
@@ -283,7 +284,6 @@ src/readcsv.i: src/readcsv.cpp.i
 
 # target to preprocess a source file
 src/readcsv.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/readcsv.cpp.i
 .PHONY : src/readcsv.cpp.i
 
@@ -292,7 +292,6 @@ src/readcsv.s: src/readcsv.cpp.s
 
 # target to generate assembly for a file
 src/readcsv.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/src/readcsv.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/src/readcsv.cpp.s
 .PHONY : src/readcsv.cpp.s
 
@@ -303,9 +302,12 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... _core"
-	@echo "... nasap_fit_cpp"
 	@echo "... src/NASAP_fit.o"
 	@echo "... src/NASAP_fit.i"
 	@echo "... src/NASAP_fit.s"
@@ -315,9 +317,6 @@ help:
 	@echo "... src/bindings/module.o"
 	@echo "... src/bindings/module.i"
 	@echo "... src/bindings/module.s"
-	@echo "... src/main.o"
-	@echo "... src/main.i"
-	@echo "... src/main.s"
 	@echo "... src/reactionNetwork.o"
 	@echo "... src/reactionNetwork.i"
 	@echo "... src/reactionNetwork.s"

@@ -1,4 +1,7 @@
-/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/nasap_fit_cpp.dir
 /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/_core.dir
 /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/edit_cache.dir
 /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/rebuild_cache.dir
+/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/list_install_components.dir
+/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/install.dir
+/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/install/local.dir
+/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles/install/strip.dir

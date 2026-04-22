@@ -63,12 +63,10 @@ CMAKE_BINARY_DIR = /home/aspi/Project/nasap-fit-cpp/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/nasap_fit_cpp.dir/all
 all: CMakeFiles/_core.dir/all
 .PHONY : all
 
 # The main recursive "codegen" target.
-codegen: CMakeFiles/nasap_fit_cpp.dir/codegen
 codegen: CMakeFiles/_core.dir/codegen
 .PHONY : codegen
 
@@ -77,41 +75,8 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/nasap_fit_cpp.dir/clean
 clean: CMakeFiles/_core.dir/clean
 .PHONY : clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/nasap_fit_cpp.dir
-
-# All Build rule for target.
-CMakeFiles/nasap_fit_cpp.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=7,8,9,10,11 "Built target nasap_fit_cpp"
-.PHONY : CMakeFiles/nasap_fit_cpp.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/nasap_fit_cpp.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles 5
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/nasap_fit_cpp.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles 0
-.PHONY : CMakeFiles/nasap_fit_cpp.dir/rule
-
-# Convenience name for target.
-nasap_fit_cpp: CMakeFiles/nasap_fit_cpp.dir/rule
-.PHONY : nasap_fit_cpp
-
-# codegen rule for target.
-CMakeFiles/nasap_fit_cpp.dir/codegen:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=7,8,9,10,11 "Finished codegen for target nasap_fit_cpp"
-.PHONY : CMakeFiles/nasap_fit_cpp.dir/codegen
-
-# clean rule for target.
-CMakeFiles/nasap_fit_cpp.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/nasap_fit_cpp.dir/build.make CMakeFiles/nasap_fit_cpp.dir/clean
-.PHONY : CMakeFiles/nasap_fit_cpp.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/_core.dir
