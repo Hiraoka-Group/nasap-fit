@@ -36,14 +36,14 @@ list(REMOVE_ITEM NASAP_PY_SOURCES
 find_package(MPI REQUIRED)
 
 # Eigen3を探す
-find_package(Eigen3 REQUIRED)
+# find_package(Eigen3 REQUIRED)
 
 # SUNDIALSを探す
 find_package(SUNDIALS REQUIRED)
 find_library(KLU_LIBRARY klu HINTS /usr/lib/x86_64-linux-gnu)
 
-# CasADiを探す
-find_package(casadi REQUIRED)
+## CasADi は依存から除外（必要なら再導入してください）
+# find_package(casadi REQUIRED)
 
 function(nasap_apply_common_settings target_name)
     target_include_directories(${target_name}
@@ -61,8 +61,8 @@ function(nasap_apply_common_settings target_name)
     endif()
 
     target_link_libraries(${target_name} PRIVATE MPI::MPI_CXX)
-    target_link_libraries(${target_name} PRIVATE Eigen3::Eigen)
-    target_link_libraries(${target_name} PRIVATE casadi)
+    # target_link_libraries(${target_name} PRIVATE Eigen3::Eigen)
+    # target_link_libraries(${target_name} PRIVATE casadi)
 
     # SUNDIALS libraries (prefer imported targets when available)
     if (TARGET SUNDIALS::cvodes)

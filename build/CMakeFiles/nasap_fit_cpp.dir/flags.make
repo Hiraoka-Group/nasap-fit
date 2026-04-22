@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/aspi/Project/nasap-fit-cpp/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -isystem /usr/include/suitesparse -isystem /usr/include/eigen3
+CXX_INCLUDES = -I/home/aspi/Project/nasap-fit-cpp/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi -isystem /usr/include/suitesparse
 
-CXX_FLAGS = -std=c++20
+CXX_FLAGS = -g -std=c++20
 

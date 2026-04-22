@@ -36,8 +36,8 @@ find_package(Eigen3 REQUIRED)
 find_package(SUNDIALS REQUIRED)
 find_library(KLU_LIBRARY klu HINTS /usr/lib/x86_64-linux-gnu)
 
-# CasADiを探す
-find_package(casadi REQUIRED)
+## CasADi は依存から除外（必要なら再導入してください）
+# find_package(casadi REQUIRED)
 
 # 実行ファイルを作成
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -66,8 +66,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE sundials_cvodes)
 target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_core.so)
 target_link_libraries(${PROJECT_NAME} PRIVATE /usr/local/lib/libsundials_sunlinsolklu.so)
 
-# CasADiライブラリをリンク
-target_link_libraries(${PROJECT_NAME} PRIVATE casadi)
+## CasADiライブラリをリンク（無効化）
+# target_link_libraries(${PROJECT_NAME} PRIVATE casadi)
 
 if (KLU_LIBRARY)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${KLU_LIBRARY})

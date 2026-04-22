@@ -172,7 +172,28 @@ class NASAP_fit:
         normalized = validate_population(population, constant_size=constant_size)
         term = build_termination_condition(_core, terminationCondition)
         return list(self._engine.runDE(normalized, term, int(seed)))
+    
 
+    def simulate(
+            self,
+            t: Sequence[float],
+            constant: Sequence[float],
+            reaction_ids: Iterable[int],
+        ) -> Any:
+            validate_constants_vector(constant, expected_size=int(self._engine.constants().constantSize))
+            for v in t:
+                if v < 0.0:
+                    raise ValueError(f"Time points must be non-negative (got {v})")
+            id_upper = self.reactionCount()
+            for i in reaction_ids:
+                if not (0 <= i < id_upper):
+                    raise ValueError(f"Reaction IDs must be in [0, {id_upper}) (got {i})")
+            t_vec = [float(v) for v in t]
+            c_vec = [float(v) for v in constant]
+            ids = [int(i) for i in reaction_ids]
+            return self._engine.simulate(t_vec, c_vec, ids)
+
+"""
     def run_lm(self, theta0: Sequence[float], terminationCondition: Mapping[str, Any]) -> Any:
         constant_size = int(self._engine.constants().constantSize)
         vec = validate_constants_vector(theta0, expected_size=constant_size)
@@ -202,26 +223,7 @@ class NASAP_fit:
         validate_constants_vector(point, expected_size=int(self._engine.constants().constantSize))
         vec = [float(v) for v in point]
         return [list(row) for row in self._engine.pseudoHessian(vec)]
-
+"""
 #    def put_cvode_sim(self, constant: Sequence[float]) -> None:
 #        vec = [float(v) for v in constant]
 #        self._engine.putCVODESim(vec)
-
-    def simulate(
-        self,
-        t: Sequence[float],
-        constant: Sequence[float],
-        reaction_ids: Iterable[int],
-    ) -> Any:
-        validate_constants_vector(constant, expected_size=int(self._engine.constants().constantSize))
-        for v in t:
-            if v < 0.0:
-                raise ValueError(f"Time points must be non-negative (got {v})")
-        id_upper = self.reactionCount()
-        for i in reaction_ids:
-            if not (0 <= i < id_upper):
-                raise ValueError(f"Reaction IDs must be in [0, {id_upper}) (got {i})")
-        t_vec = [float(v) for v in t]
-        c_vec = [float(v) for v in constant]
-        ids = [int(i) for i in reaction_ids]
-        return self._engine.simulate(t_vec, c_vec, ids)

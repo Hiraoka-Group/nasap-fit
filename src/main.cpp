@@ -67,12 +67,9 @@ signed main(int argc, char** argv) {
 	
 	std::vector<double> bestConstants(config::constantSize);
 	double minerror;
-	// LM refinement on the best solution returned by DE
-	NASAP_fit::TerminationCondition lmTerm;
-	lmTerm.maxIter = 10;
-	auto refined = diffEvo.runLM(opt[4].constants, lmTerm);
-	bestConstants = refined.constants;
-	minerror = refined.error;
+	// CasADi 依存の LM refinement は除外
+	bestConstants = opt[0].constants;
+	minerror = opt[0].error;
 	std::vector<std::string>kinds(config::constantSize);
 	for(const auto& [key, val] : diffEvo.termIndex()){
 		kinds[val]=key;
@@ -88,30 +85,6 @@ signed main(int argc, char** argv) {
 	diffEvo.putCVODESim(bestConstants);
 
 	return 0;
-
-	std::vector<std::vector<double>> hessianMat, hessianMatParallel;
-	if(mpi_env.rank()==0)std::cout<<"Calculating Hessian Matrix at optimum..."<<std::endl;
-	hessianMat =diffEvo.getHessian(bestConstants);
-	hessianMatParallel = diffEvo.getHessian_parallel(bestConstants);
-	if(mpi_env.rank()==0){
-		for (int i = 0; i < config::constantSize; i++) {
-			for (int j = 0; j < config::constantSize; j++) {
-				std::cout << std::setw(15) << hessianMat[i][j] << " ";
-			}
-			std::cout << std::endl;	
-		}
-		std::cout<<"Parallel Hessian Matrix:\n";
-		for (int i = 0; i < config::constantSize; i++) {
-			for (int j = 0; j < config::constantSize; j++) {
-				std::cout << std::setw(15) << hessianMatParallel[i][j] << " ";
-			}
-			std::cout << std::endl;
-		}
-	}
-
-	//diffEvo.putCVODESim(bestConstants);
-	
-	
 
 }//0.0349428 7370.47 966.895 138.205 0.359602 972.249 0.00584204 0.144209
 

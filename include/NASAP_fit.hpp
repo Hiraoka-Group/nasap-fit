@@ -18,7 +18,6 @@
 #include <sunlinsol/sunlinsol_pcg.h>
 #include <sunlinsol/sunlinsol_spgmr.h>
 #include <sundials/sundials_context.hpp>
-#include <casadi/casadi.hpp>
 
 #include "../include/xorshift.hpp"
 #include "../include/reactionNetwork.hpp"
@@ -85,11 +84,6 @@ private:
 		double time;
 		std::vector<double>state;
 	};
-	casadi::Function integrator_;  // build_integrator の結果
-    casadi::Function res_fun_;     // 残差ベクトルを返す関数
-    casadi::Function jac_fun_;     // ヤコビアンを返す関数
-	casadi::Function SSR_jac_fun_; // 平方残差和とヤコビアンを返す関数
-	casadi::Function SSR_hes_fun_; // 平方残差和とヘッセ行列を返す関数
 
 	std::vector<double> initialState; //初期状態（ランタイムサイズ）
 	std::vector<datum> QASAP;  //実験データ
@@ -114,8 +108,10 @@ private:
 
 	vector<vector<double>> makeRandomPopulation(int popSize, double lower, double upper, uint64_t seed);
 public:
-// jac_fun_と res_fun_のセットアップ
+	// CasADi 依存の関数は除外
+	#if 0
 	void setUpCasADiFunctions();
+	#endif
 
 	const Config& constants() const { return cfg; }
 
@@ -129,13 +125,6 @@ public:
 	double calcError(const vector<double>& constant);
 
 
-	// ヘッセ行列の計算
-	vector<vector<double>> getHessian(const vector<double>& point);
-
-	vector<vector<double>> getHessian_parallel(const vector<double>& point);
-
-	vector<vector<double>> pseudoHessian(const vector<double>& point);
-
 	// 実験データのセット
 	void setQASAPData(const vector<vector<std::string>>& arg);
 
@@ -144,9 +133,11 @@ public:
 
 	~NASAP_fit();
 
-	// Levenberg-Marquardt法による最適化の実行
+	// Levenberg-Marquardt法（CasADi 依存のため除外）
+	#if 0
 	OptimizeResult runLM(const vector<double>& theta0, const TerminationCondition& termCond);
 	vector<OptimizeResult> runLM(const vector<vector<double>>& thetaList, const TerminationCondition& termCond);
+	#endif
 
 	// 差分進化法の実行
 	vector<OptimizeResult> runDE(int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed = 1);

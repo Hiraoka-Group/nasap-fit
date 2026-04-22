@@ -114,6 +114,7 @@ void init_core(pybind11::module_ &m) {
             py::arg("arg"),
             py::arg("termCond"),
             py::arg("seed") = 1)
+/*
         .def("runLM",
             py::overload_cast<const std::vector<double>&, const NASAP_fit::TerminationCondition&>(&NASAP_fit::runLM),
             py::arg("theta0"),
@@ -124,5 +125,6 @@ void init_core(pybind11::module_ &m) {
             py::arg("termCond"))
         .def("getHessian", &NASAP_fit::getHessian, py::arg("point"))
         .def("pseudoHessian", &NASAP_fit::pseudoHessian, py::arg("point"))
+        */
         .def("simulate", &NASAP_fit::simulate, py::arg("t"), py::arg("constant"), py::arg("reaction_ids"));
 }

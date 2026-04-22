@@ -13,12 +13,12 @@
 #include <iterator>
 #include <chrono>
 
-#include <Eigen/Dense>
+//#include <Eigen/Dense>
 #include <mpi.h>
 #include <sunmatrix/sunmatrix_sparse.h>
 #include <sunlinsol/sunlinsol_klu.h>
 #include <cvodes/cvodes.h>
-#include <casadi/casadi.hpp>
+// #include <casadi/casadi.hpp>  // CasADi 依存は除去
 
 #include "../include/NASAP_fit.hpp"
 #include "../include/xorshift.hpp"
@@ -27,7 +27,6 @@
 
 int cnt=0;
     
-using namespace casadi;
 using std::vector;
 using std::cout;
 using std::endl;
@@ -129,7 +128,7 @@ std::vector<std::vector<double>> NASAP_fit::makeRandomPopulation(int popSize, do
     }
     return population;
 }
-
+/*
 static Function build_integrator(std::string name,
 						const std::vector<double>& tout,
 						const NASAP_fit::Config& cfg,
@@ -219,117 +218,8 @@ void NASAP_fit::setUpCasADiFunctions() {
     SSR_hes_fun_ = Function("SSR_hes_fun_", MXIList{params}, MXIList{SSR_hes});
     return;
 }
-//ヘッセ行列の計算
-std::vector<std::vector<double>> NASAP_fit::getHessian(const std::vector<double>& point){
-    validateConstants(point);
-    // numeric central differences for Hessian
-    int n = (int)point.size();
-    std::vector<std::vector<double>> H(n, std::vector<double>(n, 0.0));
-    std::vector<double> logPoint(n);
-    for (int i = 0; i < n; ++i) {
-        logPoint[i] = log(point[i]);
-    }
+    */
 
-    std::vector<DM> arg(1);
-    arg[0] = DM(logPoint);
-    cout<<"Calculating Hessian..."<<endl;
-    DM hdm = SSR_hes_fun_(arg).at(0);
-    cout<<" done."<<endl;
-    std::vector<double> hvec = hdm.nonzeros();
-
-    Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>> Hmat(hvec.data(), n, n);
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            H[i][j] = Hmat(i, j);
-        }
-    }
-    return H;
-}
-
-std::vector<std::vector<double>> NASAP_fit::getHessian_parallel(const std::vector<double>& point){
-    validateConstants(point);
-    int n = (int)point.size();
-    std::vector<std::vector<double>> H(n, std::vector<double>(n, 0.0));
-    std::vector<double> logPoint(n);
-    for (int i = 0; i < n; ++i) {
-        logPoint[i] = log(point[i]);
-    }
-    double eps = 1e-5;
-    std::vector<DM> arg(1);
-    DM dm;
-    std::vector<double> vec;
-    std::vector<double> buffer(2*n*n, 0.0);
-    MPI_Win win;
-    MPI_Win_create(buffer.data(), sizeof(double)*2*n*n, sizeof(double), MPI_INFO_NULL, MPI_COMM_WORLD, &win);
-    MPI_Win_fence(0, win);
-    for(int i=mpi_env.rank(); i<2*n; i+=mpi_env.size()){
-        int idx = i/2;
-        bool isUpper = (i % 2 == 0);
-        DM pert = DM::zeros(n);
-        pert(idx) = eps;
-        if(isUpper)arg[0] = DM(logPoint) + pert;
-        else arg[0] = DM(logPoint) - pert;
-        dm = SSR_jac_fun_(arg).at(0);
-        vec = dm.nonzeros();
-        MPI_Put(vec.data(), n, MPI_DOUBLE, 0, i*n, n, MPI_DOUBLE, win);
-    }
-    MPI_Win_fence(0, win);
-    if(mpi_env.rank()==0){
-        for(int i=0;i<n;i++){
-            for(int j=0;j<n;j++){
-                double f_plus = buffer[(2*i)*n + j];
-                double f_minus = buffer[(2*i+1)*n + j];
-                H[i][j] = (f_plus - f_minus) / (2 * eps);
-            }
-        }
-    }
-    std::vector<double> hflat(n * n, 0.0);
-    if (mpi_env.rank() == 0) {
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
-                hflat[i * n + j] = H[i][j];
-            }
-        }
-    }
-    MPI_Bcast(hflat.data(), n * n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    if (mpi_env.rank() != 0) {
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
-                H[i][j] = hflat[i * n + j];
-            }
-        }
-    }
-    MPI_Win_free(&win);
-    return H;
-
-}
-
-std::vector<std::vector<double>> NASAP_fit::pseudoHessian(const std::vector<double>& point){
-    validateConstants(point);
-    const int n = cfg.constantSize;
-    const int m = (int)QASAP.size() * cfg.trackedSpecies;
-    std::vector<DM> arg(1);
-    DM jdm;
-    std::vector<double> jvec;
-    Eigen::MatrixXd J;
-    Eigen::MatrixXd A;
-    std::vector<double> logTheta(n);
-    for (int i = 0; i < n; ++i) {
-        logTheta[i] = std::log(point[i]);
-    }
-    arg[0] = DM(logTheta);
-    jdm = jac_fun_(arg).at(0);
-    jvec = jdm.nonzeros();
-    J = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>>(jvec.data(), m, n);
-    A = J.transpose() * J; 
-    std::vector<std::vector<double>> H(n, std::vector<double>(n, 0.0));
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            H[i][j] = A(i, j);
-        }
-    }
-    return H;
-}
 
 //実験データのセット
 void NASAP_fit::setQASAPData(const vector<vector<std::string>>& arg) {
@@ -372,7 +262,7 @@ NASAP_fit::NASAP_fit(const Config& arg): cfg(arg) {
 
     rxnNet.build(cfg.reactNetworkFile, cfg.species, cfg.constantSize);
     setQASAPData(read_csv(cfg.QASAPFile));
-    setUpCasADiFunctions();
+    // setUpCasADiFunctions(); // CasADi 依存を除去
     
     //seting up CVODE
     y = N_VNew_Serial(cfg.species, sunctx);
@@ -732,7 +622,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     return populations;
 }
 
-
+/*
 NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, const TerminationCondition& termCond){
     const int world_rank = mpi_env.rank();
     const int n = cfg.constantSize;
@@ -759,6 +649,10 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, co
     Eigen::MatrixXd A;
     Eigen::VectorXd g;
     bool isChanged = true;
+
+    const double logLower = std::log(cfg.lowerLim);
+    const double logUpper = std::log(cfg.upperLim);
+    const double eps = 1e-5; // log-space finite-difference step
 
     
     std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
@@ -905,7 +799,7 @@ vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>&
     }
     return results;
 }
-
+*/
 
 
 void NASAP_fit::putCVODESim(const std::vector<double>& constant) {

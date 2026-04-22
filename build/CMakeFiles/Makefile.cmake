@@ -142,17 +142,10 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/lib/cmake/pybind11/pybind11ConfigVersion.cmake"
   "/usr/lib/cmake/pybind11/pybind11Targets.cmake"
   "/usr/lib/cmake/pybind11/pybind11Tools.cmake"
-  "/usr/local/lib/cmake/casadi/casadi-config-version.cmake"
-  "/usr/local/lib/cmake/casadi/casadi-config.cmake"
-  "/usr/local/lib/cmake/casadi/casadi-targets-release.cmake"
-  "/usr/local/lib/cmake/casadi/casadi-targets.cmake"
   "/usr/local/lib/cmake/sundials/SUNDIALSConfig.cmake"
   "/usr/local/lib/cmake/sundials/SUNDIALSConfigVersion.cmake"
   "/usr/local/lib/cmake/sundials/SUNDIALSTargets-relwithdebinfo.cmake"
   "/usr/local/lib/cmake/sundials/SUNDIALSTargets.cmake"
-  "/usr/share/eigen3/cmake/Eigen3Config.cmake"
-  "/usr/share/eigen3/cmake/Eigen3ConfigVersion.cmake"
-  "/usr/share/eigen3/cmake/Eigen3Targets.cmake"
   )
 
 # The corresponding makefile is:
