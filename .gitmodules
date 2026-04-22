@@ -1,3 +1,7 @@
 [submodule "extern/sundials"]
 	path = extern/sundials
 	url = https://github.com/llnl/sundials.git
+[submodule "extern/SuiteSparse"]
+	path = extern/SuiteSparse
+	url = https://github.com/DrTimothyAldenDavis/SuiteSparse.git
+	branch = dev
