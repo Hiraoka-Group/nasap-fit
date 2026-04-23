@@ -38,68 +38,35 @@ jobs:
 
           # Linux では manylinux コンテナ内で一度だけ依存をビルド
           CIBW_BEFORE_ALL_LINUX: >
-            bash -euxo pipefail -c '
-            echo "===== ENV =====";
-            uname -a;
-            pwd;
-            python --version || true;
-            cmake --version;
-            gcc --version || true;
-            g++ --version || true;
-            echo "PATH=$PATH";
-            echo "CC=$CC";
-            echo "CXX=$CXX";
-
-            echo "===== PROJECT ROOT =====";
-            ls -la;
-            echo "===== extern =====";
-            ls -la extern || true;
-            ls -la extern/SuiteSparse || true;
-            ls -la extern/sundials || true;
-
-            echo "===== CLEAN =====";
-            rm -rf build/deps/build/suitesparse build/deps/install/suitesparse;
-            rm -rf build/deps/build/sundials build/deps/install/sundials;
-            mkdir -p build/deps/build build/deps/install;
-
+            bash -euxo pipefail -c
             echo "===== CONFIGURE SUITESPARSE =====";
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse
               -DCMAKE_BUILD_TYPE=Release
               -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/suitesparse
               -DSUITESPARSE_ENABLE_PROJECTS="klu;amd;colamd;btf"
               -DSUITESPARSE_USE_FORTRAN=OFF;
-
             echo "===== SUITESPARSE CACHE =====";
             grep -E "SUITESPARSE|BLAS|LAPACK|FORTRAN|CMAKE_INSTALL_PREFIX" build/deps/build/suitesparse/CMakeCache.txt || true;
-
             echo "===== SUITESPARSE BUILD DIR =====";
             find build/deps/build/suitesparse -maxdepth 2 | sort | head -200;
-
             echo "===== BUILD SUITESPARSE =====";
             cmake --build build/deps/build/suitesparse --config Release -j2 --verbose;
-
             echo "===== INSTALL SUITESPARSE =====";
             cmake --install build/deps/build/suitesparse;
-
             echo "===== INSTALLED SUITESPARSE =====";
             find /project/build/deps/install/suitesparse -maxdepth 3 | sort | head -300;
-
             echo "===== CONFIGURE SUNDIALS =====";
             cmake -S extern/sundials -B build/deps/build/sundials
               -DCMAKE_BUILD_TYPE=Release
               -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/sundials
               -DSUNDIALS_ENABLE_KLU=ON
               -DKLU_ROOT=/project/build/deps/install/suitesparse;
-
             echo "===== SUNDIALS CACHE =====";
             grep -E "SUNDIALS|KLU|SuiteSparse|CMAKE_INSTALL_PREFIX" build/deps/build/sundials/CMakeCache.txt || true;
-
             echo "===== BUILD SUNDIALS =====";
             cmake --build build/deps/build/sundials --config Release -j2 --verbose;
-
             echo "===== INSTALL SUNDIALS =====";
             cmake --install build/deps/build/sundials;
-
             echo "===== INSTALLED SUNDIALS =====";
             find /project/build/deps/install/sundials -maxdepth 3 | sort | head -300;
 
