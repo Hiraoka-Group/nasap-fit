@@ -1,0 +1,73 @@
+name: Build wheels
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build_wheels:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build setuptools wheel scikit-build-core pybind11
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
+
+      - name: Build SuiteSparse
+        run: |
+          cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
+            -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/suitesparse \
+            -DSUITESPARSE_ENABLE_PROJECTS="klu;amd;colamd;btf" \
+            -DSUITESPARSE_USE_FORTRAN=OFF
+          cmake --build build/deps/build/suitesparse --config Release
+          cmake --install build/deps/build/suitesparse
+
+      - name: Build SUNDIALS
+        run: |
+          cmake -S extern/sundials -B build/deps/build/sundials \
+            -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/sundials \
+            -DSUNDIALS_ENABLE_KLU=ON \
+            -DKLU_ROOT=$PWD/build/deps/install/suitesparse
+          cmake --build build/deps/build/sundials --config Release
+          cmake --install build/deps/build/sundials
+
+      - name: Build project
+        run: |
+          cmake -S . -B build
+          cmake --build build -j
+
+      - name: Install project to staging dir
+        run: |
+          mkdir -p wheel_staging
+          cmake --install build --prefix "$PWD/wheel_staging"
+
+      - name: Build wheel
+        run: |
+          python -m build --wheel
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: dist/*.whl
