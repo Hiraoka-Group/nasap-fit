@@ -14,7 +14,7 @@ authors = [
   { name = "Shumbo Tanabe", email = "8703904728@g.ecc.u-tokyo.ac.jp" },
   { name = "Keisuke Takeuchi", email = "142223934+takeuchi-sci@users.noreply.github.com" },
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
   "numpy>=2.4.1,<3.0.0",
   "pandas>=3.0.0,<4.0.0",
