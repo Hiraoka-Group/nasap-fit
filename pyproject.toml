@@ -3,8 +3,11 @@ requires = ["poetry-core>=2.0.0,<3.0.0", "pybind11 >= 2.10.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-package-mode = false
-name = "nasap-fit-cpp"
+package-mode = true
+name = "nasap-fit"
+packages = [
+    { include = "nasap_fit" }
+]
 version = "0.1.0"
 description = "C++ implementation for high-performance fitting and numerical optimization in NASAP."
 authors = [
@@ -19,13 +22,6 @@ numpy = ">=2.4.1,<3.0.0"
 pandas = ">=3.0.0,<4.0.0"
 pyyaml = ">=6.0.3,<7.0.0"
 
-[build-system]
-requires = ["scikit-build-core>=0.10", "pybind11"]
-build-backend = "scikit_build_core.build"
-
 [project]
 name = "nasap-fit"
 version = "0.1.0"
-
-[tool.scikit-build]
-wheel.packages = ["nasap_fit"]
