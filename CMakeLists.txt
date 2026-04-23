@@ -140,13 +140,14 @@ function(nasap_apply_common_settings target_name)
         target_compile_definitions(${target_name} PRIVATE NASAP_USE_MPI=0)
     endif()
 
-    # Prefer imported SUNDIALS targets from the config package.
-    if (TARGET SUNDIALS::cvode)
-        target_link_libraries(${target_name} PRIVATE SUNDIALS::cvode)
-    elseif (TARGET SUNDIALS::cvodes)
+    # Prefer CVODES when available (quadrature/sensitivity APIs live there).
+    # Fall back to CVODE only if CVODES isn't provided by the installed SUNDIALS.
+    if (TARGET SUNDIALS::cvodes)
         target_link_libraries(${target_name} PRIVATE SUNDIALS::cvodes)
+    elseif (TARGET SUNDIALS::cvode)
+        target_link_libraries(${target_name} PRIVATE SUNDIALS::cvode)
     else()
-        message(FATAL_ERROR "Neither SUNDIALS::cvode nor SUNDIALS::cvodes target was found.")
+        message(FATAL_ERROR "Neither SUNDIALS::cvodes nor SUNDIALS::cvode target was found.")
     endif()
 
     if (TARGET SUNDIALS::nvecserial)
@@ -189,9 +190,9 @@ if (NASAP_BUILD_PYTHON_MODULE)
     nasap_apply_common_settings(_core)
 
     install(TARGETS _core
-        LIBRARY DESTINATION nasapfit
-        RUNTIME DESTINATION nasapfit
-        ARCHIVE DESTINATION nasapfit
+        LIBRARY DESTINATION ./nasap_fit
+        RUNTIME DESTINATION ./nasap_fit
+        ARCHIVE DESTINATION ./nasap_fit
     )
 
     if (NOT DEFINED EXAMPLE_VERSION_INFO)

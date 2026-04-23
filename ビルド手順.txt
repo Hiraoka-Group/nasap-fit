@@ -1,0 +1,29 @@
+# すべてProject root で実行
+
+# SuiteSparseのビルド・インストール
+cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
+  -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/suitesparse \
+  -DSUITESPARSE_ENABLE_PROJECTS="klu;amd;colamd;btf" \
+  -DSUITESPARSE_USE_FORTRAN=OFF
+
+cmake --build build/deps/build/suitesparse --config Release
+
+cmake --install build/deps/suitesparse-build
+
+# sundialsのビルド・インストール
+cmake -S extern/sundials -B build/deps/build/sundials \
+  -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/sundials \
+  -DSUNDIALS_ENABLE_KLU=ON \
+  -DKLU_ROOT=$PWD/build/deps/install/sundials
+
+cmake --build build/deps/build/sundials --config Release
+
+cmake --install build/deps/build/sundials
+
+
+#プロジェクトのビルド
+cmake -S . -B build
+
+cmake --build build -j
+
+cmake --install build --prefix "$PWD" 

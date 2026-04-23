@@ -14,7 +14,11 @@
 #include <chrono>
 
 //#include <Eigen/Dense>
+
+#if __has_include(<mpi.h>)
 #include <mpi.h>
+#endif
+
 #include <sunmatrix/sunmatrix_sparse.h>
 #include <sunlinsol/sunlinsol_klu.h>
 #include <cvodes/cvodes.h>
@@ -432,6 +436,9 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     if (world_size == 1) {
         return runDE_single(arg, termCond, seed);
     }
+
+    #if MPI_VERSION
+
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
         if (temp <= 0) return false;
@@ -620,6 +627,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     MPI_Win_free(&winErr);
 
     return populations;
+    #endif
 }
 
 /*
@@ -896,7 +904,9 @@ NASAP_fit::SimulationResult NASAP_fit::simulate(const vector<double>& t, const v
         assert(0 <= time_point && time_point <= endTime);
         if(!(tret-0.1<time_point&&time_point<tret+0.1)) flag=CVode(cvode_mem, time_point, y, &tret, CV_NORMAL);
         assert(flag >= 0);
-        flag = CVodeGetQuad(cvode_mem, &tret, yQ0);
+        // NOTE: Some SUNDIALS builds do not export CVodeGetQuad at runtime.
+        // CVodeGetQuadDky(t, k=0) returns the quadrature solution yQ(t).
+        flag = CVodeGetQuadDky(cvode_mem, tret, 0, yQ0);
         assert(flag >= 0);
 
         double* y_data = N_VGetArrayPointer(y);
