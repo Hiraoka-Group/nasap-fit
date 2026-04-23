@@ -9,12 +9,12 @@ on:
 
 jobs:
   build_wheels:
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.10", "3.11", "3.12"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - name: Checkout
@@ -25,49 +25,93 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
 
-      - name: Install build tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install build setuptools wheel scikit-build-core pybind11
-          sudo apt-get update
-          sudo apt-get install -y ninja-build
+      - name: Install cibuildwheel
+        run: python -m pip install --upgrade pip cibuildwheel
 
-      - name: Build SuiteSparse
-        run: |
-          cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
-            -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/suitesparse \
-            -DSUITESPARSE_ENABLE_PROJECTS="klu;amd;colamd;btf" \
-            -DSUITESPARSE_USE_FORTRAN=OFF
-          cmake --build build/deps/build/suitesparse --config Release
-          cmake --install build/deps/build/suitesparse
+      - name: Build wheels
+        env:
+          # 必要な Python だけに絞るならここで調整
+          CIBW_BUILD: "cp310-* cp311-* cp312-*"
+          CIBW_SKIP: "*-musllinux_* pp* *-win32 *-manylinux_i686"
 
-      - name: Build SUNDIALS
-        run: |
-          cmake -S extern/sundials -B build/deps/build/sundials \
-            -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/sundials \
-            -DSUNDIALS_ENABLE_KLU=ON \
-            -DKLU_ROOT=$PWD/build/deps/install/suitesparse
-          cmake --build build/deps/build/sundials --config Release
-          cmake --install build/deps/build/sundials
+          # Linux では manylinux コンテナ内で一度だけ依存をビルド
+          CIBW_BEFORE_ALL_LINUX: >
+            cmake -S extern/SuiteSparse -B build/deps/build/suitesparse
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/suitesparse
+            -DSUITESPARSE_ENABLE_PROJECTS="klu;amd;colamd;btf"
+            -DSUITESPARSE_USE_FORTRAN=OFF &&
+            cmake --build build/deps/build/suitesparse --config Release -j2 &&
+            cmake --install build/deps/build/suitesparse &&
+            cmake -S extern/sundials -B build/deps/build/sundials
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/sundials
+            -DSUNDIALS_ENABLE_KLU=ON
+            -DKLU_ROOT=/project/build/deps/install/suitesparse &&
+            cmake --build build/deps/build/sundials --config Release -j2 &&
+            cmake --install build/deps/build/sundials
 
-      - name: Build project
-        run: |
-          cmake -S . -B build
-          cmake --build build -j
+          # macOS でも同様に依存を一度だけビルド
+          CIBW_BEFORE_ALL_MACOS: >
+            cmake -S extern/SuiteSparse -B build/deps/build/suitesparse
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/suitesparse
+            -DSUITESPARSE_ENABLE_PROJECTS="klu;amd;colamd;btf"
+            -DSUITESPARSE_USE_FORTRAN=OFF &&
+            cmake --build build/deps/build/suitesparse --config Release -j2 &&
+            cmake --install build/deps/build/suitesparse &&
+            cmake -S extern/sundials -B build/deps/build/sundials
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/sundials
+            -DSUNDIALS_ENABLE_KLU=ON
+            -DKLU_ROOT=$PWD/build/deps/install/suitesparse &&
+            cmake --build build/deps/build/sundials --config Release -j2 &&
+            cmake --install build/deps/build/sundials
 
-      - name: Install project to staging dir
-        run: |
-          mkdir -p wheel_staging
-          cmake --install build --prefix "$PWD/wheel_staging"
+          # Windows でも同様
+          CIBW_BEFORE_ALL_WINDOWS: >
+            cmake -S extern/SuiteSparse -B build/deps/build/suitesparse
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=%CD%/build/deps/install/suitesparse
+            -DSUITESPARSE_ENABLE_PROJECTS="klu;amd;colamd;btf"
+            -DSUITESPARSE_USE_FORTRAN=OFF &&
+            cmake --build build/deps/build/suitesparse --config Release &&
+            cmake --install build/deps/build/suitesparse &&
+            cmake -S extern/sundials -B build/deps/build/sundials
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=%CD%/build/deps/install/sundials
+            -DSUNDIALS_ENABLE_KLU=ON
+            -DKLU_ROOT=%CD%/build/deps/install/suitesparse &&
+            cmake --build build/deps/build/sundials --config Release &&
+            cmake --install build/deps/build/sundials
 
-      - name: Build wheel
-        run: |
-          python -m build --wheel
+          # build backend に依存 prefix を見せる
+          CIBW_ENVIRONMENT_LINUX: >
+            NASAP_DEPS_DIR=/project/build/deps
+            NASAP_SUITESPARSE_ROOT=/project/build/deps/install/suitesparse
+            NASAP_SUNDIALS_ROOT=/project/build/deps/install/sundials
 
-      - name: Upload wheel artifact
+          CIBW_ENVIRONMENT_MACOS: >
+            NASAP_DEPS_DIR=$PWD/build/deps
+            NASAP_SUITESPARSE_ROOT=$PWD/build/deps/install/suitesparse
+            NASAP_SUNDIALS_ROOT=$PWD/build/deps/install/sundials
+
+          CIBW_ENVIRONMENT_WINDOWS: >
+            NASAP_DEPS_DIR=%CD%/build/deps
+            NASAP_SUITESPARSE_ROOT=%CD%/build/deps/install/suitesparse
+            NASAP_SUNDIALS_ROOT=%CD%/build/deps/install/sundials
+
+          # Linux では repair に auditwheel を使う。cibuildwheel は Linux の
+          # wheel repair に auditwheel を使う前提です。
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            auditwheel repair -w {dest_dir} {wheel}
+
+        run: python -m cibuildwheel --output-dir wheelhouse
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: dist/*.whl
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
