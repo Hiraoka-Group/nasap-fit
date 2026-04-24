@@ -37,7 +37,7 @@ jobs:
           CIBW_SKIP: "*-musllinux_* pp* *-win32 *-manylinux_i686"
 
           # Linux では manylinux コンテナ内で一度だけ依存をビルド
-          CIBW_BEFORE_ALL_LINUX: |
+          CIBW_BEFORE_ALL_LINUX: >
             bash -euxo pipefail -c
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse
               -DCMAKE_BUILD_TYPE=Release
@@ -62,7 +62,7 @@ jobs:
 
 
           # macOS でも同様に依存を一度だけビルド
-          CIBW_BEFORE_ALL_MACOS: |
+          CIBW_BEFORE_ALL_MACOS: >
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/suitesparse
@@ -79,7 +79,7 @@ jobs:
             cmake --install build/deps/build/sundials
 
           # Windows でも同様
-          CIBW_BEFORE_ALL_WINDOWS: |
+          CIBW_BEFORE_ALL_WINDOWS: >
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_INSTALL_PREFIX=%CD%/build/deps/install/suitesparse
@@ -96,7 +96,7 @@ jobs:
             cmake --install build/deps/build/sundials
 
           # build backend に依存 prefix を見せる
-          CIBW_ENVIRONMENT_LINUX: |
+          CIBW_ENVIRONMENT_LINUX: >
             NASAP_DEPS_DIR=/project/build/deps
             NASAP_SUITESPARSE_ROOT=/project/build/deps/install/suitesparse
             NASAP_SUNDIALS_ROOT=/project/build/deps/install/sundials
@@ -105,7 +105,7 @@ jobs:
             SKBUILD_SEARCH_PREFIXES="/project/build/deps/install/sundials;/project/build/deps/install/suitesparse"
             
 
-          CIBW_ENVIRONMENT_MACOS: |
+          CIBW_ENVIRONMENT_MACOS: >
             NASAP_DEPS_DIR=$PWD/build/deps
             NASAP_SUITESPARSE_ROOT=$PWD/build/deps/install/suitesparse
             NASAP_SUNDIALS_ROOT=$PWD/build/deps/install/sundials
