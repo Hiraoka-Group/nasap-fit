@@ -38,29 +38,26 @@ jobs:
 
           # Linux では manylinux コンテナ内で一度だけ依存をビルド
           CIBW_BEFORE_ALL_LINUX: >
-            bash -euxo pipefail -c
-            cmake -S extern/SuiteSparse -B build/deps/build/suitesparse
-              -DCMAKE_BUILD_TYPE=Release
-              -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/suitesparse
-              -DSUITESPARSE_ENABLE_PROJECTS="klu;amd;colamd;btf"
-              -DSUITESPARSE_USE_FORTRAN=OFF;
-            
-            grep -E "SUITESPARSE|BLAS|LAPACK|FORTRAN|CMAKE_INSTALL_PREFIX" build/deps/build/suitesparse/CMakeCache.txt || true;
-            
-            cmake --build build/deps/build/suitesparse --config Release -j2 --verbose;
-            cmake --install build/deps/build/suitesparse;
-            cmake -S extern/sundials -B build/deps/build/sundials
-              -DCMAKE_BUILD_TYPE=Release
-              -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/sundials
-              -DSUNDIALS_ENABLE_KLU=ON
-              -DKLU_ROOT=/project/build/deps/install/suitesparse;
-            grep -E "SUNDIALS|KLU|SuiteSparse|CMAKE_INSTALL_PREFIX" build/deps/build/sundials/CMakeCache.txt || true;
-
-            cmake --build build/deps/build/sundials --config Release -j2 --verbose;
-
-            cmake --install build/deps/build/sundials;
-            echo "=====BUILD COMPLETE=====";
-            find -name "SUNDIALSConfig.cmake";
+            bash -euxo pipefail -c "
+              cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/suitesparse \
+                -DSUITESPARSE_ENABLE_PROJECTS="klu;amd;colamd;btf" \
+                -DSUITESPARSE_USE_FORTRAN=OFF; \
+              grep -E "SUITESPARSE|BLAS|LAPACK|FORTRAN|CMAKE_INSTALL_PREFIX" build/deps/build/suitesparse/CMakeCache.txt || true; \
+              cmake --build build/deps/build/suitesparse --config Release -j2 --verbose; \
+              cmake --install build/deps/build/suitesparse; \
+              cmake -S extern/sundials -B build/deps/build/sundials \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/sundials \
+                -DSUNDIALS_ENABLE_KLU=ON \
+                -DKLU_ROOT=/project/build/deps/install/suitesparse; \
+              grep -E "SUNDIALS|KLU|SuiteSparse|CMAKE_INSTALL_PREFIX" build/deps/build/sundials/CMakeCache.txt || true; \
+              cmake --build build/deps/build/sundials --config Release -j2 --verbose; \
+              cmake --install build/deps/build/sundials; \
+              echo "=====BUILD COMPLETE====="; \
+              find -name "SUNDIALSConfig.cmake"; \
+            "
 
 
           # macOS でも同様に依存を一度だけビルド
