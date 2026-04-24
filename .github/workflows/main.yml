@@ -123,7 +123,7 @@ jobs:
           # Linux では repair に auditwheel を使う。cibuildwheel は Linux の
           # wheel repair に auditwheel を使う前提です。
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            LD_LIBRARY_PATH=/project/build/deps/install/sundials/lib:/project/build/deps/install/suitesparse/lib:$LD_LIBRARY_PATH
+            LD_LIBRARY_PATH=/project/build/deps/install/sundials/lib:/project/build/deps/install/suitesparse/lib:/project/build/deps/install/suitesparse/lib64:$LD_LIBRARY_PATH
             auditwheel repair -w {dest_dir} {wheel}
 
         run: python -m cibuildwheel --output-dir wheelhouse
