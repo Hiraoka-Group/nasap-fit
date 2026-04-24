@@ -59,6 +59,8 @@ jobs:
             cmake --build build/deps/build/sundials --config Release -j2 --verbose;
 
             cmake --install build/deps/build/sundials;
+            echo "=====BUILD COMPLETE=====";
+            find -name "SUNDIALSConfig.cmake";
 
 
           # macOS でも同様に依存を一度だけビルド
