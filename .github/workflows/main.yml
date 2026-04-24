@@ -115,16 +115,16 @@ jobs:
             NASAP_SUITESPARSE_ROOT=/project/build/deps/install/suitesparse
             NASAP_SUNDIALS_ROOT=/project/build/deps/install/sundials
             SUNDIALS_DIR=/project/build/deps/install/sundials/lib/cmake/sundials
-            CMAKE_PREFIX_PATH=/project/build/deps/install/sundials;/project/build/deps/install/suitesparse
-            SKBUILD_SEARCH_PREFIXES=/project/build/deps/install/sundials;/project/build/deps/install/suitesparse
+            CMAKE_PREFIX_PATH="/project/build/deps/install/sundials;/project/build/deps/install/suitesparse"
+            SKBUILD_SEARCH_PREFIXES="/project/build/deps/install/sundials;/project/build/deps/install/suitesparse"
 
           CIBW_ENVIRONMENT_MACOS: >
             NASAP_DEPS_DIR=$PWD/build/deps
             NASAP_SUITESPARSE_ROOT=$PWD/build/deps/install/suitesparse
             NASAP_SUNDIALS_ROOT=$PWD/build/deps/install/sundials
             SUNDIALS_DIR=$PWD/build/deps/install/sundials/lib/cmake/sundials
-            CMAKE_PREFIX_PATH=$PWD/build/deps/install/sundials;$PWD/build/deps/install/suitesparse
-            SKBUILD_SEARCH_PREFIXES=$PWD/build/deps/install/sundials;$PWD/build/deps/install/suitesparse
+            CMAKE_PREFIX_PATH="$PWD/build/deps/install/sundials;$PWD/build/deps/install/suitesparse"
+            SKBUILD_SEARCH_PREFIXES="$PWD/build/deps/install/sundials;$PWD/build/deps/install/suitesparse"
             DYLD_LIBRARY_PATH=$PWD/build/deps/install/suitesparse/lib:$PWD/build/deps/install/sundials/lib
 
           CIBW_ENVIRONMENT_WINDOWS: >
