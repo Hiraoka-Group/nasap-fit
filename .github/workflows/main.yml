@@ -78,7 +78,8 @@ jobs:
             -DSUNDIALS_ENABLE_KLU=ON
             -DKLU_ROOT=$PWD/build/deps/install/suitesparse &&
             cmake --build build/deps/build/sundials --config Release -j2 &&
-            cmake --install build/deps/build/sundials
+            cmake --install build/deps/build/sundials &&
+            echo "=====BUILD COMPLETE=====";
 
           # Windows でも同様
           CIBW_BEFORE_ALL_WINDOWS: >
