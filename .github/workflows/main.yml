@@ -43,7 +43,8 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/suitesparse \
               -DSUITESPARSE_ENABLE_PROJECTS="klu;amd;colamd;btf" \
-              -DSUITESPARSE_USE_FORTRAN=OFF
+              -DSUITESPARSE_USE_FORTRAN=OFF \
+              -DSUITESPARSE_USE_BLAS=OFF
             grep -E "SUITESPARSE|BLAS|LAPACK|FORTRAN|CMAKE_INSTALL_PREFIX" build/deps/build/suitesparse/CMakeCache.txt || true
             cmake --build build/deps/build/suitesparse --config Release -j2 --verbose
             cmake --install build/deps/build/suitesparse
