@@ -1,7 +1,7 @@
-#NMRによって得られた濃度の時間変化データのパス(必須)(絶対パス or プロジェクトのルートに対する相対パス)
-QASAPDataFile: data/Table_S1.csv
-#反応ネットワークを記述したファイルのパス(必須)(絶対パス or プロジェクトのルートに対する相対パス)
-reactionDataFile: data/classified_reactions_str.csv
+#NMRによって得られた濃度の時間変化データのパス(必須)(絶対パス or このconfig.yamlファイルのあるフォルダに対する相対パス)
+QASAPDataFile: Table_S1.csv
+#反応ネットワークを記述したファイルのパス(必須)(絶対パス or このconfig.yamlファイルのあるフォルダに対する相対パス)
+reactionDataFile: classified_reactions_str.csv
 #化学種の数(必須)
 species: 29
 #反応速度定数の数(必須)

@@ -37,9 +37,9 @@ def config_from_yaml(
     if not isinstance(raw, Mapping):
         raise ValueError("config.yaml must parse to a mapping")
 
+    # Spec: resolve relative paths inside YAML relative to the YAML file location.
+    # Do NOT auto-detect repo/project root; it makes behavior depend on presence of .git/pyproject.toml/CMakeLists.txt.
     root = project_root
-    if root is None:
-        root = find_project_root(config_yaml_path)
     parsed = validate_config_yaml(
         raw,
         config_path=str(config_yaml_path),
