@@ -51,8 +51,9 @@ struct ReactionNetwork {
 
 	struct CvodeUserData {
 		ReactionNetwork* net{};
-		const double* constants{}; // length: constantSize
+		const double* p{}; // length: constantSize
 		const std::vector<int>* reactionIds;
+		
 	};
 
 	std::map<std::string, int> termIndex;      // kind -> index
@@ -87,12 +88,12 @@ private:
 
 	void ensureSizes();
 
-	int rhsfImpl(sunrealtype t, N_Vector y, N_Vector ydot, const double* constants);
+	int rhsfImpl(sunrealtype t, N_Vector y, N_Vector ydot, const double* p);
 	int jacImpl(sunrealtype t,
 			N_Vector y,
 			N_Vector fy,
 			SUNMatrix Jac,
-			const double* constants);
+			const double* p);
 	
-	int quadRhsImpl(sunrealtype t, N_Vector y, N_Vector yQdot, const double* constants, const std::vector<int>* reactionIds);
+	int quadRhsImpl(sunrealtype t, N_Vector y, N_Vector yQdot, const double* p, const std::vector<int>* reactionIds);
 };

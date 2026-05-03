@@ -85,12 +85,12 @@ clean: CMakeFiles/_core.dir/clean
 CMakeFiles/_core.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target _core"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target _core"
 .PHONY : CMakeFiles/_core.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/_core.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles 7
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/_core.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/aspi/Project/nasap-fit-cpp/build/CMakeFiles 0
 .PHONY : CMakeFiles/_core.dir/rule
@@ -102,7 +102,7 @@ _core: CMakeFiles/_core.dir/rule
 # codegen rule for target.
 CMakeFiles/_core.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/_core.dir/build.make CMakeFiles/_core.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Finished codegen for target _core"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/aspi/Project/nasap-fit-cpp/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Finished codegen for target _core"
 .PHONY : CMakeFiles/_core.dir/codegen
 
 # clean rule for target.

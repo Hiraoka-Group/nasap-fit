@@ -213,8 +213,8 @@ void ReactionNetwork::build(const std::string& reactNetworkFile, int species_, i
 
 int ReactionNetwork::rhsfCb(sunrealtype t, N_Vector y, N_Vector ydot, void* user_data) {
 	auto* ud = static_cast<CvodeUserData*>(user_data);
-	if (ud == nullptr || ud->net == nullptr || ud->constants == nullptr) return -1;
-	return ud->net->rhsfImpl(t, y, ydot, ud->constants);
+	if (ud == nullptr || ud->net == nullptr || ud->p == nullptr) return -1;
+	return ud->net->rhsfImpl(t, y, ydot, ud->p);
 }
 
 int ReactionNetwork::JacFnCb(sunrealtype t,
@@ -226,25 +226,25 @@ int ReactionNetwork::JacFnCb(sunrealtype t,
 						N_Vector tmp2,
 						N_Vector tmp3) {
 	auto* ud = static_cast<CvodeUserData*>(user_data);
-	if (ud == nullptr || ud->net == nullptr || ud->constants == nullptr) return -1;
-	return ud->net->jacImpl(t, y, fy, Jac, ud->constants);
+	if (ud == nullptr || ud->net == nullptr || ud->p == nullptr) return -1;
+	return ud->net->jacImpl(t, y, fy, Jac, ud->p);
 }
 
 int ReactionNetwork::quadRhsCb(sunrealtype t, N_Vector y, N_Vector yQdot, void *user_data){
 	auto* ud = static_cast<CvodeUserData*>(user_data);
-	if (ud == nullptr || ud->net == nullptr || ud->constants == nullptr) return -1;
+	if (ud == nullptr || ud->net == nullptr || ud->p == nullptr) return -1;
 	if (ud->reactionIds==nullptr)return 0;
-	return ud->net->quadRhsImpl(t, y, yQdot, ud->constants, ud->reactionIds);
+	return ud->net->quadRhsImpl(t, y, yQdot, ud->p, ud->reactionIds);
 }
 
-int ReactionNetwork::rhsfImpl(sunrealtype /*t*/, N_Vector y, N_Vector ydot, const double* constants) {
+int ReactionNetwork::rhsfImpl(sunrealtype /*t*/, N_Vector y, N_Vector ydot, const double* p) {
 	ensureSizes();
 
 	auto* sp_ptr = N_VGetArrayPointer(y);
 	auto* ydotData = N_VGetArrayPointer(ydot);
 	assert(sp_ptr != nullptr);
 	assert(ydotData != nullptr);
-	assert(constants != nullptr);
+	assert(p != nullptr);
 
 	std::memcpy(speciesData_.data(), sp_ptr, species * sizeof(double));
 	speciesData_[species] = 1.0;
@@ -252,7 +252,7 @@ int ReactionNetwork::rhsfImpl(sunrealtype /*t*/, N_Vector y, N_Vector ydot, cons
 
 	std::span<double> ydotspan(ydotData, species);
 	std::span<const double> speciesSpan(speciesData_.data(), species + 1);
-	std::span<const double> kSpan(constants, constantSize);
+	std::span<const double> kSpan(p, constantSize);
 
 	for (const auto& term : rhsTerms) {
 		term.accumulate(ydotspan, speciesSpan, kSpan);
@@ -264,12 +264,12 @@ int ReactionNetwork::jacImpl(sunrealtype /*t*/,
 					N_Vector y,
 					N_Vector /*fy*/,
 					SUNMatrix Jac,
-					const double* constants) {
+					const double* p) {
 	ensureSizes();
 
 	auto* sp_ptr = N_VGetArrayPointer(y);
 	assert(sp_ptr != nullptr);
-	assert(constants != nullptr);
+	assert(p != nullptr);
 
 	sunindextype* Jp = SUNSparseMatrix_IndexPointers(Jac);
 	sunindextype* Ji = SUNSparseMatrix_IndexValues(Jac);
@@ -287,7 +287,7 @@ int ReactionNetwork::jacImpl(sunrealtype /*t*/,
 	speciesData_[species] = 1.0;
 
 	std::span<const double> speciesSpan(speciesData_.data(), species + 1);
-	std::span<const double> kSpan(constants, constantSize);
+	std::span<const double> kSpan(p, constantSize);
 
 	int idx = 0;
 	for (const auto& termList : jacTerms) {
@@ -301,7 +301,7 @@ int ReactionNetwork::jacImpl(sunrealtype /*t*/,
 	return 0;
 }
 
-int ReactionNetwork::quadRhsImpl(sunrealtype t, N_Vector y, N_Vector yQdot, const double* constants, const std::vector<int>* reactionIds) {
+int ReactionNetwork::quadRhsImpl(sunrealtype t, N_Vector y, N_Vector yQdot, const double* p, const std::vector<int>* reactionIds) {
 	double* y_data = N_VGetArrayPointer(y);
     double* yQdot_data = N_VGetArrayPointer(yQdot);
     int M = reactionIds->size();
@@ -312,10 +312,10 @@ int ReactionNetwork::quadRhsImpl(sunrealtype t, N_Vector y, N_Vector yQdot, cons
         int kind = data[idx][4];
         int duplicacy = data[idx][5];
         if(entering==species) {
-            yQdot_data[i] = duplicacy * constants[kind] * y_data[init];
+			yQdot_data[i] = duplicacy * p[kind] * y_data[init];
         }
         else{
-            yQdot_data[i] = duplicacy * constants[kind] * y_data[init] * y_data[entering];
+			yQdot_data[i] = duplicacy * p[kind] * y_data[init] * y_data[entering];
         }
     }
     return 0;

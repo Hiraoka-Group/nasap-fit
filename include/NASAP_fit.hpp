@@ -107,6 +107,9 @@ private:
 	vector<OptimizeResult> runDE_single(const vector<vector<double>>& arg, const TerminationCondition& termCond, uint64_t seed = 1);
 
 	vector<vector<double>> makeRandomPopulation(int popSize, double lower, double upper, uint64_t seed);
+
+	vector<vector<double>> forwardSensitivityAnalysis(vector<double>& constant);
+	vector<vector<double>> backwardSensitivityAnalysis(vector<double>& constant);
 public:
 	// CasADi 依存の関数は除外
 	#if 0
@@ -138,6 +141,7 @@ public:
 	OptimizeResult runLM(const vector<double>& theta0, const TerminationCondition& termCond);
 	vector<OptimizeResult> runLM(const vector<vector<double>>& thetaList, const TerminationCondition& termCond);
 	#endif
+	vector<vector<double>> calcJacobian(vector<double>& constant);
 
 	// 差分進化法の実行
 	vector<OptimizeResult> runDE(int popSize, double lowerLim, double upperLim, const TerminationCondition& termCond, uint64_t seed = 1);

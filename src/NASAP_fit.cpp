@@ -28,9 +28,6 @@
 #include "../include/xorshift.hpp"
 #include "../include/readcsv.hpp"
 
-
-int cnt=0;
-    
 using std::vector;
 using std::cout;
 using std::endl;
@@ -808,7 +805,22 @@ vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>&
     return results;
 }
 */
+//残差ベクトルのJacobianを数値微分で計算する。返り値はm行n列の2次元vectorで、mは残差ベクトルの次元、nはパラメータ（速度定数）の次元。
+vector<vector<double>> NASAP_fit::calcJacobian(vector<double>& constant){
+    for (int i = 0; i < cfg.species; ++i) {
+        NV_Ith_S(y, i) = initialState[i];
+    }
+    CVodeReInit(cvode_mem, 0.0, y);
+    ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), nullptr };
+    CVodeSetUserData(cvode_mem, (void*)&ud);
+    bool flag=CV_SUCCESS;
+    flag = CVodeAdjInit(cvode_mem, 50, CV_HERMITE);
+    assert(flag == CV_SUCCESS);
 
+    //Perform forward integration
+    
+
+}
 
 void NASAP_fit::putCVODESim(const std::vector<double>& constant) {
     if (mpi_env.rank() != 0) return;
