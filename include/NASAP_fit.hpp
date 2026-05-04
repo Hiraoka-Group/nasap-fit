@@ -137,7 +137,7 @@ public:
 	~NASAP_fit();
 
 	// Levenberg-Marquardt法（CasADi 依存のため除外）
-	#if 0
+	#if 1
 	OptimizeResult runLM(const vector<double>& theta0, const TerminationCondition& termCond);
 	vector<OptimizeResult> runLM(const vector<vector<double>>& thetaList, const TerminationCondition& termCond);
 	#endif

@@ -53,6 +53,8 @@ struct ReactionNetwork {
 		ReactionNetwork* net{};
 		const double* p{}; // length: constantSize
 		const std::vector<int>* reactionIds;
+		int Ns = 0;
+		const int* plist = nullptr; // length: Ns, maps sensitivity index -> parameter index
 		
 	};
 
@@ -82,6 +84,15 @@ struct ReactionNetwork {
 					N_Vector tmp3);
 
 	static int quadRhsCb(sunrealtype t, N_Vector y, N_Vector yQdot, void *user_data);
+	static int sensRhsCb(int Ns,
+					sunrealtype t,
+					N_Vector y,
+					N_Vector ydot,
+					N_Vector* yS,
+					N_Vector* ySdot,
+					void* user_data,
+					N_Vector tmp1,
+					N_Vector tmp2);
 
 private:
 	std::vector<double> speciesData_; // size: species + 1 (last is dummy=1.0)
@@ -96,4 +107,12 @@ private:
 			const double* p);
 	
 	int quadRhsImpl(sunrealtype t, N_Vector y, N_Vector yQdot, const double* p, const std::vector<int>* reactionIds);
+	int sensRhsImpl(int Ns,
+				sunrealtype t,
+				N_Vector y,
+				N_Vector ydot,
+				N_Vector* yS,
+				N_Vector* ySdot,
+				const double* p,
+				const int* plist);
 };

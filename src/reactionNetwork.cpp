@@ -237,6 +237,20 @@ int ReactionNetwork::quadRhsCb(sunrealtype t, N_Vector y, N_Vector yQdot, void *
 	return ud->net->quadRhsImpl(t, y, yQdot, ud->p, ud->reactionIds);
 }
 
+int ReactionNetwork::sensRhsCb(int Ns,
+						sunrealtype t,
+						N_Vector y,
+						N_Vector ydot,
+						N_Vector* yS,
+						N_Vector* ySdot,
+						void* user_data,
+						N_Vector tmp1,
+						N_Vector tmp2) {
+	auto* ud = static_cast<CvodeUserData*>(user_data);
+	if (ud == nullptr || ud->net == nullptr || ud->p == nullptr) return -1;
+	return ud->net->sensRhsImpl(Ns, t, y, ydot, yS, ySdot, ud->p, ud->plist);
+}
+
 int ReactionNetwork::rhsfImpl(sunrealtype /*t*/, N_Vector y, N_Vector ydot, const double* p) {
 	ensureSizes();
 
@@ -319,4 +333,65 @@ int ReactionNetwork::quadRhsImpl(sunrealtype t, N_Vector y, N_Vector yQdot, cons
         }
     }
     return 0;
+}
+
+int ReactionNetwork::sensRhsImpl(int Ns,
+						sunrealtype /*t*/,
+						N_Vector y,
+						N_Vector /*ydot*/,
+						N_Vector* yS,
+						N_Vector* ySdot,
+						const double* p,
+						const int* plist) {
+	ensureSizes();
+
+	double* yData = N_VGetArrayPointer(y);
+	if (yData == nullptr || yS == nullptr || ySdot == nullptr || p == nullptr) return -1;
+
+	std::memcpy(speciesData_.data(), yData, species * sizeof(double));
+	speciesData_[species] = 1.0;
+
+	std::vector<double*> ySDataList(Ns, nullptr);
+	std::vector<double*> ySdotDataList(Ns, nullptr);
+	for (int q = 0; q < Ns; ++q) {
+		if (yS[q] == nullptr || ySdot[q] == nullptr) return -1;
+		ySDataList[q] = N_VGetArrayPointer(yS[q]);
+		ySdotDataList[q] = N_VGetArrayPointer(ySdot[q]);
+		if (ySDataList[q] == nullptr || ySdotDataList[q] == nullptr) return -1;
+		std::fill(ySdotDataList[q], ySdotDataList[q] + species, 0.0);
+	}
+
+	std::span<const double> speciesSpan(speciesData_.data(), species + 1);
+
+	for (const auto& term : rhsTerms) {
+		const int a = term.add_to;
+		const int r = term.rateConstant;
+		const int j = term.reactant1;
+		const int k = term.reactant2;
+		const double c = static_cast<double>(term.duplicacy);
+		const double base = c * p[r];
+		const bool isUnimolecular = (k < 0 || k == species);
+
+		for (int q = 0; q < Ns; ++q) {
+			double* ySData = ySDataList[q];
+			double* ySdotData = ySdotDataList[q];
+
+			if (isUnimolecular) {
+				ySdotData[a] += base * ySData[j];
+			} else {
+				ySdotData[a] += base * (ySData[j] * speciesSpan[k] + speciesSpan[j] * ySData[k]);
+			}
+
+			const int paramIndex = (plist == nullptr) ? q : plist[q];
+			if (paramIndex == r) {
+				if (isUnimolecular) {
+					ySdotData[a] += c * speciesSpan[j];
+				} else {
+					ySdotData[a] += c * speciesSpan[j] * speciesSpan[k];
+				}
+			}
+		}
+	}
+
+	return 0;
 }
