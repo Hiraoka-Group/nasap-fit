@@ -12,6 +12,7 @@
 #include <type_traits>
 #include <iterator>
 #include <chrono>
+#include <cmath>
 
 //#include <Eigen/Dense>
 
@@ -116,6 +117,12 @@ double NASAP_fit::calcError(const std::vector<double>& constant) {
         }
     }
     return SSR;
+}
+
+double NASAP_fit::calcNRMSEFromError(double error) const {
+    const double sampleCount = static_cast<double>(QASAP.size()) * static_cast<double>(cfg.trackedSpecies);
+    if (!std::isfinite(error) || sampleCount <= 0.0) return DBL_MAX;
+    return std::sqrt(error / sampleCount);
 }
 
 std::vector<std::vector<double>> NASAP_fit::makeRandomPopulation(int popSize, double lower, double upper, uint64_t seed) {
@@ -261,7 +268,12 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector
 
         for (int gen = 0; gen < termCond.maxIter; ++gen) {
 		if (cfg.logLevel != LogLevel::quiet) {
-			cout << "current generation : " << gen << " / " << termCond.maxIter << "\n";
+			cout << "current generation : " << gen;
+            if(termCond.maxIter > 0 && termCond.maxIter != INT_MAX){ 
+                cout << " / " << termCond.maxIter << "\n";
+            }else{
+                cout << "\n";
+            }
 		}
         double temp = 0;
 
@@ -301,6 +313,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector
         }
 		if (cfg.logLevel == LogLevel::verbose) {
 			cout << "best error: " << std::setprecision(10) << bestpop << "\n";
+			cout << "best NRMSE: " << std::setprecision(10) << calcNRMSEFromError(bestpop) << "\n";
 		}
 
         bool stop = false;
@@ -396,7 +409,12 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
 
         for (int gen = 0; gen < termCond.maxIter; ++gen) {
 		if (world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-			cout << "current generation : " << gen << " / " << termCond.maxIter << "\n";
+			cout << "current generation : " << gen;
+            if(termCond.maxIter > 0 && termCond.maxIter != INT_MAX){ 
+                cout << " / " << termCond.maxIter << "\n";
+            }else{
+                cout << "\n";
+            }
 		}
         double temp = 0;
 
@@ -474,7 +492,8 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
         double globalBest = DBL_MAX;
         MPI_Allreduce(&localBest, &globalBest, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
         if (world_rank == 0 && cfg.logLevel == LogLevel::verbose) {
-            cout << "best error: " << std::setprecision(10) << globalBest << "bestSofar: " << bestSoFar << "\n";
+            cout << "best error: " << std::setprecision(10) << globalBest
+                 << "\nbest NRMSE: " << calcNRMSEFromError(globalBest)<< "\n";
         }
 
         bool stop = false;
@@ -541,6 +560,138 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     #endif
 }
 
+NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, const TerminationCondition& termCond){
+    const int world_rank = mpi_env.rank();
+    const int n = cfg.constantSize;
+    validateConstants(theta0);
+
+    std::vector<double> theta = theta0;
+    std::vector<double> logTheta(n);
+    for (int i = 0; i < n; ++i) logTheta[i] = log(theta[i]);
+
+    double bestErr = calcError(theta);
+    if (!std::isfinite(bestErr)) bestErr = DBL_MAX;
+
+    double lambda = 10.0;
+    const int maxIter = (termCond.maxIter > 0) ? termCond.maxIter : 200;
+    double bestSoFar = bestErr;
+    int stallCount = 0;
+
+    Eigen::VectorXd r;
+    Eigen::MatrixXd J;
+    Eigen::MatrixXd A;
+    Eigen::VectorXd g;
+    bool isChanged = true;
+
+    std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+    for (int iter = 0; ; ++iter) {
+
+        if (maxIter > 0 && iter >= maxIter) {
+            if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                cout << "Maximum iterations reached: " << iter << " >= " << maxIter << endl;
+            }
+            break;
+        } 
+        if (termCond.timeLimit > 0) {
+            double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
+            if (elapsed >= termCond.timeLimit) {
+                if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                    cout << "Time limit reached: " << std::setprecision(10) << elapsed << " >= " << termCond.timeLimit << "\n";
+                }
+                break;
+            }
+        }
+        if (termCond.targetError > 0 && bestErr <= termCond.targetError) {
+            if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                cout << "Target error reached: " << bestErr << " <= " << termCond.targetError << "\n";
+            }
+            break;
+        }
+
+        if (world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+            if (cfg.logLevel == LogLevel::verbose) {
+                for (int i = 0; i < cfg.constantSize; i++) {
+                    cout << std::setprecision(4) << theta[i] << ", ";
+                }
+                cout << endl;
+                cout << "Current error: " << std::setprecision(10) << bestErr << endl;
+                cout << "Current NRMSE: " << std::setprecision(10) << calcNRMSEFromError(bestErr) << endl;
+                cout << "Iter : " << iter << ", Lambda: " << std::setprecision(10) << lambda << endl;
+            } else {
+                cout << "Iter : " << iter << " / " << maxIter
+                     << ", error: " << std::setprecision(10) << bestErr << endl;
+            }
+        }
+
+        if (isChanged) {
+            computeLMResAndJac(theta, r, J);
+            A = J.transpose() * J;
+            g = J.transpose() * r;
+        }
+        Eigen::MatrixXd A_try = A;
+        A_try.diagonal().array() += lambda;
+        Eigen::VectorXd delta = -A_try.ldlt().solve(g);
+        if (!delta.allFinite()) break;
+
+        std::vector<double> trial(n), logTrial(n);
+        for (int i = 0; i < n; ++i) {
+            logTrial[i] = std::clamp(logTheta[i] + delta[i], log(cfg.lowerLim), log(cfg.upperLim));
+            //logTrial[i] = logTheta[i] + delta[i];
+            trial[i] = exp(logTrial[i]);
+        }
+
+        double predictedImprove = -(g.dot(delta) + 0.5 * delta.dot(A_try * delta));
+        double newErr = calcError(trial);
+        double actualImprove = bestErr - newErr;
+        double reliabilityIndex = actualImprove / predictedImprove;
+
+        if (newErr < bestErr) {
+            isChanged = true;
+            theta = std::move(trial);
+            logTheta = std::move(logTrial);
+            bestErr = newErr;
+            if (reliabilityIndex > 0.75) {
+                lambda /= 3.0;
+            } else if (reliabilityIndex < 0.25) {
+                lambda *= 2.0;
+            }
+            const double stepNorm = delta.norm();
+            if (stepNorm < termCond.xtol) {
+                if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                    cout << "XTOL reached: " << stepNorm << " < " << termCond.xtol << "\n";
+                }
+                break;
+            }
+
+            // ftol / stall
+            if (termCond.stall > 0 || termCond.ftolAbs > 0 || termCond.ftolRel > 0) {
+                //const double absImprove = bestSoFar - bestErr;
+                //const double relImprove = (bestSoFar > 0) ? (absImprove / bestSoFar) : DBL_MAX;
+                //const bool improvedAbs = (termCond.ftolAbs > 0) ? (absImprove > termCond.ftolAbs) : (absImprove > 0);
+                //const bool improvedRel = (termCond.ftolRel > 0) ? (relImprove > termCond.ftolRel) : true;
+                if (std::abs(bestSoFar - newErr) > termCond.ftolAbs + termCond.ftolRel * std::abs(newErr)) {
+                    bestSoFar = bestErr;
+                    stallCount = 0;
+                } else {
+                    stallCount++;
+                }
+                if (termCond.stall > 0 && stallCount >= termCond.stall){
+                    if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
+                        cout << "Stall limit reached: " << stallCount << " >= " << termCond.stall << "\n";
+                    }
+                    break;
+                }
+            }
+        } else {
+            isChanged = false;
+            lambda *= 2.0;
+        }
+    }
+    OptimizeResult result(cfg.constantSize);
+    result.constants = std::move(theta);
+    result.error = bestErr;
+    return result;
+}
 
 vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>& thetaList, const TerminationCondition& termCond){
     const int world_size = mpi_env.size();

@@ -8,12 +8,7 @@ engine = NASAP_fit.from_yaml("data/config.yaml")  # YAML検証→Config生成→
 # DE（terminationConditionはdict、未知キーはwarning、不正値はValueError）
 pop = engine.run_de(
     pop_size=128,
-    terminationCondition={"maxIter": 50,
-                           "timeLimit": 60.0,
-                           "xtol": 1e-6, #runDEでは無効
-                           "ftolAbs": 1e-5,
-                           "ftolRel": 0.02,
-                           "stall": 20,},  
+    terminationCondition={"timeLimit": 60.0},  
     seed=1,
 )
 
@@ -22,13 +17,12 @@ best = min(pop, key=lambda r: r.error)
 # LM
 refined = engine.run_lm(
     best.constants,
-    terminationCondition={"maxIter": 50,
+    terminationCondition={"maxIter": 300,
                            "timeLimit": 60.0,
-                           "xtol": 1e-6, 
-                           "timeLimit": 60.0,
+                           "xtol": 1e-8, 
                            "ftolAbs": 1e-5,
-                           "ftolRel": 0.02,
-                           "stall": 10},
+                           "ftolRel": 0.005,
+                           "stall": 50},
 )
 
 

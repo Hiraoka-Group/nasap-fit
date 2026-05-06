@@ -102,6 +102,7 @@ void init_core(pybind11::module_ &m) {
 		.def("termIndex", &NASAP_fit::termIndex, py::return_value_policy::reference_internal)
 		.def("reactionCount", &NASAP_fit::reactionCount)
 		.def("calcError", &NASAP_fit::calcError, py::arg("constant"))
+		.def("calcNRMSEFromError", &NASAP_fit::calcNRMSEFromError, py::arg("error"))
         .def("runDE",
             py::overload_cast<int, double, double, const NASAP_fit::TerminationCondition&, uint64_t>(&NASAP_fit::runDE),
             py::arg("popSize"),
@@ -114,7 +115,7 @@ void init_core(pybind11::module_ &m) {
             py::arg("arg"),
             py::arg("termCond"),
             py::arg("seed") = 1)
-/*
+
         .def("runLM",
             py::overload_cast<const std::vector<double>&, const NASAP_fit::TerminationCondition&>(&NASAP_fit::runLM),
             py::arg("theta0"),
@@ -123,8 +124,8 @@ void init_core(pybind11::module_ &m) {
             py::overload_cast<const std::vector<std::vector<double>>&, const NASAP_fit::TerminationCondition&>(&NASAP_fit::runLM),
             py::arg("thetaList"),
             py::arg("termCond"))
-        .def("getHessian", &NASAP_fit::getHessian, py::arg("point"))
-        .def("pseudoHessian", &NASAP_fit::pseudoHessian, py::arg("point"))
-        */
+//        .def("getHessian", &NASAP_fit::getHessian, py::arg("point"))
+        .def("GaussNewtonHessian", &NASAP_fit::GaussNewtonHessian, py::arg("point"))
+        
         .def("simulate", &NASAP_fit::simulate, py::arg("t"), py::arg("constant"), py::arg("reaction_ids"));
 }

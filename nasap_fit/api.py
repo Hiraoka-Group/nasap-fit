@@ -209,6 +209,12 @@ class NASAP_fit:
         normalized = validate_population(thetas, constant_size=constant_size, min_size=1)
         term = build_termination_condition(_core, terminationCondition)
         return list(self._engine.runLM(normalized, term))
+    
+    #log point に対する残差二乗和のGaussNewtonHessianを導出
+    def GaussNewtonHessian(self, point: Sequence[float]) -> list[list[float]]:
+        validate_constants_vector(point, expected_size=int(self._engine.constants().constantSize))
+        vec = [float(v) for v in point]
+        return [list(row) for row in self._engine.GaussNewtonHessian(vec)]
 """
     def get_hessian(self, point: Sequence[float]) -> list[list[float]]:
         validate_constants_vector(point, expected_size=int(self._engine.constants().constantSize))
@@ -218,12 +224,9 @@ class NASAP_fit:
 #    def get_hessian_parallel(self, point: Sequence[float]) -> list[list[float]]:
 #        vec = [float(v) for v in point]
 #        return [list(row) for row in self._engine.getHessian_parallel(vec)]
-
-    def pseudo_hessian(self, point: Sequence[float]) -> list[list[float]]:
-        validate_constants_vector(point, expected_size=int(self._engine.constants().constantSize))
-        vec = [float(v) for v in point]
-        return [list(row) for row in self._engine.pseudoHessian(vec)]
 """
+
+
 #    def put_cvode_sim(self, constant: Sequence[float]) -> None:
 #        vec = [float(v) for v in constant]
 #        self._engine.putCVODESim(vec)

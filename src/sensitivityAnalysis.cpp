@@ -62,15 +62,21 @@ void NASAP_fit::computeLMResAndJac(vector<double>& constant, Eigen::VectorXd& re
     assert(flag == CV_SUCCESS);
 
     double tret = 0.0;
+    bool hasReturnedSens = false;
     for (int i = 0; i < (int)QASAP.size(); ++i) {
         const double t = QASAP[i].time;
         assert(0 <= t && t <= endTime);
         if (t != tret) {
             flag = CVode(cvode_mem, t, y, &tret, CV_NORMAL);
             assert(flag >= 0);
+            flag = CVodeGetSens(cvode_mem, &tret, uS);
+            assert(flag == CV_SUCCESS);
+            hasReturnedSens = true;
+        } else if (!hasReturnedSens && t != 0.0) {
+            flag = CVodeGetSens(cvode_mem, &tret, uS);
+            assert(flag == CV_SUCCESS);
+            hasReturnedSens = true;
         }
-        flag = CVodeGetSens(cvode_mem, &tret, uS);
-        assert(flag == CV_SUCCESS);
 
         const double* y_data = N_VGetArrayPointer(y);
         for (int j = 0; j < cfg.trackedSpecies; ++j) {
@@ -89,148 +95,23 @@ void NASAP_fit::computeLMResAndJac(vector<double>& constant, Eigen::VectorXd& re
     N_VDestroyVectorArray(uS, cfg.constantSize);
 }
 
+vector<vector<double>> NASAP_fit::GaussNewtonHessian(const vector<double>& constant){
+    validateConstants(constant);
 
-NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, const TerminationCondition& termCond){
-    const int world_rank = mpi_env.rank();
-    const int n = cfg.constantSize;
-    validateConstants(theta0);
+    Eigen::VectorXd residual;
+    Eigen::MatrixXd jacobian;
 
-    std::vector<double> theta = theta0;
-    std::vector<double> logTheta(n);
-    for (int i = 0; i < n; ++i) logTheta[i] = log(theta[i]);
+    vector<double> work = constant;
+    computeLMResAndJac(work, residual, jacobian);
 
-    double bestErr = calcError(theta);
-    if (!std::isfinite(bestErr)) bestErr = DBL_MAX;
-
-    double lambda = 10.0;
-    const int maxIter = (termCond.maxIter > 0) ? termCond.maxIter : 200;
-    double bestSoFar = bestErr;
-    int stallCount = 0;
-
-    Eigen::VectorXd r;
-    Eigen::MatrixXd J;
-    Eigen::MatrixXd A;
-    Eigen::VectorXd g;
-    bool isChanged = true;
-
-    std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
-    for (int iter = 0; ; ++iter) {
-
-        if (maxIter > 0 && iter >= maxIter) {
-            if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-                cout << "Maximum iterations reached: " << iter << " >= " << maxIter << endl;
-            }
-            break;
-        } 
-        if (termCond.timeLimit > 0) {
-            double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
-            if (elapsed >= termCond.timeLimit) {
-                if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-                    cout << "Time limit reached: " << std::setprecision(10) << elapsed << " >= " << termCond.timeLimit << "\n";
-                }
-                break;
-            }
-        }
-        if (termCond.targetError > 0 && bestErr <= termCond.targetError) {
-            if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-                cout << "Target error reached: " << bestErr << " <= " << termCond.targetError << "\n";
-            }
-            break;
-        }
-
-        if (world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-            if (cfg.logLevel == LogLevel::verbose) {
-                for (int i = 0; i < cfg.constantSize; i++) {
-                    cout << std::setprecision(4) << theta[i] << ", ";
-                }
-                cout << endl;
-                cout << "Current error: " << std::setprecision(10) << bestErr << endl;
-                cout << "Iter : " << iter << ", Lambda: " << std::setprecision(10) << lambda << endl;
-            } else {
-                cout << "Iter : " << iter << " / " << maxIter
-                     << ", error: " << std::setprecision(10) << bestErr << endl;
-            }
-        }
-
-        if (isChanged) {
-            computeLMResAndJac(theta, r, J);
-            A = J.transpose() * J;
-            g = J.transpose() * r;
-        }
-        Eigen::MatrixXd A_try = A;
-        A_try.diagonal().array() += lambda;
-        Eigen::VectorXd delta = -A_try.ldlt().solve(g);
-        if (!delta.allFinite()) break;
-
-        std::vector<double> trial(n), logTrial(n);
-        for (int i = 0; i < n; ++i) {
-            logTrial[i] = std::clamp(logTheta[i] + delta[i], log(cfg.lowerLim), log(cfg.upperLim));
-            //logTrial[i] = logTheta[i] + delta[i];
-            trial[i] = exp(logTrial[i]);
-        }
-
-        double predictedImprove = -(g.dot(delta) + 0.5 * delta.dot(A_try * delta));
-        double newErr = calcError(trial);
-        double actualImprove = bestErr - newErr;
-        double reliabilityIndex = actualImprove / predictedImprove;
-
-        if (newErr < bestErr) {
-            isChanged = true;
-            theta = std::move(trial);
-            logTheta = std::move(logTrial);
-            bestErr = newErr;
-            if (reliabilityIndex > 0.75) {
-                lambda /= 3.0;
-            } else if (reliabilityIndex < 0.25) {
-                lambda *= 2.0;
-            }
-            const double stepNorm = delta.norm();
-            if (stepNorm < termCond.xtol) {
-                if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-                    cout << "XTOL reached: " << stepNorm << " < " << termCond.xtol << "\n";
-                }
-                break;
-            }
-
-            // ftol / stall
-            if (termCond.stall > 0 || termCond.ftolAbs > 0 || termCond.ftolRel > 0) {
-                //const double absImprove = bestSoFar - bestErr;
-                //const double relImprove = (bestSoFar > 0) ? (absImprove / bestSoFar) : DBL_MAX;
-                //const bool improvedAbs = (termCond.ftolAbs > 0) ? (absImprove > termCond.ftolAbs) : (absImprove > 0);
-                //const bool improvedRel = (termCond.ftolRel > 0) ? (relImprove > termCond.ftolRel) : true;
-                if (std::abs(bestSoFar - newErr) > termCond.ftolAbs + termCond.ftolRel * std::abs(newErr)) {
-                    bestSoFar = bestErr;
-                    stallCount = 0;
-                } else {
-                    stallCount++;
-                }
-                if (termCond.stall > 0 && stallCount >= termCond.stall){
-                    if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-                        cout << "Stall limit reached: " << stallCount << " >= " << termCond.stall << "\n";
-                    }
-                    break;
-                }
-            }
-        } else {
-            isChanged = false;
-            lambda *= 2.0;
+    Eigen::MatrixXd hessian = jacobian.transpose() * jacobian;
+    vector<vector<double>> result(cfg.constantSize, vector<double>(cfg.constantSize, 0.0));
+    for (int i = 0; i < cfg.constantSize; ++i) {
+        for (int j = 0; j < cfg.constantSize; ++j) {
+            result[i][j] = hessian(i, j);
         }
     }
-    OptimizeResult result(cfg.constantSize);
-    result.constants = std::move(theta);
-    result.error = bestErr;
     return result;
 }
 
-vector<vector<double>> NASAP_fit::backwardSensitivityAnalysis(vector<double>& constant){
-    for (int i = 0; i < cfg.species; ++i) {
-        NV_Ith_S(y, i) = initialState[i];
-    }
-    CVodeReInit(cvode_mem, 0.0, y);
-    ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), nullptr };
-    CVodeSetUserData(cvode_mem, (void*)&ud);
-    bool flag=CV_SUCCESS;
-    flag = CVodeAdjInit(cvode_mem, 50, CV_HERMITE);
-    assert(flag == CV_SUCCESS);
-    return {};
-}
+

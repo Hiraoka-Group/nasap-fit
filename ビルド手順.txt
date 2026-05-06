@@ -8,7 +8,7 @@ cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
 
 cmake --build build/deps/build/suitesparse --config Release
 
-cmake --install build/deps/suitesparse-build
+cmake --install build/deps/build/suitesparse
 
 # sundialsのビルド・インストール
 cmake -S extern/sundials -B build/deps/build/sundials \

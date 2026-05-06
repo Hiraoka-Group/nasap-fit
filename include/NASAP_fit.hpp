@@ -109,8 +109,6 @@ private:
 
 	vector<vector<double>> makeRandomPopulation(int popSize, double lower, double upper, uint64_t seed);
 
-	vector<vector<double>> forwardSensitivityAnalysis(vector<double>& constant);
-	vector<vector<double>> backwardSensitivityAnalysis(vector<double>& constant);
 
 	void computeLMResAndJac(vector<double>& constant, Eigen::VectorXd& residual, Eigen::MatrixXd& jacobian);
 public:
@@ -129,6 +127,9 @@ public:
 
 	//平方残差和の計算（CVODEを用いる）
 	double calcError(const vector<double>& constant);
+
+	// calcError が返す平方残差和から NRMSE を計算
+	double calcNRMSEFromError(double error) const;
 
 
 	// 実験データのセット
@@ -151,6 +152,8 @@ public:
 	vector<OptimizeResult> runDE(vector<vector<double>> arg, const TerminationCondition& termCond, uint64_t seed = 1);
 
 	void putCVODESim(const vector<double>& constant);
+
+	vector<vector<double>> GaussNewtonHessian(const vector<double>& constant);
 
 	struct SimulationResult {
 		struct ReactionProgressResult{
