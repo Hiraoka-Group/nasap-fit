@@ -129,97 +129,6 @@ std::vector<std::vector<double>> NASAP_fit::makeRandomPopulation(int popSize, do
     }
     return population;
 }
-/*
-static Function build_integrator(std::string name,
-						const std::vector<double>& tout,
-						const NASAP_fit::Config& cfg,
-						const ReactionNetwork& rxnNet) {
-    // 状態変数
-    SX sp = SX::sym("sp", cfg.species);
-    // パラメータ（反応速度定数）
-    SX logk = SX::sym("logk", cfg.constantSize);
-
-    // 反応速度
-    SX xdot = SX::zeros(cfg.species);
-    //ODE
-    // Build xdot from ReactionNetwork::rhsTerms (mass-action style terms)
-    for (const ReactionNetwork::RhsTerm &t : rxnNet.rhsTerms) {
-        // start with the rate constant multiplier
-        SX term;
-        if(t.reactant2 != cfg.species)
-            term = t.duplicacy * exp(logk(t.rateConstant)) * sp(t.reactant1) * sp(t.reactant2);
-        else{
-            term = t.duplicacy * exp(logk(t.rateConstant)) * sp(t.reactant1);
-        }
-        // add contribution to the target species (signed by t.coeff)
-        xdot(t.add_to) = xdot(t.add_to) + term;
-    }
-    // DAE 定義
-    SXDict dae;
-    dae["x"] = sp;
-    dae["p"] = logk;
-    dae["ode"] = xdot;
-
-    // integrator options
-    Dict opts;
-    opts["abstol"] = cfg.tolAbsError;
-    opts["reltol"] = cfg.tolRelError;
-    opts["max_num_steps"] = INT_MAX;
-
-    return integrator(
-        name,
-        "cvodes",
-        dae,
-        0.0,          // t0
-        tout,        
-        opts
-    );
-};
-
-void NASAP_fit::setUpCasADiFunctions() {
-    // Levenberg-Marquardt refinement of populations[idx]
-    std::vector<double> t_obs;//観測時間点
-
-    MX x0 = MX::zeros(cfg.species);
-    for (int i = 0; i < cfg.species; i++) {
-        x0(i) = initialState[i];
-    }
-    for (const auto& datum : QASAP) {
-        t_obs.push_back(datum.time);
-    }
-    integrator_ = build_integrator("F", t_obs, cfg, rxnNet);
-    MX params = MX::sym("params", cfg.constantSize);
-    MXDict arg;
-    arg["p"]  = params;
-    arg["x0"] = x0;
-    
-    MXDict res = integrator_(arg);
-    MX xf(res.at("xf"));
-
-    // 残差ベクトル r(theta)
-    MX r = MX::zeros(QASAP.size() * cfg.trackedSpecies);
-    // 平方残差和 SSR
-    MX SSR = 0;
-    for (int i = 0; i < QASAP.size(); i++) {
-        MX x = xf(Slice(), i);
-        for (int j = 0; j < cfg.trackedSpecies; j++) {
-            MX sim_val = x(cfg.trackedIndex[j]) / cfg.fullConc[j];
-            MX exp_val = QASAP[i].state[j]/100;
-            r(i * cfg.trackedSpecies + j) = sim_val - exp_val;
-            SSR += r(i * cfg.trackedSpecies + j) * r(i * cfg.trackedSpecies + j);
-        }
-    }
-    MX SSR_jac = jacobian(SSR, params);
-    MX SSR_hes = hessian(SSR, params);
-    MX J = jacobian(r, params);
-
-    res_fun_ = Function("res_fun_", MXIList{params}, MXIList{r});
-    jac_fun_ = Function("jac_fun_", MXIList{params}, MXIList{J});
-    SSR_jac_fun_ = Function("SSR_jac_fun_", MXIList{params}, MXIList{SSR_jac});
-    SSR_hes_fun_ = Function("SSR_hes_fun_", MXIList{params}, MXIList{SSR_hes});
-    return;
-}
-    */
 
 
 //実験データのセット
@@ -434,7 +343,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
         return runDE_single(arg, termCond, seed);
     }
 
-    #if MPI_VERSION
+    #if defined(NASAP_USE_MPI) && NASAP_USE_MPI
 
     auto transProb = [&](double temp, double oldE, double newE) {
         if (newE < oldE) return true;
@@ -624,156 +533,14 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
     MPI_Win_free(&winErr);
 
     return populations;
+    #else
+    // MPI not enabled at build time. MpiEnvironment will report world_size==1 in stub mode,
+    // so reaching here implies a misconfiguration.
+    assert(false && "MPI world_size>1 but NASAP_USE_MPI=0");
+    return {};
     #endif
 }
 
-/*
-NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, const TerminationCondition& termCond){
-    const int world_rank = mpi_env.rank();
-    const int n = cfg.constantSize;
-    const int m = (int)QASAP.size() * cfg.trackedSpecies;
-    validateConstants(theta0);
-
-    std::vector<double> theta = theta0;
-    std::vector<double> logTheta(n);
-    for (int i = 0; i < n; ++i) logTheta[i] = log(theta[i]);
-
-    double bestErr = calcError(theta);
-    if (!std::isfinite(bestErr)) bestErr = DBL_MAX;
-
-    double lambda = 10.0;
-    const int maxIter = (termCond.maxIter > 0) ? termCond.maxIter : 200;
-    double bestSoFar = bestErr;
-    int stallCount = 0;
-
-    std::vector<DM> arg(1);
-    DM rdm, jdm;
-    std::vector<double> rvec, jvec;
-    Eigen::VectorXd r;
-    Eigen::MatrixXd J;
-    Eigen::MatrixXd A;
-    Eigen::VectorXd g;
-    bool isChanged = true;
-
-    const double logLower = std::log(cfg.lowerLim);
-    const double logUpper = std::log(cfg.upperLim);
-    const double eps = 1e-5; // log-space finite-difference step
-
-    
-    std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
-    for (int iter = 0; ; ++iter) {
-
-        if (maxIter > 0 && iter >= maxIter) {
-            if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-                cout << "Maximum iterations reached: " << iter << " >= " << maxIter << endl;
-            }
-            break;
-        } 
-        if (termCond.timeLimit > 0) {
-            double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - startTime).count();
-            if (elapsed >= termCond.timeLimit) {
-                if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-                    cout << "Time limit reached: " << std::setprecision(10) << elapsed << " >= " << termCond.timeLimit << "\n";
-                }
-                break;
-            }
-        }
-        if (termCond.targetError > 0 && bestErr <= termCond.targetError) {
-            if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-                cout << "Target error reached: " << bestErr << " <= " << termCond.targetError << "\n";
-            }
-            break;
-        }
-
-        if (world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-            if (cfg.logLevel == LogLevel::verbose) {
-                for (int i = 0; i < cfg.constantSize; i++) {
-                    cout << std::setprecision(4) << theta[i] << ", ";
-                }
-                cout << endl;
-                cout << "Current error: " << std::setprecision(10) << bestErr << endl;
-                cout << "Iter : " << iter << ", Lambda: " << std::setprecision(10) << lambda << endl;
-            } else {
-                cout << "Iter : " << iter << " / " << maxIter
-                     << ", error: " << std::setprecision(10) << bestErr << endl;
-            }
-        }
-
-        if (isChanged) {
-            arg[0] = DM(logTheta);
-            rdm = res_fun_(arg).at(0);
-            jdm = jac_fun_(arg).at(0);
-            rvec = rdm.nonzeros();
-            jvec = jdm.nonzeros();
-            r = Eigen::Map<Eigen::VectorXd>(rvec.data(), m);
-            J = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>>(jvec.data(), m, n);
-            A = J.transpose() * J;
-            g = J.transpose() * r;
-        }
-        Eigen::MatrixXd A_try = A;
-        A_try.diagonal().array() += lambda;
-        Eigen::VectorXd delta = -A_try.ldlt().solve(g);
-        if (!delta.allFinite()) break;
-
-        std::vector<double> trial(n), logTrial(n);
-        for (int i = 0; i < n; ++i) {
-            logTrial[i] = std::clamp(logTheta[i] + delta[i], log(cfg.lowerLim), log(cfg.upperLim));
-            //logTrial[i] = logTheta[i] + delta[i];
-            trial[i] = exp(logTrial[i]);
-        }
-
-        double predictedImprove = -(g.dot(delta) + 0.5 * delta.dot(A_try * delta));
-        double newErr = calcError(trial);
-        double actualImprove = bestErr - newErr;
-        double reliabilityIndex = actualImprove / predictedImprove;
-
-        if (newErr < bestErr) {
-            isChanged = true;
-            theta = std::move(trial);
-            logTheta = std::move(logTrial);
-            bestErr = newErr;
-            if (reliabilityIndex > 0.75) {
-                lambda /= 3.0;
-            } else if (reliabilityIndex < 0.25) {
-                lambda *= 2.0;
-            }
-            const double stepNorm = delta.norm();
-            if (stepNorm < termCond.xtol) {
-                if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-                    cout << "XTOL reached: " << stepNorm << " < " << termCond.xtol << "\n";
-                }
-                break;
-            }
-
-            // ftol / stall
-            if (termCond.stall > 0 || termCond.ftolAbs > 0 || termCond.ftolRel > 0) {
-                //const double absImprove = bestSoFar - bestErr;
-                //const double relImprove = (bestSoFar > 0) ? (absImprove / bestSoFar) : DBL_MAX;
-                //const bool improvedAbs = (termCond.ftolAbs > 0) ? (absImprove > termCond.ftolAbs) : (absImprove > 0);
-                //const bool improvedRel = (termCond.ftolRel > 0) ? (relImprove > termCond.ftolRel) : true;
-                if (std::abs(bestSoFar - newErr) > termCond.ftolAbs + termCond.ftolRel * std::abs(newErr)) {
-                    bestSoFar = bestErr;
-                    stallCount = 0;
-                } else {
-                    stallCount++;
-                }
-                if (termCond.stall > 0 && stallCount >= termCond.stall){
-                    if(world_rank == 0 && cfg.logLevel != LogLevel::quiet) {
-                        cout << "Stall limit reached: " << stallCount << " >= " << termCond.stall << "\n";
-                    }
-                    break;
-                }
-            }
-        } else {
-            isChanged = false;
-            lambda *= 2.0;
-        }
-    }
-    OptimizeResult result(cfg.constantSize);
-    result.constants = std::move(theta);
-    result.error = bestErr;
-    return result;
-}
 
 vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>& thetaList, const TerminationCondition& termCond){
     const int world_size = mpi_env.size();
@@ -796,31 +563,22 @@ vector<NASAP_fit::OptimizeResult> NASAP_fit::runLM(const vector<vector<double>>&
         }
         populationsErrorFlat[i] = results[i].error;
     }
-    for(int i=0; i<n; i++){
+
+    #if defined(NASAP_USE_MPI) && NASAP_USE_MPI
+    for(int i=0; i<(int)n; i++){
         MPI_Bcast(populationsFlat.data() + (size_t)i * (size_t)cfg.constantSize, cfg.constantSize, MPI_DOUBLE, i % world_size, MPI_COMM_WORLD);
         MPI_Bcast(&populationsErrorFlat[(size_t)i], 1, MPI_DOUBLE, i % world_size, MPI_COMM_WORLD);
         results[i].constants.assign(populationsFlat.begin() + (size_t)i * (size_t)cfg.constantSize, populationsFlat.begin() + ((size_t)i + 1) * (size_t)cfg.constantSize);
         results[i].error = populationsErrorFlat[(size_t)i];
     }
+    #else
+    // Non-MPI build: world_size==1, so the local results are already complete.
+    #endif
+
     return results;
 }
-*/
-//残差ベクトルのJacobianを数値微分で計算する。返り値はm行n列の2次元vectorで、mは残差ベクトルの次元、nはパラメータ（速度定数）の次元。
-vector<vector<double>> NASAP_fit::calcJacobian(vector<double>& constant){
-    for (int i = 0; i < cfg.species; ++i) {
-        NV_Ith_S(y, i) = initialState[i];
-    }
-    CVodeReInit(cvode_mem, 0.0, y);
-    ReactionNetwork::CvodeUserData ud{ &rxnNet, constant.data(), nullptr };
-    CVodeSetUserData(cvode_mem, (void*)&ud);
-    bool flag=CV_SUCCESS;
-    flag = CVodeAdjInit(cvode_mem, 50, CV_HERMITE);
-    assert(flag == CV_SUCCESS);
 
-    //Perform forward integration
-    
 
-}
 
 void NASAP_fit::putCVODESim(const std::vector<double>& constant) {
     if (mpi_env.rank() != 0) return;

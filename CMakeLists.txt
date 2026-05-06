@@ -28,6 +28,16 @@ set(NASAP_SUNDIALS_ROOT "${NASAP_DEPS_DIR}/install/sundials" CACHE PATH "Install
 set(NASAP_SUITESPARSE_ROOT "${NASAP_DEPS_DIR}/install/suitesparse" CACHE PATH "Installed SuiteSparse prefix")
 set(NASAP_EIGEN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/extern/eigen" CACHE PATH "Eigen header root")
 
+if (NOT EXISTS "${NASAP_EIGEN_ROOT}/Eigen/Core")
+    find_path(NASAP_EIGEN_INCLUDE_DIR
+        NAMES Eigen/Core
+        PATHS /usr/include/eigen3 /usr/local/include/eigen3
+    )
+    if (NASAP_EIGEN_INCLUDE_DIR)
+        set(NASAP_EIGEN_ROOT "${NASAP_EIGEN_INCLUDE_DIR}" CACHE PATH "Eigen header root" FORCE)
+    endif()
+endif()
+
 # Help CMake find package config files inside the local dependency prefixes.
 list(PREPEND CMAKE_PREFIX_PATH
     "${NASAP_SUNDIALS_ROOT}"
@@ -56,13 +66,13 @@ list(REMOVE_ITEM NASAP_PY_SOURCES
 # Dependencies
 # =========================
 
-# Eigen: vendored header-only dependency
-# if (NOT EXISTS "${NASAP_EIGEN_ROOT}/Eigen/Core")
-#     message(FATAL_ERROR
-#         "Eigen headers not found at ${NASAP_EIGEN_ROOT}. "
-#         "Expected ${NASAP_EIGEN_ROOT}/Eigen/Core"
-#     )
-# endif()
+# Eigen: header-only dependency
+if (NOT EXISTS "${NASAP_EIGEN_ROOT}/Eigen/Core")
+    message(FATAL_ERROR
+        "Eigen headers not found at ${NASAP_EIGEN_ROOT}. "
+        "Expected ${NASAP_EIGEN_ROOT}/Eigen/Core"
+    )
+endif()
 
 # SUNDIALS: require local installed prefix, not system /usr/local
 

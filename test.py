@@ -19,7 +19,6 @@ pop = engine.run_de(
 
 best = min(pop, key=lambda r: r.error)
 
-"""
 # LM
 refined = engine.run_lm(
     best.constants,
@@ -31,7 +30,7 @@ refined = engine.run_lm(
                            "ftolRel": 0.02,
                            "stall": 10},
 )
-"""
+
 
 print("best error:", best.error)
 print("best constants:", best.constants)

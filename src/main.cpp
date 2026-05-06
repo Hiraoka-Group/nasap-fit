@@ -65,11 +65,8 @@ signed main(int argc, char** argv) {
 
 	if(mpi_env.rank()==0)std::cout << "Optimization took " << duration << " milliseconds." << std::endl;
 	
-	std::vector<double> bestConstants(config::constantSize);
-	double minerror;
-	// CasADi 依存の LM refinement は除外
-	bestConstants = opt[0].constants;
-	minerror = opt[0].error;
+	auto result=diffEvo.runLM(opt[0].constants, NASAP_fit::TerminationCondition{.maxIter=100, .ftolAbs=1e-9, .ftolRel=1e-7});
+	
 	std::vector<std::string>kinds(config::constantSize);
 	for(const auto& [key, val] : diffEvo.termIndex()){
 		kinds[val]=key;
@@ -77,12 +74,12 @@ signed main(int argc, char** argv) {
 	if(mpi_env.rank()==0){
 		std::cout<<"Optimized Constants:"<<std::endl;
 		for(int i=0;i<config::constantSize;i++){
-			std::cout<<kinds[i]<<": "<<bestConstants[i]<<std::endl;
+			std::cout<<kinds[i]<<": "<<result.constants[i]<<std::endl;
 		}
 		std::cout<<std::endl;
-		std::cout<<"error: "<<minerror<<std::endl;
+		std::cout<<"error: "<<result.error<<std::endl;
 	}
-	diffEvo.putCVODESim(bestConstants);
+	diffEvo.putCVODESim(result.constants);
 
 	return 0;
 

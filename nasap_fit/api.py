@@ -193,7 +193,7 @@ class NASAP_fit:
             ids = [int(i) for i in reaction_ids]
             return self._engine.simulate(t_vec, c_vec, ids)
 
-"""
+
     def run_lm(self, theta0: Sequence[float], terminationCondition: Mapping[str, Any]) -> Any:
         constant_size = int(self._engine.constants().constantSize)
         vec = validate_constants_vector(theta0, expected_size=constant_size)
@@ -209,7 +209,7 @@ class NASAP_fit:
         normalized = validate_population(thetas, constant_size=constant_size, min_size=1)
         term = build_termination_condition(_core, terminationCondition)
         return list(self._engine.runLM(normalized, term))
-
+"""
     def get_hessian(self, point: Sequence[float]) -> list[list[float]]:
         validate_constants_vector(point, expected_size=int(self._engine.constants().constantSize))
         vec = [float(v) for v in point]
