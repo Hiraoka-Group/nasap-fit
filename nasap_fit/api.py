@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -143,6 +144,12 @@ class NASAP_fit:
         constant_size = int(self._engine.constants().constantSize)
         vec = validate_constants_vector(constant, expected_size=constant_size)
         return float(self._engine.calcError(vec))
+
+    def errorToNRMSE(self, error: float) -> float:
+        err = float(error)
+        if not math.isfinite(err) or err < 0.0:
+            raise ValueError(f"error must be finite and >= 0 (got {error!r})")
+        return float(self._engine.calcNRMSEFromError(err))
 
     def reactionCount(self) -> int:
         return int(self._engine.reactionCount())
