@@ -1,12 +1,4 @@
 
-/buildにて
-$cmake ..
-$cmake --build .
-生成された _core.cpython-312-x86_64-linux-gnu.so ファイル(環境によって名前が違うかもしれません)をnasap_fitへ移動
-/nasap_fit からNASAP_fitをimportすることでpythonから使えると思います
-
-
-
 TerminationConditionクラス
 最適化の終了条件を記述する
 maxIter(デフォルト: INT_MAX)
@@ -43,6 +35,9 @@ constant - 反応速度定数の数列
 
 返り値:
 QASAPとの残差平方和
+
+def errorToNRMSE(self, error: float) -> float:
+残差平方和を正規化した値を返す
 
 
 def reactionCount(self) -> int:
@@ -124,7 +119,7 @@ terminationCondition - 最適化の終了条件
 
 
 
-def get_hessian(point: Sequence[float]) -> list[list[float]]  # (削除: CasADi/Hessian 依存)
+def get_hessian(point: Sequence[float]) -> list[list[float]]  # (現在は廃止)
 残差平方和に対する、与えられた速度定数の組におけるヘッシアンを求めます
 引数:
 point - 速度定数の組
@@ -132,7 +127,7 @@ point - 速度定数の組
 ヘッセ行列
 
 
-def pseudo_hessian(self, point: Sequence[float]) -> list[list[float]]:  # (削除: CasADi/Hessian 依存)
+def pseudo_hessian(self, point: Sequence[float]) -> list[list[float]]:  
 残差平方和に対する、与えられた速度定数の組におけるヘッシアンのガウス・ニュートン近似を求めます。
 get_hessianよりも高速です
 引数:

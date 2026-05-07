@@ -16,7 +16,7 @@
 
 //#include <Eigen/Dense>
 
-#if __has_include(<mpi.h>)
+#if defined(NASAP_USE_MPI) && NASAP_USE_MPI
 #include <mpi.h>
 #endif
 

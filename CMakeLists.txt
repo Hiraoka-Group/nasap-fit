@@ -12,15 +12,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # =========================
 option(NASAP_BUILD_EXECUTABLE "Build native executable" OFF)
 option(NASAP_BUILD_PYTHON_MODULE "Build Python extension module" ON)
-option(NASAP_ENABLE_MPI "Enable MPI support" OFF)
+option(NASAP_ENABLE_MPI "Enable MPI support" ON)
 
 # =========================
 # Dependency roots
 # =========================
-# Assumed layout:
-#   extern/eigen/...
-#   build/deps/install/sundials/{include,lib,...}
-#   build/deps/install/suitesparse/{include,lib,...}
 #
 # These can be overridden from the command line if needed.
 set(NASAP_DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build/deps" CACHE PATH "Root directory for locally built dependencies")
@@ -28,15 +24,7 @@ set(NASAP_SUNDIALS_ROOT "${NASAP_DEPS_DIR}/install/sundials" CACHE PATH "Install
 set(NASAP_SUITESPARSE_ROOT "${NASAP_DEPS_DIR}/install/suitesparse" CACHE PATH "Installed SuiteSparse prefix")
 set(NASAP_EIGEN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/extern" CACHE PATH "Eigen header root")
 
-#if (NOT EXISTS "${NASAP_EIGEN_ROOT}/Eigen/Core")
-#    find_path(NASAP_EIGEN_INCLUDE_DIR
-#        NAMES Eigen/Core
-#        PATHS /usr/include/eigen3 /usr/local/include/eigen3
-#    )
-#    if (NASAP_EIGEN_INCLUDE_DIR)
-#        set(NASAP_EIGEN_ROOT "${NASAP_EIGEN_INCLUDE_DIR}" CACHE PATH "Eigen header root" FORCE)
-#    endif()
-#endif()
+
 
 # Help CMake find package config files inside the local dependency prefixes.
 list(PREPEND CMAKE_PREFIX_PATH
