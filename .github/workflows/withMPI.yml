@@ -38,7 +38,8 @@ jobs:
 
           # Linux では manylinux コンテナ内で一度だけ依存をビルド
           CIBW_BEFORE_ALL_LINUX: |
-            bash -euxo pipefail -c 
+            bash -euxo pipefail -c '
+            yum -y install gcc gcc-c++ make || dnf -y install gcc gcc-c++ make
             yum install -y openblas-devel openmpi-devel || dnf install -y openblas-devel openmpi-devel
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
               -DCMAKE_BUILD_TYPE=Release \
@@ -56,8 +57,7 @@ jobs:
               -DKLU_ROOT=/project/build/deps/install/suitesparse
             grep -E "SUNDIALS|KLU|SuiteSparse|CMAKE_INSTALL_PREFIX" build/deps/build/sundials/CMakeCache.txt || true
             cmake --build build/deps/build/sundials --config Release -j2 --verbose
-            cmake --install build/deps/build/sundials
-            echo "=====BUILD COMPLETE====="
+            cmake --install build/deps/build/sundials'
             
 
 
@@ -111,6 +111,7 @@ jobs:
             LD_LIBRARY_PATH=/project/build/deps/install/sundials/lib:/project/build/deps/install/sundials/lib64:/project/build/deps/install/suitesparse/lib:/project/build/deps/install/suitesparse/lib64
 
           CIBW_ENVIRONMENT_MACOS: >
+            MACOSX_DEPLOYMENT_TARGET=15.0
             NASAP_ENABLE_MPI=ON
             CC=mpicc
             CXX=mpicxx

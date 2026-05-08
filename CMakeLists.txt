@@ -12,7 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
 # =========================
 option(NASAP_BUILD_EXECUTABLE "Build native executable" OFF)
 option(NASAP_BUILD_PYTHON_MODULE "Build Python extension module" ON)
-option(NASAP_ENABLE_MPI "Enable MPI support" ON)
+option(NASAP_ENABLE_MPI "Enable MPI support" OFF)
 
 # =========================
 # Dependency roots
