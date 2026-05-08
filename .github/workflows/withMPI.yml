@@ -63,7 +63,7 @@ jobs:
 
           # macOS でも同様に依存を一度だけビルド
           CIBW_BEFORE_ALL_MACOS: >
-            brew install open-mpi %%
+            brew install open-mpi &&
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/suitesparse
