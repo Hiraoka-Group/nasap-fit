@@ -59,10 +59,16 @@ jobs:
             cmake --build build/deps/build/sundials --config Release -j2 --verbose
             cmake --install build/deps/build/sundials'
           
-          CIBW_BEFORE_BUILD_LINUX: >
-            which mpicc || true &&
-            mpicc --version || true &&
-            echo "CC=$CC" && echo "PATH=$PATH" &&
+          CIBW_BEFORE_BUILD_LINUX: |
+            set -euxo pipefail
+            echo "=== before-build start ==="
+            echo "CC=${CC-}"
+            echo "CXX=${CXX-}"
+            echo "PATH=$PATH"
+            command -v mpicc || true
+            mpicc --version || true
+            ls -la /usr/bin/mpicc /usr/local/bin/mpicc 2>/dev/null || true
+            echo "=== before-build end ==="
             
 
 
