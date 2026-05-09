@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout
@@ -41,6 +41,15 @@ jobs:
             bash -euxo pipefail -c '
             yum -y install gcc gcc-c++ make || dnf -y install gcc gcc-c++ make
             yum install -y openblas-devel openmpi openmpi-devel || dnf install -y openblas-devel openmpi openmpi-devel
+            echo "=== pre-cmake diagnostics ==="
+            echo "CC=$CC"
+            echo "CXX=$CXX"
+            echo "PATH=$PATH"
+            command -v gcc || true
+            gcc --version || true
+            command -v mpicc || true
+            mpicc --version || true
+            echo "=== end diagnostics ==="
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/suitesparse \
@@ -58,17 +67,6 @@ jobs:
             grep -E "SUNDIALS|KLU|SuiteSparse|CMAKE_INSTALL_PREFIX" build/deps/build/sundials/CMakeCache.txt || true
             cmake --build build/deps/build/sundials --config Release -j2 --verbose
             cmake --install build/deps/build/sundials'
-          
-          CIBW_BEFORE_BUILD_LINUX: |
-            set -euxo pipefail
-            echo "=== before-build start ==="
-            echo "CC=${CC-}"
-            echo "CXX=${CXX-}"
-            echo "PATH=$PATH"
-            command -v mpicc || true
-            mpicc --version || true
-            ls -la /usr/bin/mpicc /usr/local/bin/mpicc 2>/dev/null || true
-            echo "=== before-build end ==="
             
 
 
