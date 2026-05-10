@@ -43,7 +43,9 @@ jobs:
             yum install -y openblas-devel openmpi openmpi-devel || dnf install -y openblas-devel openmpi openmpi-devel
             echo "=== pre-cmake diagnostics ==="
             rpm -q openmpi-devel || true
-            rpm -ql openmpi-devel | grep -E '/bin/(mpicc|mpicxx|mpi(cc|cxx))' || true
+            rpm -ql openmpi-devel | grep mpicc || true
+            rpm -ql openmpi-devel | grep mpicxx || true
+            rpm -ql openmpi-devel | grep "/bin/" || true
             rpm -ql openmpi | grep /bin/
             echo "CC=$CC"
             echo "CXX=$CXX"
