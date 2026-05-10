@@ -40,9 +40,7 @@ jobs:
           CIBW_BEFORE_ALL_LINUX: |
             bash -euxo pipefail -c '
             yum -y install gcc gcc-c++ make || dnf -y install gcc gcc-c++ make
-            yum install -y openblas-devel openmpi openmpi-devel || dnf install -y openblas-devel openmpi openmpi-devel
-            echo "=== pre-cmake diagnostics ==="
-            echo "=== end diagnostics ==="
+            yum install -y openblas-devel openmpi-devel || dnf install -y openblas-devel openmpi-devel
             export PATH=/usr/lib64/openmpi/bin:$PATH
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
               -DCMAKE_BUILD_TYPE=Release \
