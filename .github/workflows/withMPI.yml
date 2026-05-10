@@ -55,6 +55,7 @@ jobs:
             command -v mpicc || true
             mpicc --version || true
             echo "=== end diagnostics ==="
+            export PATH=/usr/lib64/openmpi/bin:$PATH
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/suitesparse \
@@ -114,6 +115,7 @@ jobs:
           # build backend に依存 prefix を見せる
           CIBW_ENVIRONMENT_LINUX: >
             NASAP_ENABLE_MPI=ON
+            PATH=/usr/lib64/openmpi/bin:$PATH
             CC=mpicc
             CXX=mpicxx
             NASAP_DEPS_DIR=/project/build/deps
