@@ -127,7 +127,7 @@ point - 速度定数の組
 ヘッセ行列
 
 
-def pseudo_hessian(self, point: Sequence[float]) -> list[list[float]]:  
+def GaussNewtonHessian(self, point: Sequence[float]) -> list[list[float]]:  
 残差平方和に対する、与えられた速度定数の組におけるヘッシアンのガウス・ニュートン近似を求めます。
 get_hessianよりも高速です
 引数:
