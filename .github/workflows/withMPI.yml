@@ -38,12 +38,14 @@ jobs:
 
           # Linux では manylinux コンテナ内で一度だけ依存をビルド
           CIBW_BEFORE_ALL_LINUX: |
-            bash -euxo pipefail -c 
-            yum install -y openblas-devel || dnf install -y openblas-devel
+            bash -euxo pipefail -c '
+            yum -y install gcc gcc-c++ make || dnf -y install gcc gcc-c++ make
+            yum install -y openblas-devel openmpi-devel || dnf install -y openblas-devel openmpi-devel
+            export PATH=/usr/lib64/openmpi/bin:$PATH
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/suitesparse \
-              '-DSUITESPARSE_ENABLE_PROJECTS=suitesparse_config;amd;colamd;btf;klu' \
+              "-DSUITESPARSE_ENABLE_PROJECTS=suitesparse_config;amd;colamd;btf;klu" \
               -DSUITESPARSE_USE_FORTRAN=OFF \
               -DSUITESPARSE_USE_BLAS=OFF
             grep -E "SUITESPARSE|BLAS|LAPACK|FORTRAN|CMAKE_INSTALL_PREFIX" build/deps/build/suitesparse/CMakeCache.txt || true
@@ -56,12 +58,13 @@ jobs:
               -DKLU_ROOT=/project/build/deps/install/suitesparse
             grep -E "SUNDIALS|KLU|SuiteSparse|CMAKE_INSTALL_PREFIX" build/deps/build/sundials/CMakeCache.txt || true
             cmake --build build/deps/build/sundials --config Release -j2 --verbose
-            cmake --install build/deps/build/sundials
+            cmake --install build/deps/build/sundials'
             
 
 
           # macOS でも同様に依存を一度だけビルド
           CIBW_BEFORE_ALL_MACOS: >
+            brew install open-mpi &&
             cmake -S extern/SuiteSparse -B build/deps/build/suitesparse
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_INSTALL_PREFIX=$PWD/build/deps/install/suitesparse
@@ -96,6 +99,10 @@ jobs:
 
           # build backend に依存 prefix を見せる
           CIBW_ENVIRONMENT_LINUX: >
+            NASAP_ENABLE_MPI=ON
+            PATH=/usr/lib64/openmpi/bin:$PATH
+            CC=mpicc
+            CXX=mpicxx
             NASAP_DEPS_DIR=/project/build/deps
             NASAP_SUITESPARSE_ROOT=/project/build/deps/install/suitesparse
             NASAP_SUNDIALS_ROOT=/project/build/deps/install/sundials
@@ -105,6 +112,10 @@ jobs:
             LD_LIBRARY_PATH=/project/build/deps/install/sundials/lib:/project/build/deps/install/sundials/lib64:/project/build/deps/install/suitesparse/lib:/project/build/deps/install/suitesparse/lib64
 
           CIBW_ENVIRONMENT_MACOS: >
+            MACOSX_DEPLOYMENT_TARGET=15.0
+            NASAP_ENABLE_MPI=ON
+            CC=mpicc
+            CXX=mpicxx
             NASAP_DEPS_DIR=$PWD/build/deps
             NASAP_SUITESPARSE_ROOT=$PWD/build/deps/install/suitesparse
             NASAP_SUNDIALS_ROOT=$PWD/build/deps/install/sundials
@@ -117,6 +128,9 @@ jobs:
             NASAP_DEPS_DIR=%CD%/build/deps
             NASAP_SUITESPARSE_ROOT=%CD%/build/deps/install/suitesparse
             NASAP_SUNDIALS_ROOT=%CD%/build/deps/install/sundials
+
+          CIBW_CONFIG_SETTINGS_LINUX: >
+            cmake.define.NASAP_ENABLE_MPI=ON
 
           # Linux では repair に auditwheel を使う。cibuildwheel は Linux の
           # wheel repair に auditwheel を使う前提です。
