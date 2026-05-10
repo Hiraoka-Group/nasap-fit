@@ -58,13 +58,6 @@ jobs:
               -DCMAKE_INSTALL_PREFIX=/project/build/deps/install/sundials \
               -DSUNDIALS_ENABLE_KLU=ON \
               -DKLU_ROOT=/project/build/deps/install/suitesparse
-              || { 
-              echo "=== SUNDIALS configure failed; dumping logs ===";
-              ls -la build/deps/build/sundials || true;
-              cat build/deps/build/sundials/CMakeFiles/CMakeError.log 2>/dev/null || true;
-              cat build/deps/build/sundials/CMakeFiles/CMakeOutput.log 2>/dev/null || true;
-              exit 1;
-            }
             grep -E "SUNDIALS|KLU|SuiteSparse|CMAKE_INSTALL_PREFIX" build/deps/build/sundials/CMakeCache.txt || true
             cmake --build build/deps/build/sundials --config Release -j2 --verbose
             cmake --install build/deps/build/sundials'
