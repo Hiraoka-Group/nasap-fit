@@ -1,8 +1,6 @@
 name: Build wheels
 
 on:
-  push:
-    tags: ["v*"]
   pull_request:
     paths:
       - 'src/**'
