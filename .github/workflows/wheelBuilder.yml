@@ -31,9 +31,11 @@ jobs:
       - name: Install cibuildwheel
         run: python -m pip install --upgrade pip cibuildwheel
 
+      - name: Set package version
+        run: echo "SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NASAP_FIT=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+
       - name: Build wheels
         env:
-          SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NASAP_FIT: ${{ github.ref_name }}
           # 必要な Python だけに絞るならここで調整
           CIBW_BUILD: "cp312-* cp313-* cp314-*"
           CIBW_SKIP: "*-musllinux_* pp* *-win32 *-manylinux_i686"
@@ -97,6 +99,7 @@ jobs:
             cmake --install build/deps/build/sundials
 
           # build backend に依存 prefix を見せる
+          CIBW_ENVIRONMENT_PASS_LINUX: SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NASAP_FIT
           CIBW_ENVIRONMENT_LINUX: >
             NASAP_DEPS_DIR=/project/build/deps
             NASAP_SUITESPARSE_ROOT=/project/build/deps/install/suitesparse
@@ -106,6 +109,7 @@ jobs:
             SKBUILD_SEARCH_PREFIXES="/project/build/deps/install/sundials;/project/build/deps/install/suitesparse"
             LD_LIBRARY_PATH=/project/build/deps/install/sundials/lib:/project/build/deps/install/sundials/lib64:/project/build/deps/install/suitesparse/lib:/project/build/deps/install/suitesparse/lib64
 
+          CIBW_ENVIRONMENT_PASS_MACOS: SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NASAP_FIT
           CIBW_ENVIRONMENT_MACOS: >
             NASAP_DEPS_DIR=$PWD/build/deps
             NASAP_SUITESPARSE_ROOT=$PWD/build/deps/install/suitesparse
