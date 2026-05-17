@@ -94,7 +94,7 @@ void init_core(pybind11::module_ &m) {
         .def_readonly("y", &NASAP_fit::SimulationResult::y)
         .def_readonly("reactionProgress", &NASAP_fit::SimulationResult::reactionProgress);
 
-    py::class_<NASAP_fit>(m, "NASAP_fit")
+    py::class_<NASAP_fit>(m, "NasapFit")
         // NASAP_fit owns non-copyable/non-movable resources (e.g., sundials::Context),
         // so avoid return-by-value factory init which requires move construction.
         .def(py::init<const NASAP_fit::Config&>(), py::arg("cfg"))

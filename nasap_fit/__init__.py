@@ -1,3 +1,3 @@
-from .api import NASAP_fit, config_from_yaml, default_config
+from .api import NasapFit, config_from_yaml, default_config
 
-__all__ = ["NASAP_fit", "config_from_yaml", "default_config"]
+__all__ = ["NasapFit", "config_from_yaml", "default_config"]
