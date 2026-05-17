@@ -2,14 +2,16 @@
 requires = [
   "scikit-build-core>=0.12",
   "pybind11>=2.10",
+  "hatch-vcs",
 ]
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "nasap-fit"
-version = "0.1.0"
+dynamic = ["version"]
 description = "C++ implementation for high-performance fitting and numerical optimization in NASAP."
 readme = "README.md"
+license = { file = "LICENSE" }
 authors = [
   { name = "Shumbo Tanabe", email = "8703904728@g.ecc.u-tokyo.ac.jp" },
   { name = "Keisuke Takeuchi", email = "142223934+takeuchi-sci@users.noreply.github.com" },
@@ -20,6 +22,25 @@ dependencies = [
   "pandas>=3.0.0,<4.0.0",
   "pyyaml>=6.0.3,<7.0.0",
 ]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Chemistry",
+]
+
+[project.urls]
+Homepage = "https://github.com/Hiraoka-Group/nasap-fit"
+Repository = "https://github.com/Hiraoka-Group/nasap-fit"
+Issues = "https://github.com/Hiraoka-Group/nasap-fit/issues"
+
+[tool.hatch.version]
+source = "vcs"
 
 [tool.scikit-build]
+metadata.version.provider = "scikit_build_core.metadata.hatch_vcs"
 wheel.packages = ["nasap_fit"]
