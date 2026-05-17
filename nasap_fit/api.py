@@ -105,7 +105,7 @@ def _parse_log_level(v: Any) -> Any:
     raise TypeError(f"logLevel must be str|int|LogLevel (got {type(v).__name__})")
 
 
-class NASAP_fit:
+class NasapFit:
     def __init__(
         self,
         cfg: Any | None = None,
@@ -123,7 +123,7 @@ class NASAP_fit:
             columns = tracked_species + 1
             validate_qasap_data(qasap_data, expected_columns=columns)
 
-        self._engine = _core.NASAP_fit() if cfg is None else _core.NASAP_fit(cfg)
+        self._engine = _core.NasapFit() if cfg is None else _core.NasapFit(cfg)
 
     @classmethod
     def from_yaml(
@@ -132,7 +132,7 @@ class NASAP_fit:
         *,
         project_root: str | Path | None = None,
         validate_files: bool = True,
-    ) -> "NASAP_fit":
+    ) -> "NasapFit":
         cfg = config_from_yaml(config_yaml_path, project_root=project_root, validate_files=validate_files)
         return cls(cfg)
 
