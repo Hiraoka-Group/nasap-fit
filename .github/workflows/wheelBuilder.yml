@@ -33,6 +33,7 @@ jobs:
 
       - name: Build wheels
         env:
+          SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NASAP_FIT: ${{ github.ref_name }}
           # 必要な Python だけに絞るならここで調整
           CIBW_BUILD: "cp312-* cp313-* cp314-*"
           CIBW_SKIP: "*-musllinux_* pp* *-win32 *-manylinux_i686"
