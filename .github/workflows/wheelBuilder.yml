@@ -4,6 +4,15 @@ on:
   release:
     types: [published]
   pull_request:
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'extern/**'
+      - 'nasap_fit/**'
+      - 'pyproject.toml'
+      - 'CMakeLists.txt'
+      - '**/*.cmake'
+      - '.github/workflows/wheelBuilder.yml'
   workflow_dispatch:
 
 jobs:

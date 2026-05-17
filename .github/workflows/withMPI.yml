@@ -2,9 +2,17 @@ name: Build wheels
 
 on:
   push:
-    branches: [main, master]
     tags: ["v*"]
   pull_request:
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'extern/**'
+      - 'nasap_fit/**'
+      - 'pyproject.toml'
+      - 'CMakeLists.txt'
+      - '**/*.cmake'
+      - '.github/workflows/withMPI.yml'
   workflow_dispatch:
 
 jobs:
