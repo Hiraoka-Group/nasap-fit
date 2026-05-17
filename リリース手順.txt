@@ -1,0 +1,28 @@
+# ============================================================
+# PyPI リリース手順
+# ============================================================
+
+# 【初回のみ】PyPI Trusted Publisher の設定
+#   1. pypi.org にログインし、「Your projects」→「Publishing」→「Add a new pending publisher」を開く
+#   2. 以下を入力して登録する
+#      - PyPI Project Name : nasap-fit
+#      - Owner             : Hiraoka-Group
+#      - Repository name   : nasap-fit
+#      - Workflow name     : wheelBuilder.yml
+#      - Environment name  : pypi
+#   3. GitHub リポジトリの Settings → Environments → New environment で
+#      「pypi」という名前の Environment を作成する
+#      （Protection rules は任意。Required reviewers を設定するとリリース前に承認が必要になる）
+
+# 【毎回のリリース手順】
+#   1. main ブランチに変更をマージする
+#   2. GitHub リポジトリのページで「Releases」→「Draft a new release」を開く
+#   3. 「Choose a tag」で新しいタグ名を入力する（例: v0.2.0）
+#      ※ バージョンは semver 形式で、必ず「v」を先頭に付ける
+#   4. Release notes を記入し「Publish release」を押す
+#   → GitHub Actions が自動で wheel をビルドし PyPI にアップロードされる
+
+# 【バージョン番号のルール（hatch-vcs）】
+#   - git tag がそのままパッケージバージョンになる（pyproject.toml の編集不要）
+#   - タグ: v1.2.3  →  パッケージバージョン: 1.2.3
+#   - タグのないコミットは 1.2.3.devN+gHASH 形式になる（開発版）

@@ -1,4 +1,8 @@
-# すべてProject root で実行
+# ============================================================
+# 開発者向けローカルビルド手順
+# （C++ 拡張を手元でビルドして動作確認する場合。pip install では不要）
+# すべて Project root で実行。SuiteSparse → SUNDIALS → 本体の順でビルドすること。
+# ============================================================
 
 # SuiteSparseのビルド・インストール
 cmake -S extern/SuiteSparse -B build/deps/build/suitesparse \
