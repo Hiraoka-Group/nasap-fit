@@ -433,7 +433,9 @@ def build_termination_condition(
             continue
         _set_tc_field(tc, k, v, allowed)
 
-    if tc == default:
+    # pybind11 does not expose __eq__ for TerminationCondition, so comparing
+    # tc == default uses identity (always False).  Check each field explicitly.
+    if all(getattr(tc, f) == getattr(default, f) for f in allowed):
         raise ValueError("no effective termination conditions specified")
     if (tc.ftolAbs > 0.0 or tc.ftolRel > 0.0) and tc.stall == default.stall:
         tc.stall = 1
