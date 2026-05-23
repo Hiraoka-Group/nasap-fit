@@ -140,85 +140,87 @@ class NasapFit:
     def config(self) -> Any:
         return self._engine.constants()
 
-    def calcError(self, constant: Sequence[float]) -> float:
+    def calc_error(self, constants: Sequence[float]) -> float:
         constant_size = int(self._engine.constants().constantSize)
-        vec = validate_constants_vector(constant, expected_size=constant_size)
+        vec = validate_constants_vector(constants, expected_size=constant_size)
         return float(self._engine.calcError(vec))
 
-    def errorToNRMSE(self, error: float) -> float:
+    def calc_nrmse(self, error: float) -> float:
         err = float(error)
         if not math.isfinite(err) or err < 0.0:
             raise ValueError(f"error must be finite and >= 0 (got {error!r})")
         return float(self._engine.calcNRMSEFromError(err))
 
-    def reactionCount(self) -> int:
+    @property
+    def reaction_count(self) -> int:
         return int(self._engine.reactionCount())
 
-    def termIndex(self) -> Mapping[str, int]:
+    @property
+    def rate_constant_index(self) -> Mapping[str, int]:
         # pybind11 converts std::map to dict-like; normalize to a plain dict.
         return dict(self._engine.termIndex())
 
     def run_de(
         self,
         pop_size: int,
-        terminationCondition: Mapping[str, Any],
-        lower_lim: float = 1e-3,
-        upper_lim: float = 1e4,
+        termination_condition: Mapping[str, Any],
+        lower_bound: float = 1e-3,
+        upper_bound: float = 1e4,
         seed: int = 1,
     ) -> list[Any]:
-        term = build_termination_condition(_core, terminationCondition)
-        return list(self._engine.runDE(int(pop_size), float(lower_lim), float(upper_lim), term, int(seed)))
+        term = build_termination_condition(_core, termination_condition)
+        return list(self._engine.runDE(int(pop_size), float(lower_bound), float(upper_bound), term, int(seed)))
 
     def run_de_from_population(
         self,
         population: Sequence[Sequence[float]],
-        terminationCondition: Mapping[str, Any],
+        termination_condition: Mapping[str, Any],
         seed: int = 1,
     ) -> list[Any]:
         constant_size = int(self._engine.constants().constantSize)
         normalized = validate_population(population, constant_size=constant_size)
-        term = build_termination_condition(_core, terminationCondition)
+        term = build_termination_condition(_core, termination_condition)
         return list(self._engine.runDE(normalized, term, int(seed)))
     
 
     def simulate(
             self,
             t: Sequence[float],
-            constant: Sequence[float],
+            constants: Sequence[float],
             reaction_ids: Iterable[int],
         ) -> Any:
-            validate_constants_vector(constant, expected_size=int(self._engine.constants().constantSize))
+            validate_constants_vector(constants, expected_size=int(self._engine.constants().constantSize))
             for v in t:
                 if v < 0.0:
                     raise ValueError(f"Time points must be non-negative (got {v})")
-            id_upper = self.reactionCount()
+            id_upper = self.reaction_count
             for i in reaction_ids:
                 if not (0 <= i < id_upper):
                     raise ValueError(f"Reaction IDs must be in [0, {id_upper}) (got {i})")
             t_vec = [float(v) for v in t]
-            c_vec = [float(v) for v in constant]
+            c_vec = [float(v) for v in constants]
             ids = [int(i) for i in reaction_ids]
             return self._engine.simulate(t_vec, c_vec, ids)
 
 
-    def run_lm(self, theta0: Sequence[float], terminationCondition: Mapping[str, Any]) -> Any:
+    def run_lm(self, initial_constants: Sequence[float], termination_condition: Mapping[str, Any]) -> Any:
         constant_size = int(self._engine.constants().constantSize)
-        vec = validate_constants_vector(theta0, expected_size=constant_size)
-        term = build_termination_condition(_core, terminationCondition)
+        vec = validate_constants_vector(initial_constants, expected_size=constant_size)
+        term = build_termination_condition(_core, termination_condition)
         return self._engine.runLM(vec, term)
 
     def run_lm_batch(
         self,
-        thetas: Sequence[Sequence[float]],
-        terminationCondition: Mapping[str, Any],
+        initial_constants: Sequence[Sequence[float]],
+        termination_condition: Mapping[str, Any],
     ) -> list[Any]:
         constant_size = int(self._engine.constants().constantSize)
-        normalized = validate_population(thetas, constant_size=constant_size, min_size=1)
-        term = build_termination_condition(_core, terminationCondition)
+        normalized = validate_population(initial_constants, constant_size=constant_size, min_size=1)
+        term = build_termination_condition(_core, termination_condition)
         return list(self._engine.runLM(normalized, term))
     
     #log point に対する残差二乗和のGaussNewtonHessianを導出
-    def GaussNewtonHessian(self, point: Sequence[float]) -> list[list[float]]:
+    def gauss_newton_hessian(self, point: Sequence[float]) -> list[list[float]]:
         validate_constants_vector(point, expected_size=int(self._engine.constants().constantSize))
         vec = [float(v) for v in point]
         return [list(row) for row in self._engine.GaussNewtonHessian(vec)]
