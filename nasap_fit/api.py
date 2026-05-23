@@ -140,12 +140,12 @@ class NasapFit:
     def config(self) -> Any:
         return self._engine.constants()
 
-    def calcError(self, constant: Sequence[float]) -> float:
+    def calc_error(self, constant: Sequence[float]) -> float:
         constant_size = int(self._engine.constants().constantSize)
         vec = validate_constants_vector(constant, expected_size=constant_size)
         return float(self._engine.calcError(vec))
 
-    def errorToNRMSE(self, error: float) -> float:
+    def calc_nrmse(self, error: float) -> float:
         err = float(error)
         if not math.isfinite(err) or err < 0.0:
             raise ValueError(f"error must be finite and >= 0 (got {error!r})")
