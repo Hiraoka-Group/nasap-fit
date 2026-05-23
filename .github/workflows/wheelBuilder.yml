@@ -144,6 +144,11 @@ jobs:
             LD_LIBRARY_PATH=/project/build/deps/install/sundials/lib:/project/build/deps/install/sundials/lib64:/project/build/deps/install/suitesparse/lib:/project/build/deps/install/suitesparse/lib64:$LD_LIBRARY_PATH
             auditwheel repair -w {dest_dir} {wheel}
 
+          # After installing the built wheel, run the test suite to catch
+          # wheels that build successfully but fail at runtime.
+          CIBW_TEST_REQUIRES: "pytest scipy"
+          CIBW_TEST_COMMAND: "pytest {project}/tests"
+
         run: python -m cibuildwheel --output-dir wheelhouse
 
       - name: Upload artifacts

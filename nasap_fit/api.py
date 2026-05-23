@@ -402,12 +402,14 @@ class NasapFit:
 
                 - ``timePoints`` - number of time points recorded.
                 - ``t`` - list of recorded time points.
-                - ``y`` - 2-D array of concentrations; ``y[species][time_index]``
-                  is the concentration of species *species* at ``t[time_index]``.
+                - ``y`` - 2-D array of concentrations; ``y[time_index][species_index]``
+                  is the concentration of species *species_index* at ``t[time_index]``.
                 - ``reactionProgress.reaction_ids`` - tracked reaction IDs.
-                - ``reactionProgress.J`` - 2-D array of reaction progress;
-                  ``J[reaction_id][time_index]`` is the progress of reaction
-                  *reaction_id* at ``t[time_index]``.
+                - ``reactionProgress.J`` - 2-D array of cumulative reaction progress
+                  (mol/L, i.e. extent of reaction ξ divided by volume V);
+                  ``J[time_index][i]`` is the time-integrated rate
+                  ``∫₀ᵗ rate_i(τ) dτ`` for the *i*-th entry of *reaction_ids*
+                  at ``t[time_index]``.
                 - ``reactionProgress.reaction_labels`` - human-readable label for
                   each tracked reaction (e.g. ``"1 + 2 -> 3 + 4"``).
 
