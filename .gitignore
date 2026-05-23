@@ -48,3 +48,6 @@ __pycache__/
 
 # Virtual environment
 .venv/
+
+# MkDocs build output
+site/
