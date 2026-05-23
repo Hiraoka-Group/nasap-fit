@@ -151,10 +151,12 @@ class NasapFit:
             raise ValueError(f"error must be finite and >= 0 (got {error!r})")
         return float(self._engine.calcNRMSEFromError(err))
 
-    def reactionCount(self) -> int:
+    @property
+    def reaction_count(self) -> int:
         return int(self._engine.reactionCount())
 
-    def termIndex(self) -> Mapping[str, int]:
+    @property
+    def rate_constant_index(self) -> Mapping[str, int]:
         # pybind11 converts std::map to dict-like; normalize to a plain dict.
         return dict(self._engine.termIndex())
 
@@ -191,7 +193,7 @@ class NasapFit:
             for v in t:
                 if v < 0.0:
                     raise ValueError(f"Time points must be non-negative (got {v})")
-            id_upper = self.reactionCount()
+            id_upper = self.reaction_count
             for i in reaction_ids:
                 if not (0 <= i < id_upper):
                     raise ValueError(f"Reaction IDs must be in [0, {id_upper}) (got {i})")
