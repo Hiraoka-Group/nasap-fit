@@ -140,9 +140,9 @@ class NasapFit:
     def config(self) -> Any:
         return self._engine.constants()
 
-    def calc_error(self, constant: Sequence[float]) -> float:
+    def calc_error(self, constants: Sequence[float]) -> float:
         constant_size = int(self._engine.constants().constantSize)
-        vec = validate_constants_vector(constant, expected_size=constant_size)
+        vec = validate_constants_vector(constants, expected_size=constant_size)
         return float(self._engine.calcError(vec))
 
     def calc_nrmse(self, error: float) -> float:
@@ -163,33 +163,33 @@ class NasapFit:
     def run_de(
         self,
         pop_size: int,
-        terminationCondition: Mapping[str, Any],
-        lower_lim: float = 1e-3,
-        upper_lim: float = 1e4,
+        termination_condition: Mapping[str, Any],
+        lower_bound: float = 1e-3,
+        upper_bound: float = 1e4,
         seed: int = 1,
     ) -> list[Any]:
-        term = build_termination_condition(_core, terminationCondition)
-        return list(self._engine.runDE(int(pop_size), float(lower_lim), float(upper_lim), term, int(seed)))
+        term = build_termination_condition(_core, termination_condition)
+        return list(self._engine.runDE(int(pop_size), float(lower_bound), float(upper_bound), term, int(seed)))
 
     def run_de_from_population(
         self,
         population: Sequence[Sequence[float]],
-        terminationCondition: Mapping[str, Any],
+        termination_condition: Mapping[str, Any],
         seed: int = 1,
     ) -> list[Any]:
         constant_size = int(self._engine.constants().constantSize)
         normalized = validate_population(population, constant_size=constant_size)
-        term = build_termination_condition(_core, terminationCondition)
+        term = build_termination_condition(_core, termination_condition)
         return list(self._engine.runDE(normalized, term, int(seed)))
     
 
     def simulate(
             self,
             t: Sequence[float],
-            constant: Sequence[float],
+            constants: Sequence[float],
             reaction_ids: Iterable[int],
         ) -> Any:
-            validate_constants_vector(constant, expected_size=int(self._engine.constants().constantSize))
+            validate_constants_vector(constants, expected_size=int(self._engine.constants().constantSize))
             for v in t:
                 if v < 0.0:
                     raise ValueError(f"Time points must be non-negative (got {v})")
@@ -198,25 +198,25 @@ class NasapFit:
                 if not (0 <= i < id_upper):
                     raise ValueError(f"Reaction IDs must be in [0, {id_upper}) (got {i})")
             t_vec = [float(v) for v in t]
-            c_vec = [float(v) for v in constant]
+            c_vec = [float(v) for v in constants]
             ids = [int(i) for i in reaction_ids]
             return self._engine.simulate(t_vec, c_vec, ids)
 
 
-    def run_lm(self, theta0: Sequence[float], terminationCondition: Mapping[str, Any]) -> Any:
+    def run_lm(self, initial_constants: Sequence[float], termination_condition: Mapping[str, Any]) -> Any:
         constant_size = int(self._engine.constants().constantSize)
-        vec = validate_constants_vector(theta0, expected_size=constant_size)
-        term = build_termination_condition(_core, terminationCondition)
+        vec = validate_constants_vector(initial_constants, expected_size=constant_size)
+        term = build_termination_condition(_core, termination_condition)
         return self._engine.runLM(vec, term)
 
     def run_lm_batch(
         self,
-        thetas: Sequence[Sequence[float]],
-        terminationCondition: Mapping[str, Any],
+        initial_constants: Sequence[Sequence[float]],
+        termination_condition: Mapping[str, Any],
     ) -> list[Any]:
         constant_size = int(self._engine.constants().constantSize)
-        normalized = validate_population(thetas, constant_size=constant_size, min_size=1)
-        term = build_termination_condition(_core, terminationCondition)
+        normalized = validate_population(initial_constants, constant_size=constant_size, min_size=1)
+        term = build_termination_condition(_core, termination_condition)
         return list(self._engine.runLM(normalized, term))
     
     #log point に対する残差二乗和のGaussNewtonHessianを導出
