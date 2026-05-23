@@ -220,7 +220,7 @@ class NasapFit:
         return list(self._engine.runLM(normalized, term))
     
     #log point に対する残差二乗和のGaussNewtonHessianを導出
-    def GaussNewtonHessian(self, point: Sequence[float]) -> list[list[float]]:
+    def gauss_newton_hessian(self, point: Sequence[float]) -> list[list[float]]:
         validate_constants_vector(point, expected_size=int(self._engine.constants().constantSize))
         vec = [float(v) for v in point]
         return [list(row) for row in self._engine.GaussNewtonHessian(vec)]
