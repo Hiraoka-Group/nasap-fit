@@ -29,6 +29,10 @@ refined = engine.run_lm(
 print("best error:", best.error)
 print("best constants:", best.constants)
 
+print("\ncalculating Hessian Matrix...")
+hessianMat = engine.calc_hessian(best.constants)
+print(hessianMat)
+
 simulationResult = engine.simulate(
     t=[1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 300.0],
     constant=best.constants,

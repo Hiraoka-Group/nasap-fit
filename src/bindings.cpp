@@ -126,6 +126,7 @@ void init_core(pybind11::module_ &m) {
             py::arg("termCond"))
 //        .def("getHessian", &NASAP_fit::getHessian, py::arg("point"))
         .def("GaussNewtonHessian", &NASAP_fit::GaussNewtonHessian, py::arg("point"))
-        
+        .def("calc_hessian", &NASAP_fit::calc_hessian, py::arg("point"))
+
         .def("simulate", &NASAP_fit::simulate, py::arg("t"), py::arg("constant"), py::arg("reaction_ids"));
 }

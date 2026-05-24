@@ -154,6 +154,7 @@ public:
 	void putCVODESim(const vector<double>& constant);
 
 	vector<vector<double>> GaussNewtonHessian(const vector<double>& constant);
+	vector<vector<double>> calc_hessian(const vector<double>& constant);
 
 	struct SimulationResult {
 		struct ReactionProgressResult{
