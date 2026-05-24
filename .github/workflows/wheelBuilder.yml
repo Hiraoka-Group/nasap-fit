@@ -1,10 +1,18 @@
 name: Build wheels
 
 on:
-  push:
-    branches: [main, master]
-    tags: ["v*"]
+  release:
+    types: [published]
   pull_request:
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'extern/**'
+      - 'nasap_fit/**'
+      - 'pyproject.toml'
+      - 'CMakeLists.txt'
+      - '**/*.cmake'
+      - '.github/workflows/wheelBuilder.yml'
   workflow_dispatch:
 
 jobs:
@@ -21,6 +29,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,6 +39,14 @@ jobs:
 
       - name: Install cibuildwheel
         run: python -m pip install --upgrade pip cibuildwheel
+
+      - name: Set package version
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
+            echo "SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NASAP_FIT=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+          else
+            echo "SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NASAP_FIT=0.0.0.dev0" >> $GITHUB_ENV
+          fi
 
       - name: Build wheels
         env:
@@ -95,6 +113,7 @@ jobs:
             cmake --install build/deps/build/sundials
 
           # build backend に依存 prefix を見せる
+          CIBW_ENVIRONMENT_PASS_LINUX: SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NASAP_FIT
           CIBW_ENVIRONMENT_LINUX: >
             NASAP_DEPS_DIR=/project/build/deps
             NASAP_SUITESPARSE_ROOT=/project/build/deps/install/suitesparse
@@ -104,6 +123,7 @@ jobs:
             SKBUILD_SEARCH_PREFIXES="/project/build/deps/install/sundials;/project/build/deps/install/suitesparse"
             LD_LIBRARY_PATH=/project/build/deps/install/sundials/lib:/project/build/deps/install/sundials/lib64:/project/build/deps/install/suitesparse/lib:/project/build/deps/install/suitesparse/lib64
 
+          CIBW_ENVIRONMENT_PASS_MACOS: SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NASAP_FIT
           CIBW_ENVIRONMENT_MACOS: >
             NASAP_DEPS_DIR=$PWD/build/deps
             NASAP_SUITESPARSE_ROOT=$PWD/build/deps/install/suitesparse
@@ -124,6 +144,11 @@ jobs:
             LD_LIBRARY_PATH=/project/build/deps/install/sundials/lib:/project/build/deps/install/sundials/lib64:/project/build/deps/install/suitesparse/lib:/project/build/deps/install/suitesparse/lib64:$LD_LIBRARY_PATH
             auditwheel repair -w {dest_dir} {wheel}
 
+          # After installing the built wheel, run the test suite to catch
+          # wheels that build successfully but fail at runtime.
+          CIBW_TEST_REQUIRES: "pytest scipy"
+          CIBW_TEST_COMMAND: "pytest {project}/tests"
+
         run: python -m cibuildwheel --output-dir wheelhouse
 
       - name: Upload artifacts
@@ -131,3 +156,24 @@ jobs:
         with:
           name: wheels-${{ matrix.os }}
           path: wheelhouse/*.whl
+
+  upload_pypi:
+    name: Upload to PyPI
+    needs: build_wheels
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    environment:
+      name: pypi
+      url: https://pypi.org/p/nasap-fit
+    permissions:
+      id-token: write
+    steps:
+      - name: Download all wheels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
