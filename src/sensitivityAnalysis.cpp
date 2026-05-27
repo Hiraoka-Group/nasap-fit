@@ -49,6 +49,7 @@ inline double tangent_value(const double* s, int species, int idx) {
     return (idx == species) ? 0.0 : s[idx];
 }
 
+//f_y^T lambda を計算して out に加算する。
 void add_jacobian_transpose_product(
     const ReactionNetwork& net,
     const double* y,
@@ -73,7 +74,11 @@ void add_jacobian_transpose_product(
     }
 }
 
-//right hand side function for yB={adjoint of y, adjoint of s}
+// right hand side function for yB={lambdaY, lambdaS}
+// lambdaY = adjoint of y, lambdaS = adjoint of s
+// lambdaY' = -f_y^T lambdaY
+// lambdaS' = -f_y^T lambdaS - (∂f_y/∂p)^T lambdaY
+// ∂f_y(y(p),p)/∂p = f_yy * ∂y/∂p + ∂f/∂p
 int hessianAdjointRhs(
     sunrealtype /*t*/,
     N_Vector y,
@@ -101,7 +106,9 @@ int hessianAdjointRhs(
     double* outY = bdotData;
     double* outS = bdotData + n;
 
+    //lambdaY' += -f_y^T lambdaY
     add_jacobian_transpose_product(net, yData, p, lambdaY, outY);
+    //lambdaS' += -f_y^T lambdaS
     add_jacobian_transpose_product(net, yData, p, lambdaS, outS);
 
     for (const auto& term : net.rhsTerms) {
@@ -113,15 +120,20 @@ int hessianAdjointRhs(
         const double la = lambdaS[a];
         const double yj = species_value(yData, n, j);
         const double yk = species_value(yData, n, k);
+        //sj = ∂y/∂p_dir, sk = ∂y/∂p_dir logpについて感度を求めるための補正を加える
         const double sj = pdir * tangent_value(ySData, n, j);
         const double sk = pdir * tangent_value(ySData, n, k);
 
         if (j != n) {
+            //f_yy * ∂y/∂p_dir * lambdaS
             outY[j] += la * ckp * sk;
+            //∂f_y/∂p_dir * lambdaS
             if (r == ud->direction) outY[j] += la * ckp * yk;
         }
         if (k != n) {
+            //f_yy * ∂y/∂p_dir * lambdaS
             outY[k] += la * ckp * sj;
+            //∂f_y/∂p_dir * lambdaS
             if (r == ud->direction) outY[k] += la * ckp * yj;
         }
     }
@@ -132,7 +144,9 @@ int hessianAdjointRhs(
     return 0;
 }
 
-//∂^{2}G/∂p_i ∂p_j を積分して得るためのCVODESのquadRhsコールバック関数
+// ∂^{2}G/∂p_i ∂p_j を積分して得るためのCVODESのquadRhsコールバック関数
+// ((∂/∂p_i)f_{p_j})^T lambdaY + f_{p_j}^T lambdaS  を計算して qBdot に加算する。
+// (∂/∂p_i)f_{p_j} = f_{p_i}{p_j} + f_{yp_i} * ∂y/∂p_i を用いる
 int hessianAdjointQuadRhs(
     sunrealtype /*t*/,
     N_Vector y,
@@ -166,14 +180,19 @@ int hessianAdjointQuadRhs(
         const double ckp = static_cast<double>(term.duplicacy) * p[r];
         const double yj = species_value(yData, n, j);
         const double yk = species_value(yData, n, k);
+        // sj = ∂y/∂p_dir, sk = ∂y/∂p_dir  logpについて感度を求めるための補正を加える
         const double sj = pdir * tangent_value(ySData, n, j);
         const double sk = pdir * tangent_value(ySData, n, k);
         const double yprod = yj * yk;
         const double sproddot = sj * yk + yj * sk;
 
+        // lambdaY[a] * ∂f_a/∂theta_r
         qdotData[r] += lambdaY[a] * ckp * yprod;
+        // c p_r (s_{d,j} y_k + y_j s_{d,k}) をtheta_rで微分
         qdotData[r] += lambdaS[a] * ckp * sproddot;
+        //同じパラメータ方向に関して二階微分する場合
         if (r == ud->direction) {
+            // ∂²f_a/∂theta_r² = c p_r y_j y_k
             qdotData[r] += lambdaS[a] * ckp * yprod;
         }
     }
