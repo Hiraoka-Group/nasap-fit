@@ -102,7 +102,7 @@ void init_core(pybind11::module_ &m) {
 		.def("termIndex", &NASAP_fit::termIndex, py::return_value_policy::reference_internal)
 		.def("reactionCount", &NASAP_fit::reactionCount)
 		.def("calcError", &NASAP_fit::calcError, py::arg("constant"))
-		.def("calcNRMSEFromError", &NASAP_fit::calcNRMSEFromError, py::arg("error"))
+		.def("calcRMSEFromError", &NASAP_fit::calcRMSEFromError, py::arg("error"))
         .def("runDE",
             py::overload_cast<int, double, double, const NASAP_fit::TerminationCondition&, uint64_t>(&NASAP_fit::runDE),
             py::arg("popSize"),

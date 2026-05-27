@@ -125,11 +125,11 @@ public:
 	//reactionNetwork内の素反応の数を返す
 	const int reactionCount() const { return rxnNet.data.size(); }
 
-	//平方残差和の計算（CVODEを用いる）
+	//濃度単位での平方残差和の計算（CVODEを用いる）
 	double calcError(const vector<double>& constant);
 
-	// calcError が返す平方残差和から NRMSE を計算
-	double calcNRMSEFromError(double error) const;
+	// calcError が返す平方残差和から濃度単位の RMSE を計算
+	double calcRMSEFromError(double error) const;
 
 
 	// 実験データのセット

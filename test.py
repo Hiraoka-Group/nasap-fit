@@ -18,7 +18,7 @@ best = min(pop, key=lambda r: r.error)
 refined = engine.run_lm(
     best.constants,
     termination_condition={"maxIter": 300,
-                           "timeLimit": 60.0,
+                           "timeLimit": 30.0,
                            "xtol": 1e-8,
                            "ftolAbs": 1e-5,
                            "ftolRel": 0.005,

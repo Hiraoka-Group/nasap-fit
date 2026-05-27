@@ -228,7 +228,7 @@ class NasapFit:
         return self._engine.constants()
 
     def calc_error(self, constants: Sequence[float]) -> float:
-        """Compute the sum of squared residuals between simulation and QASAP data.
+        """Compute the sum of squared concentration residuals.
 
         Parameters
         ----------
@@ -239,8 +239,8 @@ class NasapFit:
         Returns
         -------
         float
-            Sum of squared residuals (SSR) between the simulated concentrations
-            and the QASAP reference data.
+            Sum of squared residuals (SSR) between simulated concentrations and
+            QASAP percentage values converted using each 100% concentration.
 
         Raises
         ------
@@ -251,8 +251,8 @@ class NasapFit:
         vec = validate_constants_vector(constants, expected_size=constant_size)
         return float(self._engine.calcError(vec))
 
-    def calc_nrmse(self, error: float) -> float:
-        """Convert a raw SSR value to Normalised Root Mean Squared Error (NRMSE).
+    def calc_rmse(self, error: float) -> float:
+        """Convert a concentration SSR value to RMSE.
 
         Parameters
         ----------
@@ -263,7 +263,7 @@ class NasapFit:
         Returns
         -------
         float
-            NRMSE normalised against the QASAP reference data.
+            Root mean squared residual in concentration units.
 
         Raises
         ------
@@ -273,7 +273,7 @@ class NasapFit:
         err = float(error)
         if not math.isfinite(err) or err < 0.0:
             raise ValueError(f"error must be finite and >= 0 (got {error!r})")
-        return float(self._engine.calcNRMSEFromError(err))
+        return float(self._engine.calcRMSEFromError(err))
 
     @property
     def reaction_count(self) -> int:

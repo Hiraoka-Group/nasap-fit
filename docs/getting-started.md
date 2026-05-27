@@ -89,11 +89,11 @@ refined = engine.run_lm(
 print(f"Refined SSR: {refined.error:.4f}")
 ```
 
-### 4. Compute NRMSE
+### 4. Compute concentration RMSE
 
 ```python
-nrmse = engine.calc_nrmse(refined.error)
-print(f"NRMSE: {nrmse:.4f}")
+rmse = engine.calc_rmse(refined.error)
+print(f"Concentration RMSE: {rmse:.4f}")
 ```
 
 ### 5. Simulate concentration profiles

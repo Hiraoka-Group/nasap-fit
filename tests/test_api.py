@@ -39,6 +39,8 @@ pytestmark = pytest.mark.skipif(
 _KF_TRUE = 0.3
 _KR_TRUE = 0.1
 _K_TRUE = [_KF_TRUE, _KR_TRUE]  # index 0 = kf, index 1 = kr (alphabetical)
+_FULL_CONC = 2.0e-3
+_T_EVAL = [0.0, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
 
 
 @pytest.fixture(scope="module")
@@ -53,10 +55,9 @@ def minimal_engine(tmp_path_factory):
              _KF_TRUE * x[0] - _KR_TRUE * x[1],
         ]
 
-    t_eval = [0.0, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
     sol = solve_ivp(
-        rhs, [0.0, 50.0], [1.0, 0.0],
-        t_eval=t_eval, method="Radau", rtol=1e-10, atol=1e-13,
+        rhs, [0.0, 50.0], [_FULL_CONC, 0.0],
+        t_eval=_T_EVAL, method="Radau", rtol=1e-10, atol=1e-13,
     )
 
     tmp = tmp_path_factory.mktemp("minimal_system")
@@ -70,9 +71,8 @@ def minimal_engine(tmp_path_factory):
     )
 
     # Track only species B (index 1).
-    # The C++ engine computes SSR as (y_sim/fullConc - QASAP/100)^2,
-    # so QASAP values must be in percentage units (0-100 scale).
-    _FULL_CONC = 1.0
+    # QASAP is stored as percentage values, while the objective compares
+    # concentrations: y_sim - (QASAP/100 * fullConc).
     lines = ["time,B"]
     for t, y_b in zip(sol.t, sol.y[1]):
         pct = max(float(y_b), 0.0) / _FULL_CONC * 100.0
@@ -87,9 +87,9 @@ def minimal_engine(tmp_path_factory):
         "trackedSpecies:\n"
         "  B:\n"
         "    index: 1\n"
-        "    '100%concentration': 1.0\n"
+        f"    '100%concentration': {_FULL_CONC}\n"
         "initConc:\n"
-        "  0: 1.0\n"
+        f"  0: {_FULL_CONC}\n"
         "tolAbsError: 1.0e-10\n"
         "tolRelError: 1.0e-7\n"
         "logLevel: quiet\n",
@@ -149,6 +149,25 @@ def test_calc_error_true_k_less_than_bad_k(minimal_engine):
     assert err_true < err_bad
 
 
+def test_calc_error_is_sum_of_squared_concentration_residuals(minimal_engine):
+    bad_constants = [10.0, 10.0]
+    simulated = minimal_engine.simulate(
+        t=_T_EVAL, constants=bad_constants, reaction_ids=[]
+    )
+    expected = 0.0
+    for t, state in zip(_T_EVAL, simulated.y):
+        observed_b = (
+            _FULL_CONC
+            * _KF_TRUE
+            / (_KF_TRUE + _KR_TRUE)
+            * (1.0 - math.exp(-(_KF_TRUE + _KR_TRUE) * t))
+        )
+        expected += (state[1] - observed_b) ** 2
+    assert minimal_engine.calc_error(bad_constants) == pytest.approx(
+        expected, rel=1e-5, abs=1e-14
+    )
+
+
 def test_calc_error_wrong_length_raises(minimal_engine):
     with pytest.raises(ValueError):
         minimal_engine.calc_error([0.3])  # should be length 2
@@ -160,24 +179,30 @@ def test_calc_error_nonpositive_raises(minimal_engine):
 
 
 # ---------------------------------------------------------------------------
-# calc_nrmse
+# calc_rmse
 # ---------------------------------------------------------------------------
 
-def test_calc_nrmse_nonneg(minimal_engine):
+def test_calc_rmse_nonneg(minimal_engine):
     err = minimal_engine.calc_error(_K_TRUE)
-    nrmse = minimal_engine.calc_nrmse(err)
-    assert math.isfinite(nrmse)
-    assert nrmse >= 0.0
+    rmse = minimal_engine.calc_rmse(err)
+    assert math.isfinite(rmse)
+    assert rmse >= 0.0
 
 
-def test_calc_nrmse_negative_raises(minimal_engine):
+def test_calc_rmse_is_root_mean_squared_concentration_error(minimal_engine):
+    err = minimal_engine.calc_error([10.0, 10.0])
+    expected = math.sqrt(err / len(_T_EVAL))
+    assert minimal_engine.calc_rmse(err) == pytest.approx(expected)
+
+
+def test_calc_rmse_negative_raises(minimal_engine):
     with pytest.raises(ValueError):
-        minimal_engine.calc_nrmse(-1.0)
+        minimal_engine.calc_rmse(-1.0)
 
 
-def test_calc_nrmse_inf_raises(minimal_engine):
+def test_calc_rmse_inf_raises(minimal_engine):
     with pytest.raises(ValueError):
-        minimal_engine.calc_nrmse(math.inf)
+        minimal_engine.calc_rmse(math.inf)
 
 
 # ---------------------------------------------------------------------------
@@ -277,7 +302,7 @@ def test_simulate_concentration_sum_is_conserved(minimal_engine):
     # y[time_index][species_index]
     totals = [result.y[i][0] + result.y[i][1] for i in range(3)]
     for total in totals:
-        assert abs(total - 1.0) < 1e-4  # initial total = 1.0
+        assert abs(total - _FULL_CONC) < 1e-8
 
 
 def test_simulate_reaction_progress_structure(minimal_engine):
@@ -301,7 +326,7 @@ def test_simulate_invalid_reaction_id_raises(minimal_engine):
 
 
 def test_simulate_reaction_progress_mass_balance(minimal_engine):
-    # For A ⇌ B starting at [A]=1, [B]=0:
+    # For A ⇌ B starting at [A]=_FULL_CONC, [B]=0:
     #   d[B]/dt = kf*[A] - kr*[B]  =>  J_forward(t) - J_reverse(t) = [B](t) - [B](0) = [B](t)
     # This identity holds exactly for any t.
     t_test = [1.0, 5.0, 10.0, 50.0]
@@ -368,6 +393,11 @@ def test_gauss_newton_hessian_shape(minimal_engine):
     H = minimal_engine.gauss_newton_hessian(_K_TRUE)
     assert len(H) == 2
     assert all(len(row) == 2 for row in H)
+
+
+def test_gauss_newton_hessian_uses_concentration_residual_scaling(minimal_engine):
+    H = minimal_engine.gauss_newton_hessian(_K_TRUE)
+    assert max(abs(value) for row in H for value in row) < 1e-3
 
 
 def test_gauss_newton_hessian_values_finite(minimal_engine):

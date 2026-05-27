@@ -79,7 +79,7 @@ void NASAP_fit::validateConstants(const vector<double>& constants){
     for(double c : constants) assert(std::isfinite(c) && c > 0);
 }
 
-//平方残差和の計算
+//濃度単位での平方残差和の計算
 double NASAP_fit::calcError(const std::vector<double>& constant) {
     int flag=CV_SUCCESS;
 
@@ -113,13 +113,15 @@ double NASAP_fit::calcError(const std::vector<double>& constant) {
         for (int j = 0; j < cfg.trackedSpecies; j++) {
             size_t idx= (size_t)indexOrder[j];
             assert(0 <= idx && idx < (size_t)cfg.species);
-            SSR += (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]/100) * (y_data[idx] / cfg.fullConc[j] - QASAP[i].state[j]/100);
+            const double observedConcentration = QASAP[i].state[j] * cfg.fullConc[j] / 100.0;
+            const double residual = y_data[idx] - observedConcentration;
+            SSR += residual * residual;
         }
     }
     return SSR;
 }
 
-double NASAP_fit::calcNRMSEFromError(double error) const {
+double NASAP_fit::calcRMSEFromError(double error) const {
     const double sampleCount = static_cast<double>(QASAP.size()) * static_cast<double>(cfg.trackedSpecies);
     if (!std::isfinite(error) || sampleCount <= 0.0) return DBL_MAX;
     return std::sqrt(error / sampleCount);
@@ -313,7 +315,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE_single(const std::vector
         }
 		if (cfg.logLevel == LogLevel::verbose) {
 			cout << "best error: " << std::setprecision(10) << bestpop << "\n";
-			cout << "best NRMSE: " << std::setprecision(10) << calcNRMSEFromError(bestpop) << "\n";
+			cout << "best RMSE (concentration): " << std::setprecision(10) << calcRMSEFromError(bestpop) << "\n";
 		}
 
         bool stop = false;
@@ -493,7 +495,7 @@ std::vector<NASAP_fit::OptimizeResult> NASAP_fit::runDE(std::vector<std::vector<
         MPI_Allreduce(&localBest, &globalBest, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
         if (world_rank == 0 && cfg.logLevel == LogLevel::verbose) {
             cout << "best error: " << std::setprecision(10) << globalBest
-                 << "\nbest NRMSE: " << calcNRMSEFromError(globalBest)<< "\n";
+                 << "\nbest RMSE (concentration): " << calcRMSEFromError(globalBest)<< "\n";
         }
 
         bool stop = false;
@@ -615,7 +617,7 @@ NASAP_fit::OptimizeResult NASAP_fit::runLM(const std::vector<double>& theta0, co
                 }
                 cout << endl;
                 cout << "Current error: " << std::setprecision(10) << bestErr << endl;
-                cout << "Current NRMSE: " << std::setprecision(10) << calcNRMSEFromError(bestErr) << endl;
+                cout << "Current RMSE (concentration): " << std::setprecision(10) << calcRMSEFromError(bestErr) << endl;
                 cout << "Iter : " << iter << ", Lambda: " << std::setprecision(10) << lambda << endl;
             } else {
                 cout << "Iter : " << iter << " / " << maxIter

@@ -234,9 +234,10 @@ void NASAP_fit::computeLMResAndJac(vector<double>& constant, Eigen::VectorXd& re
             const int speciesIndex = indexOrder[j];
             assert(0 <= speciesIndex && speciesIndex < cfg.species);
 
-            residual[row] = y_data[speciesIndex] / cfg.fullConc[j] - QASAP[i].state[j] / 100.0;
+            const double observedConcentration = QASAP[i].state[j] * cfg.fullConc[j] / 100.0;
+            residual[row] = y_data[speciesIndex] - observedConcentration;
             for (int q = 0; q < n; ++q) {
-                jacobian(row, q) = NV_Ith_S(uS[q], speciesIndex) * constant[q] / cfg.fullConc[j];
+                jacobian(row, q) = NV_Ith_S(uS[q], speciesIndex) * constant[q];
             }
         }
     }
@@ -285,11 +286,11 @@ vector<vector<double>> NASAP_fit::calc_hessian(const vector<double>& constant) {
         for (int j = 0; j < cfg.trackedSpecies; ++j) {
             const int speciesIndex = indexOrder[j];
             assert(0 <= speciesIndex && speciesIndex < cfg.species);
-            const double invFullConc = 1.0 / cfg.fullConc[j];
-            const double residual = obsY[obsIndex][speciesIndex] * invFullConc - QASAP[obsIndex].state[j] / 100.0;
-            const double sScaled = obsS[obsIndex][speciesIndex] * invFullConc;
-            lambdaY[speciesIndex] += 2.0 * sScaled * invFullConc;
-            lambdaS[speciesIndex] += 2.0 * residual * invFullConc;
+            const double observedConcentration = QASAP[obsIndex].state[j] * cfg.fullConc[j] / 100.0;
+            const double residual = obsY[obsIndex][speciesIndex] - observedConcentration;
+            const double sensitivity = obsS[obsIndex][speciesIndex];
+            lambdaY[speciesIndex] += 2.0 * sensitivity;
+            lambdaS[speciesIndex] += 2.0 * residual;
         }
     };
 
