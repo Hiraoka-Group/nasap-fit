@@ -515,6 +515,27 @@ class NasapFit:
         return [list(row) for row in self._engine.GaussNewtonHessian(vec)]
 
     def calc_hessian(self, point: Sequence[float]) -> list[list[float]]:
+        """Compute the exact SSR Hessian with respect to log-parameters at *point*.
+
+        Let ``q = log(p)``. This method returns the Hessian
+        ``∂²f(eᵍ)/∂q ∂qᵀ`` evaluated at the given rate-constant vector,
+        computed via the CVODES adjoint method.
+
+        Parameters
+        ----------
+        point : sequence of float
+            Rate-constant vector at which to evaluate the Hessian.
+
+        Returns
+        -------
+        list of list of float
+            Square Hessian matrix of size ``(reaction_count, reaction_count)``.
+
+        Raises
+        ------
+        ValueError
+            If *point* has the wrong length or contains invalid values.
+        """
         validate_constants_vector(point, expected_size=int(self._engine.constants().constantSize))
         vec = [float(v) for v in point]
         return [list(row) for row in self._engine.calc_hessian(vec)]
