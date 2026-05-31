@@ -403,3 +403,23 @@ def test_gauss_newton_hessian_uses_concentration_residual_scaling(minimal_engine
 def test_gauss_newton_hessian_values_finite(minimal_engine):
     H = minimal_engine.gauss_newton_hessian(_K_TRUE)
     assert all(math.isfinite(H[i][j]) for i in range(2) for j in range(2))
+
+
+# ---------------------------------------------------------------------------
+# calc_hessian
+# ---------------------------------------------------------------------------
+
+def test_calc_hessian_shape(minimal_engine):
+    H = minimal_engine.calc_hessian(_K_TRUE)
+    assert len(H) == 2
+    assert all(len(row) == 2 for row in H)
+
+
+def test_calc_hessian_values_finite(minimal_engine):
+    H = minimal_engine.calc_hessian(_K_TRUE)
+    assert all(math.isfinite(H[i][j]) for i in range(2) for j in range(2))
+
+
+def test_calc_hessian_is_symmetric(minimal_engine):
+    H = minimal_engine.calc_hessian(_K_TRUE)
+    assert H[0][1] == pytest.approx(H[1][0], rel=1e-6)
