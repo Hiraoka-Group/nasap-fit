@@ -18,7 +18,7 @@ best = min(pop, key=lambda r: r.error)
 refined = engine.run_lm(
     best.constants,
     termination_condition={"maxIter": 300,
-                           "timeLimit": 60.0,
+                           "timeLimit": 30.0,
                            "xtol": 1e-8,
                            "ftolAbs": 1e-5,
                            "ftolRel": 0.005,
@@ -28,6 +28,10 @@ refined = engine.run_lm(
 
 print("best error:", best.error)
 print("best constants:", best.constants)
+
+print("\ncalculating Hessian Matrix...")
+hessianMat = engine.calc_hessian(best.constants)
+print(hessianMat)
 
 simulationResult = engine.simulate(
     t=[1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 300.0],
